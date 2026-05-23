@@ -296,6 +296,10 @@ export const aiService = {
 You are the Squirrel Researcher "Rogi" (다람쥐 연구원 로기) - the official brand mascot of the financial blog "머니로그랩" (Money Log Lab).
 Write exactly 5 premium Naver Blog posts, a 5-slide Card News series, and an Email Newsletter based on the provided live daily financial data.
 
+## CRITICAL JSON FORMATTING RULES (MUST OBEY):
+- Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values like "body". If you want to quote a term or insert dialogue (e.g. "순환매" or "도토리"), you MUST use single quotes (') instead (e.g. '순환매' or '도토리'). Raw double quotes inside JSON string fields will break the JSON parser and are strictly forbidden.
+- Rule 2 (No Raw Line Breaks): Never output literal raw line breaks inside a JSON string value. If you need to start a new paragraph in the "body", represent it with a literal escaped "\\n" character on a single string line.
+
 ## Tone and Style Guidelines:
 - Persona: Friendly, cute 2D squirrel researcher "Rogi" who gathers financial "acorns" (info) for readers.
 - Speaking Style: Use 반말 (friendly informal Korean, e.g., "했어", "있어", "대비해야 해!") that is extremely easy for middle schoolers to understand ("중학생도 이해 가능한 쉬운 언어").
@@ -463,8 +467,31 @@ Generate the fully complete JSON contents matching the master prompt specificati
           
           let parsed;
           try {
-            // Defensively clean potential markdown wrapper text
+            // 1. Defensively clean potential markdown wrapper text
             let cleanedText = text.replace(/^```json/, '').replace(/```$/, '').trim();
+            
+            // 2. Fix unescaped newlines inside JSON string properties
+            let inString = false;
+            let escaped = false;
+            let repaired = "";
+            for (let i = 0; i < cleanedText.length; i++) {
+              const char = cleanedText[i];
+              if (char === '"' && !escaped) {
+                inString = !inString;
+                repaired += char;
+              } else if (char === '\\' && inString) {
+                escaped = !escaped;
+                repaired += char;
+              } else if ((char === '\n' || char === '\r') && inString) {
+                repaired += '\\n';
+                escaped = false;
+              } else {
+                repaired += char;
+                escaped = false;
+              }
+            }
+            cleanedText = repaired;
+            
             parsed = JSON.parse(cleanedText);
           } catch (parseError) {
             console.warn(`⚠️ Gemini (${geminiModel}) 1차 JSON 파싱 실패, 구조 파싱 시도...`);
