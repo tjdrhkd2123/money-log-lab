@@ -67,6 +67,14 @@ export function authenticateAdminToken(req, res, next) {
     });
   }
 
+  // Support Cron Bypass Key for 24/7 automated external cron triggers (e.g. cron-job.org)
+  const isBypass = token === config.adminPassword || (process.env.CRON_SECRET && token === process.env.CRON_SECRET);
+  if (isBypass) {
+    console.log('🤖 외부 자동 크론(cron-job.org 등)이 고정 보안 키로 접근 권한을 획득하였습니다.');
+    req.user = { role: 'admin', isCron: true };
+    return next();
+  }
+
   jwt.verify(token, config.jwtSecret, (err, user) => {
     if (err) {
       return res.status(403).json({

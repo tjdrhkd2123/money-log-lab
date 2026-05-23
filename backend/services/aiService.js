@@ -446,7 +446,13 @@ Generate the fully complete JSON contents matching the master prompt specificati
         console.log(`🔮 Gemini (${geminiModel}) AI 엔진을 통해 포스팅 생성 시도 중...`);
         try {
           const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-          const model = genAI.getGenerativeModel({ model: geminiModel });
+          const model = genAI.getGenerativeModel({ 
+            model: geminiModel,
+            generationConfig: {
+              responseMimeType: "application/json",
+              maxOutputTokens: 8192
+            }
+          });
           const result = await model.generateContent([systemPrompt, userPrompt]);
           const response = await result.response;
           let text = response.text();
