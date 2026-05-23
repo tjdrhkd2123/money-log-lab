@@ -149,7 +149,7 @@ app.get('/api/public/card-news', (req, res) => {
  * 3. POST /api/subscribe
  * Registers a new email subscriber. Protected by Rate Limiting and strict validations.
  */
-app.post('/api/subscribe', subscriptionRateLimiter, (req, res) => {
+app.post('/api/subscribe', subscriptionRateLimiter, async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
