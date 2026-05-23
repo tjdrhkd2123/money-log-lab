@@ -11,6 +11,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 export const config = {
   port: process.env.PORT || 5000,
   geminiApiKey: process.env.GEMINI_API_KEY || '',
+  claudeApiKey: process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY || '',
   resendApiKey: process.env.RESEND_API_KEY || '',
   senderEmail: process.env.SENDER_EMAIL || 'newsletter@moneyloglab.com',
   adminPassword: process.env.ADMIN_PASSWORD || 'rogi1234',

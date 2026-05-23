@@ -95,7 +95,13 @@ export default function AdminSecret({ onNavigateHome }) {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        setDashboardData(data);
+        // Keep existing subscribers metrics when merging manual harvest data
+        setDashboardData(prev => ({
+          ...prev,
+          ...data,
+          subscribersCount: prev?.subscribersCount ?? 0,
+          subscribers: prev?.subscribers ?? []
+        }));
         setHarvestMessage('⚡ 수집 완료! 4대 포스팅 및 독자 뉴스레터 발송이 완료되었습니다!');
       } else {
         setHarvestMessage(`⚠️ 수집 중 오류: ${data.message}`);
@@ -280,7 +286,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             <div style={{ color: 'var(--color-accent-emerald)' }}><Users size={24} /></div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>총 구독 이메일 수</div>
-              <h3 style={{ fontSize: '20px', fontWeight: '800' }}>{dashboardData.subscribersCount} 명</h3>
+              <h3 style={{ fontSize: '20px', fontWeight: '800' }}>{dashboardData.subscribersCount ?? 0} 명</h3>
             </div>
           </div>
 
@@ -288,7 +294,25 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             <div style={{ color: 'var(--color-accent-orange)' }}><FileText size={24} /></div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>자동화 대기 포스팅</div>
-              <h3 style={{ fontSize: '20px', fontWeight: '800' }}>4 개 완료</h3>
+              <h3 style={{ fontSize: '20px', fontWeight: '800' }}>{dashboardData.dailyAcorns?.generated?.posts?.length || 5} 개 완료</h3>
+            </div>
+          </div>
+
+          <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px' }}>
+            <div style={{ color: 'var(--color-accent-emerald)' }}><KeyRound size={24} /></div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>최근 사용된 AI 엔진</div>
+              <h3 style={{ 
+                fontSize: '14px', 
+                fontWeight: '700', 
+                color: dashboardData.dailyAcorns?.generated?.error ? 'var(--color-accent-orange)' : 'var(--color-accent-emerald)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '180px'
+              }} title={dashboardData.dailyAcorns?.generated?.engine}>
+                {dashboardData.dailyAcorns?.generated?.engine || '분석 대기 중'}
+              </h3>
             </div>
           </div>
 
@@ -298,6 +322,24 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>자동 수집 주기</div>
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-accent-emerald)' }}>매일 아침 07:00 AM</h3>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* API Error Warning Badge */}
+      {dashboardData?.dailyAcorns?.generated?.error && (
+        <div className="glass-card" style={{
+          marginBottom: '30px', padding: '14px 20px', borderRadius: 'var(--border-radius-md)',
+          background: 'rgba(255, 159, 28, 0.05)', borderColor: 'var(--color-accent-orange)',
+          color: 'var(--color-accent-orange)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px'
+        }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <div>
+            <strong>⚠️ AI 엔진 호출 오류 감지:</strong> {dashboardData.dailyAcorns.generated.error}
+            <br />
+            <span style={{ fontSize: '12px', opacity: 0.8 }}>
+              (API 키가 만료/오류 상태이거나 요금이 청구되지 않아 사전 제작된 모의 시나리오 데이터로 로딩되었습니다. Render 환경변수의 API 키 설정을 점검해 주세요!)
+            </span>
           </div>
         </div>
       )}
@@ -350,9 +392,10 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)',
                     textTransform: 'uppercase', color: 'var(--color-accent-blue)'
                   }}>
-                    {post.category === 'economic' ? '경제·글로벌' : 
-                     post.category === 'stock' ? '국내 주식' :
-                     post.category === 'coin' ? 'Bitget/OKX 코인' : '부동산 칼럼'}
+                    {post.category === 'economic' ? '📊 경제·글로벌' : 
+                     post.category === 'stock' ? '📈 국내 주식' :
+                     post.category === 'bitgetCoin' ? '🪙 Bitget 코인' :
+                     post.category === 'okxCoin' ? '🪙 OKX 코인' : '🏠 부동산 칼럼'}
                   </span>
                   <FileCheck size={14} style={{ color: 'var(--color-accent-emerald)' }} />
                 </div>
@@ -385,7 +428,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                       <h2 style={{ fontSize: '20px', color: '#ffffff', marginTop: '4px' }}>
                         {activeTab === 'economic' ? '📊 경제·글로벌 포스팅' :
                          activeTab === 'stock' ? '📈 주식 분석 포스팅' :
-                         activeTab === 'coin' ? '🪙 가상자산 포스팅' : '🏠 부동산 칼럼'}
+                         activeTab === 'bitgetCoin' ? '🪙 Bitget 코인 포스팅' :
+                         activeTab === 'okxCoin' ? '🪙 OKX 코인 포스팅' : '🏠 부동산 칼럼'}
                       </h2>
                     </div>
 
