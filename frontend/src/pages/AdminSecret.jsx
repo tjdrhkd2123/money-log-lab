@@ -16,6 +16,8 @@ export default function AdminSecret({ onNavigateHome }) {
   const [harvesting, setHarvesting] = useState(false);
   const [copiedId, setCopiedId] = useState('');
   const [harvestMessage, setHarvestMessage] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [progressStatus, setProgressStatus] = useState('');
 
   // Auto load data if already authenticated
   useEffect(() => {
@@ -86,6 +88,31 @@ export default function AdminSecret({ onNavigateHome }) {
   const handleManualHarvest = async () => {
     setHarvesting(true);
     setHarvestMessage('');
+    setProgress(0);
+    setProgressStatus('로기가 수집 도토리를 챙기고 있어요... 🐿️');
+
+    // Simulate smooth progress
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += 1;
+      
+      if (currentProgress < 15) {
+        setProgress(currentProgress);
+        setProgressStatus('국내 및 글로벌 실시간 금융 지표 수집 중... (KOSPI, 환율 등) 📊');
+      } else if (currentProgress < 35) {
+        setProgress(currentProgress);
+        setProgressStatus('Bitget & OKX 해외 거래소 급등 코인 탐색 및 검증 중... 🪙');
+      } else if (currentProgress < 85) {
+        setProgress(currentProgress);
+        setProgressStatus('다람쥐 AI 작가 가동! 5개 분야 네이버 포스팅 원고 작성 중... ✍️ (약 15초 소요)');
+      } else if (currentProgress < 98) {
+        setProgress(currentProgress);
+        setProgressStatus('오늘의 이메일 뉴스레터 및 넘겨보는 카드뉴스 초안 구성 중... 🎨');
+      } else if (currentProgress === 98) {
+        setProgressStatus('AI 최종 응답을 대기하며 결과를 꼼꼼히 정리 중입니다... ⏳');
+      }
+    }, 250); // 98% reached in ~25 seconds
+
     try {
       const response = await fetch('https://money-log-lab-backend.onrender.com/api/admin/trigger-harvest', {
         method: 'POST',
@@ -94,6 +121,11 @@ export default function AdminSecret({ onNavigateHome }) {
         }
       });
       const data = await response.json();
+      
+      clearInterval(interval);
+      setProgress(100);
+      setProgressStatus('데이터 수집 및 5대 블로그 포스팅 작성이 완료되었습니다! 🎉');
+
       if (response.ok && data.success) {
         // Keep existing subscribers metrics when merging manual harvest data
         setDashboardData(prev => ({
@@ -102,16 +134,22 @@ export default function AdminSecret({ onNavigateHome }) {
           subscribersCount: prev?.subscribersCount ?? 0,
           subscribers: prev?.subscribers ?? []
         }));
-        setHarvestMessage('⚡ 수집 완료! 4대 포스팅 및 독자 뉴스레터 발송이 완료되었습니다!');
+        setHarvestMessage('⚡ 수집 완료! 5대 포스팅 및 독자 뉴스레터 발송이 완료되었습니다!');
       } else {
         setHarvestMessage(`⚠️ 수집 중 오류: ${data.message}`);
       }
     } catch (err) {
+      clearInterval(interval);
+      setProgress(100);
       setHarvestMessage('⚠️ 서버 응답 오류가 발생했습니다.');
     } finally {
       setHarvesting(false);
-      // Clear message after 5 seconds
-      setTimeout(() => setHarvestMessage(''), 5000);
+      // Clear progress states after 5 seconds
+      setTimeout(() => {
+        setHarvestMessage('');
+        setProgress(0);
+        setProgressStatus('');
+      }, 5000);
     }
   };
 
@@ -340,6 +378,67 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             <span style={{ fontSize: '12px', opacity: 0.8 }}>
               (API 키가 만료/오류 상태이거나 요금이 청구되지 않아 사전 제작된 모의 시나리오 데이터로 로딩되었습니다. Render 환경변수의 API 키 설정을 점검해 주세요!)
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Progress Bar for Manual Harvesting */}
+      {harvesting && (
+        <div className="glass-card pulse-glowing" style={{
+          marginBottom: '30px', padding: '24px', borderRadius: 'var(--border-radius-md)',
+          background: 'rgba(0, 245, 212, 0.03)', borderColor: 'var(--color-accent-emerald)',
+          display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Neon animated background pulse */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, height: '3px',
+            width: `${progress}%`, background: 'linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-emerald))',
+            transition: 'width 0.3s ease-out'
+          }} />
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--color-accent-emerald)' }} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
+                {progressStatus}
+              </span>
+            </div>
+            <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-accent-emerald)', fontFamily: 'var(--font-headers)' }}>
+              {progress}%
+            </span>
+          </div>
+          
+          {/* Progress track */}
+          <div style={{
+            width: '100%', height: '10px', background: 'rgba(255,255,255,0.04)',
+            borderRadius: '5px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)'
+          }}>
+            <div style={{
+              width: `${progress}%`, height: '100%',
+              background: 'linear-gradient(90deg, #00b4d8 0%, #00f5d4 100%)',
+              borderRadius: '5px', transition: 'width 0.3s ease-out',
+              boxShadow: '0 0 10px rgba(0, 245, 212, 0.5)'
+            }} />
+          </div>
+          
+          <div style={{ display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--color-text-secondary)', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 15 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              지표 수집 (15%)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 35 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              코인 탐색 (35%)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 85 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              AI 포스팅 작성 (85%)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 95 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              뉴스레터 디자인 (95%)
+            </div>
           </div>
         </div>
       )}
