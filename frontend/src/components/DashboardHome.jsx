@@ -40,7 +40,7 @@ export default function DashboardHome() {
     }
   };
 
-  if (loading) {
+  if (loading || !indices) {
     return (
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[1, 2, 3].map(i => (

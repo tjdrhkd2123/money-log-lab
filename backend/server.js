@@ -62,7 +62,7 @@ prepareHashedPassword();
  * 1. GET /api/public/indices
  * Fetches latest KOSPI, KOSDAQ, and USD/KRW indices for public landing page widgets.
  */
-app.get('/api/public/indices', (res, send) => {
+app.get('/api/public/indices', (req, res) => {
   try {
     const db = getDb();
     if (db.dailyAcorns && db.dailyAcorns.indices) {
