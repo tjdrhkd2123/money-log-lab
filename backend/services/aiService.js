@@ -492,6 +492,12 @@ Generate the fully complete JSON contents matching the master prompt specificati
             }
             cleanedText = repaired;
             
+            // 3. Fix missing commas between properties dynamically
+            cleanedText = cleanedText
+              .replace(/}\s*"/g, '},\n"')       // missing comma after }
+              .replace(/]\s*"/g, '],\n"')       // missing comma after ]
+              .replace(/([^\\]")\s*"([a-zA-Z0-9_]+)"\s*\:/g, '$1,\n"$2":'); // missing comma after "
+            
             parsed = JSON.parse(cleanedText);
           } catch (parseError) {
             console.warn(`⚠️ Gemini (${geminiModel}) 1차 JSON 파싱 실패, 구조 파싱 시도...`);
