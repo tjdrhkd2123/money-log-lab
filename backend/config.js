@@ -13,6 +13,7 @@ export const config = {
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   claudeApiKey: process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY || '',
   resendApiKey: process.env.RESEND_API_KEY || '',
+  resendAudienceId: process.env.RESEND_AUDIENCE_ID || '',
   senderEmail: process.env.SENDER_EMAIL || 'newsletter@moneyloglab.com',
   adminPassword: process.env.ADMIN_PASSWORD || 'rogi1234',
   jwtSecret: process.env.JWT_SECRET || 'rogi_secret_key_squirrel_acorn_2026',

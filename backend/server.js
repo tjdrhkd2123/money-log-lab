@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 
 import { config } from './config.js';
 import { initScheduler, triggerDailyHarvest } from './services/scheduler.js';
+import { mailService } from './services/mailService.js';
 import {
   subscriptionRateLimiter,
   adminLoginRateLimiter,
@@ -168,7 +169,7 @@ app.post('/api/subscribe', subscriptionRateLimiter, (req, res) => {
   try {
     const db = getDb();
     
-    // Check duplication
+    // Check duplication in local cache
     if (db.subscribers.includes(sanitizedEmail)) {
       return res.status(400).json({
         success: false,
@@ -176,17 +177,26 @@ app.post('/api/subscribe', subscriptionRateLimiter, (req, res) => {
       });
     }
 
+    // Attempt to register subscriber in Resend Audience registry
+    const resendRes = await mailService.addContact(sanitizedEmail);
+    if (!resendRes.success && !resendRes.simulated) {
+      return res.status(500).json({
+        success: false,
+        message: `🚨 Resend 이메일 연동 등록 실패: ${resendRes.error}`
+      });
+    }
+
     db.subscribers.push(sanitizedEmail);
     writeDb(db);
 
-    console.log(`➕ 신규 이메일 구독자 등록 완료: ${sanitizedEmail}`);
+    console.log(`➕ 신규 이메일 구독자 등록 완료 (로컬 캐시 및 Resend): ${sanitizedEmail}`);
 
     return res.status(201).json({
       success: true,
       message: '🐿️ 로기의 도토리 경제 뉴스레터 구독 성공! 내일부터 아침 7시에 경제 도토리를 배달해 줄게!'
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: '서버 저장 중 알 수 없는 요류가 발생했습니다.' });
+    res.status(500).json({ success: false, message: `서버 저장 중 알 수 없는 요류 발생: ${error.message}` });
   }
 });
 

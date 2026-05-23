@@ -7,7 +7,56 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let resolvedAudienceId = config.resendAudienceId || null;
+
 export const mailService = {
+  /**
+   * Automatically discover or create the default Audience ID
+   */
+  getAudienceId: async () => {
+    if (resolvedAudienceId) return resolvedAudienceId;
+    if (!config.resendApiKey) return null;
+    
+    try {
+      console.log('🔍 Resend에서 사용 가능한 주소록(Audience)을 자동으로 조회하고 있습니다...');
+      const response = await axios.get('https://api.resend.com/audiences', {
+        headers: {
+          'Authorization': `Bearer ${config.resendApiKey}`
+        },
+        timeout: 8000
+      });
+      
+      const audiences = response.data?.data || [];
+      if (audiences.length > 0) {
+        resolvedAudienceId = audiences[0].id;
+        console.log(`🎯 기본 주소록 자동 감지 성공! (이름: ${audiences[0].name}, ID: ${resolvedAudienceId})`);
+        return resolvedAudienceId;
+      }
+      
+      // If no audience exists, automatically create one!
+      console.log('ℹ️ Resend에 등록된 주소록이 없습니다. 머니로그랩용 주소록을 자동 생성합니다...');
+      const createRes = await axios.post(
+        'https://api.resend.com/audiences',
+        { name: 'Money Log Lab' },
+        {
+          headers: {
+            'Authorization': `Bearer ${config.resendApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 8000
+        }
+      );
+      
+      resolvedAudienceId = createRes.data?.id;
+      console.log(`🎯 신규 주소록 자동 생성 및 연동 성공! (ID: ${resolvedAudienceId})`);
+      return resolvedAudienceId;
+    } catch (error) {
+      const apiErrorMsg = error.response?.data?.message || error.message;
+      console.error('❌ Resend 주소록 ID 자동 감지 실패:', apiErrorMsg);
+      return null;
+    }
+  },
+
   /**
    * Sends the newsletter to a list of subscribers using Resend API.
    * Gracefully falls back to writing a mock email file locally if API Key is not set.
@@ -76,6 +125,85 @@ export const mailService = {
       const apiErrorMsg = error.response?.data?.message || error.message;
       console.error('❌ Resend API 메일 발송 중 오류 발생:', apiErrorMsg);
       return { success: false, error: apiErrorMsg };
+    }
+  },
+
+  /**
+   * Adds a new subscriber contact to the Resend Audience.
+   */
+  addContact: async (email) => {
+    if (!config.resendApiKey) {
+      console.log('ℹ️ Resend API 미설정으로 로컬 DB에만 임시 저장됩니다.');
+      return { success: true, simulated: true };
+    }
+
+    const audienceId = await mailService.getAudienceId();
+    if (!audienceId) {
+      console.log('ℹ️ Resend Audience ID를 자동 조회하지 못해 로컬 DB에만 임시 저장됩니다.');
+      return { success: true, simulated: true };
+    }
+    
+    try {
+      const response = await axios.post(
+        `https://api.resend.com/audiences/${audienceId}/contacts`,
+        {
+          email: email,
+          unsubscribed: false
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${config.resendApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 8000
+        }
+      );
+      console.log(`🎉 Resend Audience에 신규 구독자 추가 성공: ${email}`);
+      return { success: true, contactId: response.data?.id };
+    } catch (error) {
+      const apiErrorMsg = error.response?.data?.message || error.message;
+      console.error(`❌ Resend Audience 구독자 추가 실패:`, apiErrorMsg);
+      
+      // If contact already exists, Resend returns conflict. Treat as success.
+      if (apiErrorMsg.includes('already exists') || error.response?.status === 409) {
+        return { success: true, alreadyExists: true };
+      }
+      return { success: false, error: apiErrorMsg };
+    }
+  },
+
+  /**
+   * Fetches all active contacts from the Resend Audience.
+   */
+  getContacts: async () => {
+    if (!config.resendApiKey) return null;
+
+    const audienceId = await mailService.getAudienceId();
+    if (!audienceId) return null;
+    
+    try {
+      const response = await axios.get(
+        `https://api.resend.com/audiences/${audienceId}/contacts`,
+        {
+          headers: {
+            'Authorization': `Bearer ${config.resendApiKey}`
+          },
+          timeout: 10000
+        }
+      );
+      
+      const contacts = response.data?.data || [];
+      // Filter active (subscribed) emails
+      const activeEmails = contacts
+        .filter(c => !c.unsubscribed)
+        .map(c => c.email);
+      
+      console.log(`📋 Resend Audience로부터 ${activeEmails.length}명의 활성 구독자 목록을 안전하게 로드했습니다.`);
+      return activeEmails;
+    } catch (error) {
+      const apiErrorMsg = error.response?.data?.message || error.message;
+      console.error(`❌ Resend Audience 구독자 목록 가져오기 실패:`, apiErrorMsg);
+      return null;
     }
   }
 };

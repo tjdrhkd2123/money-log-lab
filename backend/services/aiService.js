@@ -456,8 +456,38 @@ Generate the fully complete JSON contents matching the master prompt specificati
           const result = await model.generateContent([systemPrompt, userPrompt]);
           const response = await result.response;
           let text = response.text();
-          text = text.replace(/^```json/, '').replace(/```$/, '').trim();
-          const parsed = JSON.parse(text);
+          
+          if (!text || text.trim() === '') {
+            throw new Error("AI로부터 빈 응답을 받았습니다.");
+          }
+          
+          let parsed;
+          try {
+            // Defensively clean potential markdown wrapper text
+            let cleanedText = text.replace(/^```json/, '').replace(/```$/, '').trim();
+            parsed = JSON.parse(cleanedText);
+          } catch (parseError) {
+            console.warn(`⚠️ Gemini (${geminiModel}) 1차 JSON 파싱 실패, 구조 파싱 시도...`);
+            
+            // Extract brace block if wrapped in other text
+            const firstBrace = text.indexOf('{');
+            const lastBrace = text.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+              const candidate = text.slice(firstBrace, lastBrace + 1);
+              try {
+                parsed = JSON.parse(candidate);
+              } catch (innerError) {
+                console.error("❌ Gemini 원본 텍스트 파싱 불가. 로그를 위해 원본을 일부 출력합니다:");
+                console.error("앞부분 (300자):", text.substring(0, 300));
+                console.error("뒷부분 (300자):", text.substring(text.length - 300));
+                throw new Error(`JSON 분석 실패: ${innerError.message}`);
+              }
+            } else {
+              console.error("❌ JSON 괄호({ }) 구조를 찾을 수 없습니다. 원본 텍스트:", text.substring(0, 300));
+              throw parseError;
+            }
+          }
+          
           console.log(`✅ Gemini AI (${geminiModel})로 글쓰기 성공! 시크릿 룸에 로딩됩니다.`);
           parsed.engine = `Gemini (${geminiModel})`;
           parsed.error = null;

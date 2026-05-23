@@ -58,9 +58,17 @@ export async function triggerDailyHarvest() {
     console.log('💾 로기가 오늘의 도토리 분석 자료를 시크릿 데이터베이스에 저장 완료했어!');
 
     // 5. Send Email Newsletter to active subscribers
-    if (db.subscribers.length > 0) {
-      console.log(`✉️ 총 ${db.subscribers.length}명의 이메일 구독자들에게 뉴스레터 발송 개시!`);
-      await mailService.sendNewsletter(db.subscribers, generatedContent.newsletter);
+    // Try to load active contacts dynamically from Resend's permanent cloud registry first
+    let activeSubscribers = await mailService.getContacts();
+    
+    if (!activeSubscribers) {
+      console.log('ℹ️ Resend Audience 미설정 또는 오류로 인해 서버 로컬 DB 캐시를 활용하여 발송합니다.');
+      activeSubscribers = db.subscribers;
+    }
+
+    if (activeSubscribers.length > 0) {
+      console.log(`✉️ 총 ${activeSubscribers.length}명의 이메일 구독자들에게 뉴스레터 발송 개시!`);
+      await mailService.sendNewsletter(activeSubscribers, generatedContent.newsletter);
     } else {
       console.log('ℹ️ 아직 등록된 이메일 구독자가 없어서 뉴스레터 자동 발송은 대기 중이야.');
     }
