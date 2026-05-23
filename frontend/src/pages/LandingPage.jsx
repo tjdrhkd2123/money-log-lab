@@ -16,7 +16,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('http://localhost:5000/api/subscribe', {
+      const response = await fetch('https://money-log-lab-backend.onrender.com/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

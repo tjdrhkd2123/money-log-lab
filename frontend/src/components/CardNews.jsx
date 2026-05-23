@@ -10,7 +10,7 @@ export default function CardNews() {
   useEffect(() => {
     async function loadCardNews() {
       try {
-        const response = await fetch('http://localhost:5000/api/public/card-news');
+        const response = await fetch('https://money-log-lab-backend.onrender.com/api/public/card-news');
         const data = await response.json();
         if (data.success && data.cardNews) {
           setSlides(data.cardNews);

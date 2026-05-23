@@ -9,7 +9,7 @@ export default function DashboardHome() {
   async function loadIndices() {
     setRefreshing(true);
     try {
-      const response = await fetch('http://localhost:5000/api/public/indices');
+      const response = await fetch('https://money-log-lab-backend.onrender.com/api/public/indices');
       const data = await response.json();
       if (data.success) {
         setIndices(data.indices);
