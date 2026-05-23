@@ -27,6 +27,19 @@ export default function LandingPage({ onNavigateToAdmin }) {
       
       if (response.ok && data.success) {
         setStatus({ type: 'success', message: data.message });
+        
+        // Save to local backup to prevent Render ephemeral storage wipe
+        try {
+          const backups = JSON.parse(localStorage.getItem('moneyloglab_backup_subscribers') || '[]');
+          const cleanEmail = email.trim().toLowerCase();
+          if (!backups.includes(cleanEmail)) {
+            backups.push(cleanEmail);
+            localStorage.setItem('moneyloglab_backup_subscribers', JSON.stringify(backups));
+          }
+        } catch (e) {
+          console.error('Backup save failed:', e);
+        }
+        
         setEmail('');
       } else {
         setStatus({ type: 'error', message: data.message || '구독 신청 중 오류가 발생했어!' });

@@ -73,6 +73,53 @@ export default function AdminSecret({ onNavigateHome }) {
       const data = await response.json();
       if (response.ok && data.success) {
         setDashboardData(data);
+        
+        // --- Dual Synchronization Layer ---
+        try {
+          const localBackups = JSON.parse(localStorage.getItem('moneyloglab_backup_subscribers') || '[]');
+          const serverSubscribers = data.subscribers || [];
+          
+          // 1. Sync server subscribers to local backup (Server -> Local)
+          let updatedLocalBackups = [...localBackups];
+          let localChanged = false;
+          for (const sEmail of serverSubscribers) {
+            if (!updatedLocalBackups.includes(sEmail)) {
+              updatedLocalBackups.push(sEmail);
+              localChanged = true;
+            }
+          }
+          if (localChanged) {
+            localStorage.setItem('moneyloglab_backup_subscribers', JSON.stringify(updatedLocalBackups));
+          }
+          
+          // 2. Identify missing subscribers on server (Local -> Server)
+          const missingOnServer = localBackups.filter(email => !serverSubscribers.includes(email));
+          if (missingOnServer.length > 0) {
+            console.log(`🔄 서버에서 누락된 구독자 ${missingOnServer.length}명 감지. 자동 복원 중...`);
+            const syncResponse = await fetch('https://money-log-lab-backend.onrender.com/api/admin/sync-subscribers', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ subscribers: missingOnServer })
+            });
+            const syncData = await syncResponse.json();
+            if (syncResponse.ok && syncData.success) {
+              console.log('🔄 구독자 복원 완료!');
+              setDashboardData(prev => ({
+                ...prev,
+                subscribersCount: syncData.subscribersCount,
+                subscribers: syncData.subscribers,
+                diagnostics: syncData.diagnostics
+              }));
+            }
+          }
+        } catch (syncErr) {
+          console.error('Dual Sync layer error:', syncErr);
+        }
+        // ----------------------------------
+        
       } else {
         // Token might be expired
         handleLogout();
@@ -361,6 +408,141 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-accent-emerald)' }}>매일 아침 07:00 AM</h3>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 🟢 로기 연구소 API & 주소록 정밀 진단 패널 */}
+      {dashboardData && dashboardData.diagnostics && (
+        <div className="glass-card" style={{
+          marginBottom: '30px',
+          padding: '24px',
+          borderRadius: 'var(--border-radius-md)',
+          background: 'rgba(5, 15, 30, 0.6)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: 'var(--shadow-neon-blue)'
+        }}>
+          <h3 style={{
+            fontSize: '15px',
+            color: '#ffffff',
+            fontWeight: '800',
+            fontFamily: 'var(--font-headers)',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            ⚙️ 로기 연구소 API & 클라우드 연동 상태 정밀 진단
+          </h3>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '16px'
+          }}>
+            {/* Resend API Key Status */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              padding: '14px',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>RESEND API KEY (이메일 발송/연동)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700' }}>
+                {dashboardData.diagnostics.resendApiKeyLoaded ? (
+                  <span style={{ color: 'var(--color-accent-emerald)' }}>🟢 정상 탑재됨</span>
+                ) : (
+                  <span style={{ color: 'var(--color-accent-orange)' }}>🔴 미설정 (로컬 시뮬레이션)</span>
+                )}
+              </div>
+            </div>
+
+            {/* Resend Audience Status */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              padding: '14px',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>클라우드 주소록 (Audience)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700' }}>
+                {dashboardData.diagnostics.audienceId ? (
+                  <span style={{ color: 'var(--color-accent-emerald)', fontSize: '12px', wordBreak: 'break-all' }} title={dashboardData.diagnostics.audienceId}>
+                    🟢 자동 연동됨 ({dashboardData.diagnostics.audienceId.substring(0, 8)}...)
+                  </span>
+                ) : (
+                  <span style={{ color: 'var(--color-accent-orange)' }}>🔴 감지 실패 (Render 연동 확인 필요)</span>
+                )}
+              </div>
+            </div>
+
+            {/* AI Engine Status */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              padding: '14px',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>AI 엔진 연동 상태 (Gemini / Claude)</span>
+              <div style={{ display: 'flex', gap: '12px', fontSize: '13px', fontWeight: '700' }}>
+                <span style={{ color: dashboardData.diagnostics.geminiApiKeyLoaded ? 'var(--color-accent-emerald)' : 'var(--color-accent-orange)' }}>
+                  Gemini: {dashboardData.diagnostics.geminiApiKeyLoaded ? '🟢' : '🔴'}
+                </span>
+                <span style={{ color: dashboardData.diagnostics.claudeApiKeyLoaded ? 'var(--color-accent-emerald)' : 'var(--color-accent-orange)' }}>
+                  Claude: {dashboardData.diagnostics.claudeApiKeyLoaded ? '🟢' : '🔴'}
+                </span>
+              </div>
+            </div>
+
+            {/* Sender Email Status */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              padding: '14px',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>발신자 이메일 (Sender Email)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#ffffff' }}>
+                ✉️ {dashboardData.diagnostics.senderEmail || '미설정'}
+              </div>
+            </div>
+          </div>
+
+          {/* 💡 API 연동 정상 가이드 */}
+          {(!dashboardData.diagnostics.resendApiKeyLoaded || !dashboardData.diagnostics.geminiApiKeyLoaded) && (
+            <div style={{
+              marginTop: '16px',
+              padding: '14px',
+              borderRadius: '8px',
+              background: 'rgba(255, 159, 28, 0.04)',
+              border: '1px solid rgba(255, 159, 28, 0.12)',
+              fontSize: '13px',
+              color: 'var(--color-text-secondary)',
+              lineHeight: '1.6'
+            }}>
+              <strong style={{ color: 'var(--color-accent-orange)', display: 'block', marginBottom: '4px' }}>🐿️ 로기의 긴급 연동 도우미 가이드!</strong>
+              이메일이 초기화되거나 AI 수집 경고가 뜬다면 <strong>Render.com 시크릿 환경변수(Environment Variables)</strong>에 아래 변수들이 정상 등록되었는지 꼭 체크해줘!
+              <ul style={{ paddingLeft: '20px', marginTop: '6px', fontSize: '12px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <li><code>RESEND_API_KEY</code> : Resend.com에서 생성한 <code>re_...</code> 형태의 API 키 값</li>
+                <li><code>GEMINI_API_KEY</code> : Google AI Studio에서 생성한 <code>AIzaSy...</code> 형태의 API 키 값</li>
+                <li><code>SENDER_EMAIL</code> : Resend에 도메인을 연동하지 않았다면 반드시 기본 발신용 주소인 <code>onboarding@resend.dev</code> 로 설정해 줘야 해! (도메인을 연동했다면 본인 도메인 메일 가능)</li>
+              </ul>
+              <span style={{ fontSize: '11px', display: 'block', marginTop: '6px', color: 'var(--color-accent-blue)' }}>
+                * 환경변수를 수정 및 저장하면 Render 서버가 자동으로 다시 빌드되며, 약 1~2분 뒤 적용 완료된 상태(초록불)로 확인할 수 있어!
+              </span>
+            </div>
+          )}
         </div>
       )}
 

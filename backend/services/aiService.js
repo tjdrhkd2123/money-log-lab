@@ -442,7 +442,9 @@ Generate the fully complete JSON contents matching the master prompt specificati
       const geminiModels = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
+        'gemini-1.5-flash-latest',
         'gemini-1.5-flash',
+        'gemini-1.5-pro-latest',
         'gemini-1.5-pro'
       ];
       
@@ -470,24 +472,41 @@ Generate the fully complete JSON contents matching the master prompt specificati
             // 1. Defensively clean potential markdown wrapper text
             let cleanedText = text.replace(/^```json/, '').replace(/```$/, '').trim();
             
-            // 2. Fix unescaped newlines inside JSON string properties
-            let inString = false;
-            let escaped = false;
+            // 2. Fix unescaped characters inside JSON fields defensively
             let repaired = "";
+            let openQuote = false;
             for (let i = 0; i < cleanedText.length; i++) {
               const char = cleanedText[i];
-              if (char === '"' && !escaped) {
-                inString = !inString;
-                repaired += char;
-              } else if (char === '\\' && inString) {
-                escaped = !escaped;
-                repaired += char;
-              } else if ((char === '\n' || char === '\r') && inString) {
+              if (char === '"') {
+                let backslashes = 0;
+                let idx = i - 1;
+                while (idx >= 0 && cleanedText[idx] === '\\') {
+                  backslashes++;
+                  idx--;
+                }
+                if (backslashes % 2 === 0) {
+                  const prevChar = cleanedText.slice(0, i).trim().slice(-1);
+                  const nextChar = cleanedText.slice(i + 1).trim().slice(0, 1);
+                  
+                  const isStructural = 
+                    prevChar === '{' || prevChar === '}' || 
+                    prevChar === '[' || prevChar === ']' || 
+                    prevChar === ',' || prevChar === ':' ||
+                    nextChar === '}' || nextChar === ']' || 
+                    nextChar === ',' || nextChar === ':';
+                  
+                  if (!isStructural && openQuote) {
+                    repaired += "'";
+                    continue;
+                  }
+                  openQuote = !openQuote;
+                }
+              }
+              
+              if ((char === '\n' || char === '\r') && openQuote) {
                 repaired += '\\n';
-                escaped = false;
               } else {
                 repaired += char;
-                escaped = false;
               }
             }
             cleanedText = repaired;

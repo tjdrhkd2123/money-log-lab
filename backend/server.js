@@ -244,15 +244,89 @@ app.post('/api/admin/login', adminLoginRateLimiter, async (req, res) => {
  * 5. GET /api/admin/daily-acorns
  * Fetches the daily harvested indicators, coins and generated draft articles.
  */
-app.get('/api/admin/daily-acorns', authenticateAdminToken, (req, res) => {
+app.get('/api/admin/daily-acorns', authenticateAdminToken, async (req, res) => {
   try {
     const db = getDb();
+    
+    // Dynamically load subscribers from Resend cloud registry to prevent visual DB wipes
+    let activeSubscribers = await mailService.getContacts();
+    let isResendActive = true;
+    if (!activeSubscribers) {
+      activeSubscribers = db.subscribers;
+      isResendActive = false;
+    }
+    
+    // Build diagnostic status for admin panel
+    const audienceId = config.resendApiKey ? await mailService.getAudienceId().catch(() => null) : null;
+    const diagnostics = {
+      geminiApiKeyLoaded: !!config.geminiApiKey,
+      claudeApiKeyLoaded: !!config.claudeApiKey,
+      resendApiKeyLoaded: !!config.resendApiKey,
+      senderEmail: config.senderEmail,
+      audienceId: audienceId,
+      isResendActive: isResendActive
+    };
     
     return res.status(200).json({
       success: true,
       dailyAcorns: db.dailyAcorns,
+      subscribersCount: activeSubscribers.length,
+      subscribers: activeSubscribers,
+      diagnostics
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * 7. POST /api/admin/sync-subscribers
+ * Synchronizes and merges frontend local backup subscribers with server db cache.
+ */
+app.post('/api/admin/sync-subscribers', authenticateAdminToken, async (req, res) => {
+  const { subscribers } = req.body;
+  if (!subscribers || !Array.isArray(subscribers)) {
+    return res.status(400).json({ success: false, message: '올바른 구독자 목록 데이터가 아닙니다.' });
+  }
+
+  try {
+    const db = getDb();
+    let mergedCount = 0;
+    
+    for (const email of subscribers) {
+      const cleaned = email.trim().toLowerCase();
+      if (cleaned && !db.subscribers.includes(cleaned)) {
+        db.subscribers.push(cleaned);
+        mergedCount++;
+        // Attempt cloud registration if missing on Resend during dynamic restore
+        if (config.resendApiKey) {
+          await mailService.addContact(cleaned).catch(() => null);
+        }
+      }
+    }
+    
+    if (mergedCount > 0) {
+      writeDb(db);
+      console.log(`🔄 프론트엔드 백업으로부터 ${mergedCount}명의 구독자가 복원 및 병합되었습니다.`);
+    }
+
+    // Build diagnostic status for response
+    const audienceId = config.resendApiKey ? await mailService.getAudienceId().catch(() => null) : null;
+    const diagnostics = {
+      geminiApiKeyLoaded: !!config.geminiApiKey,
+      claudeApiKeyLoaded: !!config.claudeApiKey,
+      resendApiKeyLoaded: !!config.resendApiKey,
+      senderEmail: config.senderEmail,
+      audienceId: audienceId,
+      isResendActive: !!audienceId
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: `🔄 구독자 목록 동기화 완료! (${mergedCount}명 복원됨)`,
       subscribersCount: db.subscribers.length,
-      subscribers: db.subscribers
+      subscribers: db.subscribers,
+      diagnostics
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
