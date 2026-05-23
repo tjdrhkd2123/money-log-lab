@@ -435,22 +435,31 @@ Generate the fully complete JSON contents matching the master prompt specificati
 
     // 2. Try Gemini API next if Key is set
     if (config.geminiApiKey) {
-      console.log('🔮 Gemini (Flash 1.5) AI 엔진을 통해 포스팅 생성 중...');
-      try {
-        const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        const result = await model.generateContent([systemPrompt, userPrompt]);
-        const response = await result.response;
-        let text = response.text();
-        text = text.replace(/^```json/, '').replace(/```$/, '').trim();
-        const parsed = JSON.parse(text);
-        console.log('✅ Gemini AI로 글쓰기 성공! 시크릿 룸에 로딩됩니다.');
-        parsed.engine = 'Gemini 1.5 Flash';
-        parsed.error = null;
-        return parsed;
-      } catch (error) {
-        console.error('⚠️ Gemini API 호출 실패로 모의 시나리오 콘텐츠로 복구합니다:', error.message);
-        lastError = (lastError ? lastError + ' | ' : '') + `Gemini 에러: ${error.message}`;
+      const geminiModels = [
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro'
+      ];
+      
+      for (const geminiModel of geminiModels) {
+        console.log(`🔮 Gemini (${geminiModel}) AI 엔진을 통해 포스팅 생성 시도 중...`);
+        try {
+          const genAI = new GoogleGenerativeAI(config.geminiApiKey);
+          const model = genAI.getGenerativeModel({ model: geminiModel });
+          const result = await model.generateContent([systemPrompt, userPrompt]);
+          const response = await result.response;
+          let text = response.text();
+          text = text.replace(/^```json/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(text);
+          console.log(`✅ Gemini AI (${geminiModel})로 글쓰기 성공! 시크릿 룸에 로딩됩니다.`);
+          parsed.engine = `Gemini (${geminiModel})`;
+          parsed.error = null;
+          return parsed;
+        } catch (error) {
+          console.warn(`⚠️ Gemini (${geminiModel}) 호출 실패:`, error.message);
+          lastError = (lastError ? lastError + ' | ' : '') + `Gemini (${geminiModel}) 에러: ${error.message}`;
+        }
       }
     }
 
