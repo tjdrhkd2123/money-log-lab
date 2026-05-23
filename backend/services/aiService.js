@@ -391,37 +391,45 @@ Generate the fully complete JSON contents matching the master prompt specificati
 
     // 1. Try Claude API first if Key is set
     if (config.claudeApiKey) {
-      console.log('🔮 Claude (Sonnet 3.5) AI 엔진을 통해 포스팅 생성 중...');
-      try {
-        const response = await axios.post(
-          'https://api.anthropic.com/v1/messages',
-          {
-            model: 'claude-3-5-sonnet-latest',
-            max_tokens: 4000,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userPrompt }]
-          },
-          {
-            headers: {
-              'x-api-key': config.claudeApiKey,
-              'anthropic-version': '2023-06-01',
-              'content-type': 'application/json'
+      const modelsToTry = [
+        'claude-3-5-sonnet-latest',
+        'claude-3-5-haiku-latest',
+        'claude-3-haiku-20240307'
+      ];
+      
+      for (const modelName of modelsToTry) {
+        console.log(`🔮 Claude (${modelName}) AI 엔진을 통해 포스팅 생성 시도 중...`);
+        try {
+          const response = await axios.post(
+            'https://api.anthropic.com/v1/messages',
+            {
+              model: modelName,
+              max_tokens: 4000,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userPrompt }]
             },
-            timeout: 45000
-          }
-        );
+            {
+              headers: {
+                'x-api-key': config.claudeApiKey,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json'
+              },
+              timeout: 45000
+            }
+          );
 
-        let text = response.data.content[0].text;
-        text = text.replace(/^```json/, '').replace(/```$/, '').trim();
-        const parsed = JSON.parse(text);
-        console.log('✅ Claude AI로 글쓰기 성공! 시크릿 룸에 로딩됩니다.');
-        parsed.engine = 'Claude 3.5 Sonnet';
-        parsed.error = null;
-        return parsed;
-      } catch (error) {
-        const errMsg = error.response?.data?.error?.message || error.message;
-        console.error('⚠️ Claude API 호출 실패로 다른 엔진으로 우회합니다:', errMsg);
-        lastError = `Claude 에러: ${errMsg}`;
+          let text = response.data.content[0].text;
+          text = text.replace(/^```json/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(text);
+          console.log(`✅ Claude AI (${modelName})로 글쓰기 성공! 시크릿 룸에 로딩됩니다.`);
+          parsed.engine = `Claude (${modelName})`;
+          parsed.error = null;
+          return parsed;
+        } catch (error) {
+          const errMsg = error.response?.data?.error?.message || error.message;
+          console.warn(`⚠️ Claude (${modelName}) 호출 실패:`, errMsg);
+          lastError = `Claude (${modelName}) 에러: ${errMsg}`;
+        }
       }
     }
 
