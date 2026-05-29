@@ -295,314 +295,117 @@ Q. 강남 빌딩마저 유찰되는 지금의 부동산 위기는 과연 언제�
   }
 };
 
+const callGemini = async (systemPrompt, userPrompt, apiKey, isJsonMime = true) => {
+  const geminiModels = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash'
+  ];
+  
+  let lastError = null;
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  
+  for (const modelName of geminiModels) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      let responseText = '';
+      
+      try {
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          generationConfig: isJsonMime ? {
+            responseMimeType: "application/json",
+            maxOutputTokens: 8192
+          } : {
+            maxOutputTokens: 8192
+          }
+        });
+        const result = await model.generateContent([systemPrompt, userPrompt]);
+        const response = await result.response;
+        responseText = response.text();
+      } catch (jsonErr) {
+        console.warn(`⚠️ Gemini MimeType JSON 설정 에러로 일반 텍스트 모드로 우회 찔러보기...`);
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          generationConfig: { maxOutputTokens: 8192 }
+        });
+        const result = await model.generateContent([systemPrompt, userPrompt + "\nIMPORTANT: Return RAW, VALID JSON only!"]);
+        const response = await result.response;
+        responseText = response.text();
+      }
+      
+      if (!responseText || responseText.trim() === '') {
+        throw new Error("AI로부터 빈 응답을 받았습니다.");
+      }
+      
+      // Defensively clean potential markdown wrapper text
+      let cleanedText = responseText.replace(/^```json/, '').replace(/```$/, '').trim();
+      
+      let parsed;
+      try {
+        parsed = JSON.parse(cleanedText);
+      } catch (directParseError) {
+        console.warn(`⚠️ Gemini (${modelName}) direct JSON parse failed, trying custom repair...`);
+        // Defensive repair loop
+        let repaired = "";
+        let openQuote = false;
+        for (let i = 0; i < cleanedText.length; i++) {
+          const char = cleanedText[i];
+          if (char === '"') {
+            let backslashes = 0;
+            let idx = i - 1;
+            while (idx >= 0 && cleanedText[idx] === '\\') {
+              backslashes++;
+              idx--;
+            }
+            if (backslashes % 2 === 0) {
+              const prevChar = cleanedText.slice(0, i).trim().slice(-1);
+              const nextChar = cleanedText.slice(i + 1).trim().slice(0, 1);
+              
+              const isStructural = 
+                prevChar === '{' || prevChar === '}' || 
+                prevChar === '[' || prevChar === ']' || 
+                prevChar === ',' || prevChar === ':' ||
+                nextChar === '}' || nextChar === ']' || 
+                nextChar === ',' || nextChar === ':';
+              
+              if (!isStructural && openQuote) {
+                repaired += "'";
+                continue;
+              }
+              openQuote = !openQuote;
+            }
+          }
+          if ((char === '\n' || char === '\r') && openQuote) {
+            repaired += '\\n';
+          } else {
+            repaired += char;
+          }
+        }
+        cleanedText = repaired
+          .replace(/}\s*"/g, '},\n"')
+          .replace(/]\s*"/g, '],\n"')
+          .replace(/([^\\]")\s*"([a-zA-Z0-9_]+)"\s*\:/g, '$1,\n"$2":');
+          
+        parsed = JSON.parse(cleanedText);
+      }
+      
+      parsed.engine = `Gemini (${modelName})`;
+      return parsed;
+    } catch (err) {
+      console.warn(`⚠️ Gemini (${modelName}) 호출 실패:`, err.message);
+      lastError = err;
+    }
+    await sleep(1500); // Cooldown before trying fallback model
+  }
+  throw lastError || new Error("Gemini models failed to respond.");
+};
+
 export const aiService = {
   generatePosts: async (financialData) => {
     const { indices, news, coinData } = financialData;
-
-    const systemPrompt = `
-You are the Squirrel Researcher "Rogi" (다람쥐 연구원 로기) - the official brand mascot of the financial blog "머니로그랩" (Money Log Lab).
-Write exactly 5 premium Naver Blog posts, a 5-slide Card News series, and an Email Newsletter based on the provided live daily financial data.
-
-## CRITICAL JSON FORMATTING RULES (MUST OBEY):
-- Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values like "body". If you want to quote a term or insert dialogue (e.g. "순환매" or "도토리"), you MUST use single quotes (') instead (e.g. '순환매' or '도토리'). Raw double quotes inside JSON string fields will break the JSON parser and are strictly forbidden.
-- Rule 2 (No Raw Line Breaks): Never output literal raw line breaks inside a JSON string value. If you need to start a new paragraph in the "body", represent it with a literal escaped "\\n" character on a single string line.
-- Rule 3 (Strict Conciseness to Prevent Truncation): Write each post body, card news slide, and email newsletter extremely concisely. If they are too long, the response will exceed the API token limit and be cut off mid-sentence, causing a parsing crash. Keep the total output lightweight:
-  * For each Blog Post "body": Limit the main text to exactly 3 short, punchy paragraphs (maximum 150 Korean words, or about 500-600 characters) before the checklist.
-  * For each "cardNews" slide description: Limit it to exactly 1 short sentence (maximum 20 Korean words).
-  * For the "newsletter" HTML body: Keep it very simple, clean, and short (under 800 characters).
-
-## Tone and Style Guidelines:
-- Persona: Friendly, cute 2D squirrel researcher "Rogi" who gathers financial "acorns" (info) for readers.
-- Speaking Style: Use 반말 (friendly informal Korean, e.g., "했어", "있어", "대비해야 해!") that is extremely easy for middle schoolers to understand ("중학생도 이해 가능한 쉬운 언어").
-- Make sure to use squirrel/acorn metaphors occasionally but keep the analysis professional.
-
-## Writing Quality 4 Principles (MUST FOLLOW):
-- Principle 1 (No Spoiler Preview): The upper key summary box (오늘의 핵심 정리 박스) must NOT spoil exact final figures or conclusions. Instead, write a highly engaging, curiosity-triggering "Trailer" (예고편) that urges the reader to read down, and add 3 "지금 할 것 3단계" (3 immediate action steps).
-- Principle 2 (Native Term Definitions): Never use separate [💡 Term Definition] boxes. Instead, blend definitions natively into Rogi's conversational flow (e.g. "이걸 주식 연구실에서는 자금이 돌고 도는 '순환매'라고 불러! 대장주가 먼저...").
-- Principle 3 (Keyword Repetition): Repeat target search keywords (e.g. KOSPI, Samsung Electronics, SK Hynix, Bitget, OKX, etc.) 2-3 times naturally in context.
-- Principle 4 (Affiliate Link Narrative Bridge): Before rendering the affiliate referral banner ([리틀리 링크]), write a compelling narrative explaining *why* they need a crypto income pipeline now (e.g. "환율이 1,500원을 육박하고 유가가 뛰는 고금리 위기 상황에서는 단일 원화 자산에만 묶여 있으면 위험해. 로기도 해외 코인 거래소를 활용해...").
-
-## 5 Posting Categories to Generate (MUST GENERATE ALL 5):
-1. economic (경제): Hybrid style (SEO optimized first paragraph + Rogi tone body).
-2. stock (주식): Hybrid style linking DRAM/HBM server demand trends to Samsung Electronics & SK Hynix.
-3. bitgetCoin (Bitget 코인): Card block style focusing on Bitget exchange, leverage futures stats, trending coins and benefits.
-4. okxCoin (OKX 코인): Narrative style focusing on OKX exchange, dex trends, global altcoin flows.
-5. realestate (부동산): Column format (Phenomenon -> Cause -> Influence -> Outlook).
-
-## All Post Structure Sequence:
-Every single post in "posts" must have exactly these keys:
-- "category": "economic" | "stock" | "bitgetCoin" | "okxCoin" | "realestate"
-- "titles": ["title1", "title2", "title3"]
-- "recommendedTitle": "recommended_title_with_emoji"
-- "thumbnailText": "short_thumbnail_phrase"
-- "aeoSummary": "one_line_aeo_summary"
-- "previewBox": { "trailerText": "trailer", "todoSteps": ["step1", "step2", "step3"] }
-- "body": Full markdown text of the post.
-  - MUST start immediately with [IMAGE_1] on the very first line, followed by the incident/news. Do NOT write greetings like "안녕!" or "반가워!" at the start. "사건으로 바로 시작 (인사말 금지)" is critical.
-  - Must blend 💡 Term Definitions organically into the text.
-  - Must include [IMAGE_2] in the middle.
-  - Must have the 3-step checklist of "주인장이 하고 있는 것들" where the 3rd step explains the crypto hedging necessity using the specific category's affiliate bridge narrative below:
-    * economic affiliate bridge: "유가가 오르고 금리가 묶이면 예금·적금으로는 물가를 못 따라가요. 주인장은 이럴 때 코인 시장을 병행 수익 채널로 쓰는데 생각보다 진입 장벽이 낮아요. 거래소 선택만 잘 해도 수수료를 아킬 수 있어서 정리해뒀어요. [리틀리 링크]"
-    * stock affiliate bridge: "환율이 1,500원을 넘나들 때는 주식 하나만 보고 있으면 리스크를 다 짊어지는 셈이에요. 글로벌 자본이 주식 시장에서 빠질 때 일부는 코인 시장으로 이동하거든요. 주인장도 주식이 이렇게 흔들릴 때 코인을 병행하면서 분산하고 있어요. 마침 수수료 아끼면서 시작하기 좋은 거래소 혜택을 정리해뒀으니 참고해보세요. [리틀리 링크]"
-    * realestate affiliate bridge: "금리가 안 내려오는 동안 부동산 하나만 바라보고 있으면 현금흐름이 막혀요. 주인장은 그래서 부동산 외에 코인 시장도 같이 굴려요. 작은 돈부터 시작할 수 있고 수수료 아끼는 방법도 있으니 아래 참고해보세요. [리틀리 링크]"
-    * bitgetCoin & okxCoin affiliate bridge: Blend in a highly persuasive rationale about starting crypto investments now with their specific exchange benefits, concluding with [리틀리 링크].
-  - Must include exactly 1 question for readers at the end to boost engagement.
-  - Must include 3 internal links at the bottom:
-    * "[내부 링크 1] 머니로그랩 이전 관련 분석글 보러가기"
-    * "[내부 링크 2] 머니로그랩 추천 재테크 정보"
-    * "[내부 링크 3] 로기가 물어다 준 경제 도토리"
-- "hashtags": Array of exactly 10 to 15 search keywords.
-- "imageKeywords": Pixabay search terms.
-
-## JSON Output Structure:
-You MUST return raw, valid JSON only. Do not wrap in markdown \`\`\`json blocks.
-The JSON must follow this exact structure:
-{
-  "posts": [
-    {
-      "category": "economic" | "stock" | "bitgetCoin" | "okxCoin" | "realestate",
-      "titles": ["title1", "title2", "title3"],
-      "recommendedTitle": "recommended_title_with_emoji",
-      "thumbnailText": "short_thumbnail_phrase",
-      "aeoSummary": "one_line_aeo_summary",
-      "previewBox": {
-        "trailerText": "curiosity_triggering_trailer_text",
-        "todoSteps": ["step1", "step2", "step3"]
-      },
-      "body": "full_body_text_conforming_to_sequence_rules",
-      "hashtags": ["tag1", "tag2", "tag3..."],
-      "imageKeywords": ["keyword1", "keyword2"]
-    }
-  ],
-  "cardNews": [
-    {
-      "slideNumber": 1,
-      "title": "slide_title",
-      "description": "slide_desc",
-      "keyword": "slide_keyword"
-    }
-  ],
-  "newsletter": {
-    "subject": "newsletter_subject",
-    "htmlBody": "beautifully_styled_html_newsletter"
-  }
-}
-`;
-
-    const userPrompt = `
-Here is today's gathered economic data for "머니로그랩":
-- KOSPI Quote: Price ${indices.kospi.price}, Change ${indices.kospi.change} (${indices.kospi.changePercent}%)
-- KOSDAQ Quote: Price ${indices.kosdaq.price}, Change ${indices.kosdaq.change} (${indices.kosdaq.changePercent}%)
-- USD/KRW Rate: Price ${indices.usdKrw.price}, Change ${indices.usdKrw.change} (${indices.usdKrw.changePercent}%)
-- Bitget Hot Coin (Futures): ${coinData?.bitget?.formattedName || 'ONDO(온도파이낸스)'} - Price: ${coinData?.bitget?.price || '0.95'}$ (+${coinData?.bitget?.changePercent || '15.42'}%), Description: ${coinData?.bitget?.description || ''}
-- OKX Hot Coin (DEX): ${coinData?.okx?.formattedName || 'NOT(낫코인)'} - Price: ${coinData?.okx?.price || '0.018'}$ (+${coinData?.okx?.changePercent || '24.11'}%), Description: ${coinData?.okx?.description || ''}
-- Latest 24h News Headlines:
-${news.map((n, i) => `${i+1}. [${n.source}] ${n.title}`).join('\n')}
-
-Generate the fully complete JSON contents matching the master prompt specifications.
-`;
-
-    let lastError = null;
-
-    // 1. Try Claude API first if Key is set
-    if (config.claudeApiKey) {
-      const modelsToTry = [
-        'claude-3-5-sonnet-latest',
-        'claude-3-5-haiku-latest',
-        'claude-3-haiku-20240307'
-      ];
-      
-      for (const modelName of modelsToTry) {
-        console.log(`🔮 Claude (${modelName}) AI 엔진을 통해 포스팅 생성 시도 중...`);
-        try {
-          const response = await axios.post(
-            'https://api.anthropic.com/v1/messages',
-            {
-              model: modelName,
-              max_tokens: 4000,
-              system: systemPrompt,
-              messages: [{ role: 'user', content: userPrompt }]
-            },
-            {
-              headers: {
-                'x-api-key': config.claudeApiKey,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json'
-              },
-              timeout: 45000
-            }
-          );
-
-          let text = response.data.content[0].text;
-          text = text.replace(/^```json/, '').replace(/```$/, '').trim();
-          const parsed = JSON.parse(text);
-          console.log(`✅ Claude AI (${modelName})로 글쓰기 성공! 시크릿 룸에 로딩됩니다.`);
-          parsed.engine = `Claude (${modelName})`;
-          parsed.error = null;
-          return parsed;
-        } catch (error) {
-          const errMsg = error.response?.data?.error?.message || error.message;
-          console.warn(`⚠️ Claude (${modelName}) 호출 실패:`, errMsg);
-          lastError = `Claude (${modelName}) 에러: ${errMsg}`;
-        }
-      }
-    }
-
-    // 2. Try Gemini API next if Key is set
-    if (config.geminiApiKey) {
-      const geminiModels = [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash-latest',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro-latest',
-        'gemini-1.5-pro'
-      ];
-      
-      const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-      
-      for (const geminiModel of geminiModels) {
-        console.log(`🔮 Gemini (${geminiModel}) AI 엔진을 통해 포스팅 생성 시도 중...`);
-        // 1.5-second cooldown delay to dodge consecutive 429 Rate Limits
-        await sleep(1500);
-        
-        try {
-          const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-          
-          // Hybrid Config: try JSON mime type first, fallback to text mode if it fails
-          let responseText = '';
-          try {
-            const model = genAI.getGenerativeModel({ 
-              model: geminiModel,
-              generationConfig: {
-                responseMimeType: "application/json",
-                maxOutputTokens: 8192
-              }
-            });
-            const result = await model.generateContent([systemPrompt, userPrompt]);
-            const response = await result.response;
-            responseText = response.text();
-          } catch (jsonConfigError) {
-            console.warn(`⚠️ Gemini MimeType JSON 설정 에러로 일반 텍스트 모드로 우회 찔러보기...`);
-            const model = genAI.getGenerativeModel({ 
-              model: geminiModel,
-              generationConfig: {
-                maxOutputTokens: 8192
-              }
-            });
-            const result = await model.generateContent([systemPrompt, userPrompt + "\nIMPORTANT: Return RAW, VALID JSON only! Do not wrap in markdown blocks."]);
-            const response = await result.response;
-            responseText = response.text();
-          }
-          
-          if (!responseText || responseText.trim() === '') {
-            throw new Error("AI로부터 빈 응답을 받았습니다.");
-          }
-          
-          try {
-            const dataDir = path.join(__dirname, '../data');
-            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            fs.writeFileSync(path.join(dataDir, 'debug_gemini_response.txt'), `=== MODEL: ${geminiModel} ===\n${responseText}`, 'utf-8');
-            console.log(`💾 Raw response from ${geminiModel} successfully logged to debug_gemini_response.txt!`);
-          } catch (e) {
-            console.error("Failed to write debug file:", e);
-          }
-          
-          let parsed;
-          try {
-            // 1. Defensively clean potential markdown wrapper text
-            let cleanedText = responseText.replace(/^```json/, '').replace(/```$/, '').trim();
-            
-            try {
-              // Try direct parsing first to avoid corrupting already-valid JSON
-              parsed = JSON.parse(cleanedText);
-            } catch (directParseError) {
-              console.warn(`⚠️ Gemini (${geminiModel}) direct JSON parse failed, attempting defensive repair...`);
-              
-              // 2. Fix unescaped characters inside JSON fields defensively
-              let repaired = "";
-              let openQuote = false;
-              for (let i = 0; i < cleanedText.length; i++) {
-                const char = cleanedText[i];
-                if (char === '"') {
-                  let backslashes = 0;
-                  let idx = i - 1;
-                  while (idx >= 0 && cleanedText[idx] === '\\') {
-                    backslashes++;
-                    idx--;
-                  }
-                  if (backslashes % 2 === 0) {
-                    const prevChar = cleanedText.slice(0, i).trim().slice(-1);
-                    const nextChar = cleanedText.slice(i + 1).trim().slice(0, 1);
-                    
-                    const isStructural = 
-                      prevChar === '{' || prevChar === '}' || 
-                      prevChar === '[' || prevChar === ']' || 
-                      prevChar === ',' || prevChar === ':' ||
-                      nextChar === '}' || nextChar === ']' || 
-                      nextChar === ',' || nextChar === ':';
-                    
-                    if (!isStructural && openQuote) {
-                      repaired += "'";
-                      continue;
-                    }
-                    openQuote = !openQuote;
-                  }
-                }
-                
-                if ((char === '\n' || char === '\r') && openQuote) {
-                  repaired += '\\n';
-                } else {
-                  repaired += char;
-                }
-              }
-              cleanedText = repaired;
-              
-              // 3. Fix missing commas between properties dynamically
-              cleanedText = cleanedText
-                .replace(/}\s*"/g, '},\n"')       // missing comma after }
-                .replace(/]\s*"/g, '],\n"')       // missing comma after ]
-                .replace(/([^\\]")\s*"([a-zA-Z0-9_]+)"\s*\:/g, '$1,\n"$2":'); // missing comma after "
-              
-              parsed = JSON.parse(cleanedText);
-            }
-          } catch (parseError) {
-            console.warn(`⚠️ Gemini (${geminiModel}) JSON 파싱 실패, 구조 추출 재시도...`);
-            
-            // Extract brace block if wrapped in other text
-            const firstBrace = responseText.indexOf('{');
-            const lastBrace = responseText.lastIndexOf('}');
-            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-              const candidate = responseText.slice(firstBrace, lastBrace + 1);
-              try {
-                parsed = JSON.parse(candidate);
-              } catch (innerError) {
-                console.error("❌ Gemini 원본 텍스트 파싱 불가. 로그를 위해 원본을 일부 출력합니다:");
-                console.error("앞부분 (300자):", responseText.substring(0, 300));
-                console.error("뒷부분 (300자):", responseText.substring(responseText.length - 300));
-                throw new Error(`JSON 분석 실패: ${innerError.message}`);
-              }
-            } else {
-              console.error("❌ JSON 괄호({ }) 구조를 찾을 수 없습니다. 원본 텍스트:", responseText.substring(0, 300));
-              throw parseError;
-            }
-          }
-          
-          console.log(`✅ Gemini AI (${geminiModel})로 글쓰기 성공! 시크릿 룸에 로딩됩니다.`);
-          parsed.engine = `Gemini (${geminiModel})`;
-          parsed.error = null;
-          return parsed;
-        } catch (error) {
-          console.warn(`⚠️ Gemini (${geminiModel}) 호출 실패:`, error.message);
-          lastError = (lastError ? lastError + ' | ' : '') + `Gemini (${geminiModel}) 에러: ${error.message}`;
-        }
-      }
-    }
-
-    // 3. Ultimate Fallback to smart pre-rendered mock content
-    console.log('ℹ️ 사용 가능한 AI API 키가 없거나 호출이 차단되었습니다. 로기 전용 고해상도 사전 제작 시나리오를 로드합니다.');
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     
-    // Inject current collected indices/news for maximum dynamic realism
+    // Customized mock data as base fallback
     const customizedMock = { ...mockGeneratedData };
     customizedMock.posts = customizedMock.posts.map(post => {
       let body = post.body;
@@ -612,12 +415,184 @@ Generate the fully complete JSON contents matching the master prompt specificati
       if (post.category === 'stock' && indices.kospi) {
         body = body.replace(/==8조 원==/g, `==개인 대규모 순매도세 속 KOSPI ${indices.kospi.price} 변동==`);
       }
-      return {
-        ...post,
-        body
-      };
+      return { ...post, body };
     });
+
+    let lastError = null;
     
+    if (config.geminiApiKey) {
+      try {
+        console.log("🚀 [Gemini Multi-Call Engine] 2,000자 블로그 포스팅 순차 생성 시작!");
+        const posts = [];
+        const categories = ['economic', 'stock', 'bitgetCoin', 'okxCoin', 'realestate'];
+        
+        for (const category of categories) {
+          console.log(`🔮 [Gemini Multi-Call] "${category}" 카테고리 2,000자 포스팅 집필 중...`);
+          try {
+            const systemPrompt = `
+You are the Squirrel Researcher "Rogi" (다람쥐 연구원 로기) - the official brand mascot of the financial blog "머니로그랩" (Money Log Lab).
+Write a premium, SEO-optimized, highly detailed Naver Blog post for the category "${category}".
+
+## 2,000-CHARACTER SEO REQUIREMENT (CRITICAL):
+- The "body" of the post MUST be extremely detailed and long, around 1,500 to 2,000 Korean characters (excluding the checklists/links). Use rich explanations, step-by-step reasoning, and deep analysis of the provided data to ensure it ranks high on Naver Blog SEO. This is a strict quality requirement from the blog master!
+
+## CRITICAL JSON FORMATTING RULES (MUST OBEY):
+- Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values. Use single quotes (') instead.
+- Rule 2 (No Raw Line Breaks): Represent paragraph breaks in "body" with literal escaped "\\n" characters. Do not output literal raw line breaks inside JSON strings.
+
+## Tone and Style:
+- Persona: Friendly, cute 2D squirrel researcher "Rogi" who gathers financial "acorns" (info).
+- Speaking Style: Use 반말 (friendly informal Korean, e.g., "했어", "있어", "대비해야 해!") that is extremely easy for middle schoolers to understand ("중학생도 이해 가능한 쉬운 언어").
+
+## Writing Quality 4 Principles (MUST FOLLOW):
+- Principle 1 (No Spoiler Preview): The "previewBox.trailerText" must NOT spoil exact final figures. Write a curiosity-triggering "Trailer" (예고편), and add 3 "지금 할 것 3단계" (3 immediate action steps).
+- Principle 2 (Native Term Definitions): Blend definitions natively into Rogi's conversational flow (e.g. "이걸 주식 연구실에서는 자금이 돌고 도는 '순환매'라고 불러!").
+- Principle 3 (Keyword Repetition): Repeat target search keywords naturally 2-3 times.
+- Principle 4 (Affiliate Link Narrative Bridge): Before rendering the affiliate referral banner ([리틀리 링크]), write a compelling narrative explaining *why* they need a crypto income pipeline now.
+
+## Category Specifications for "${category}":
+${category === 'economic' ? '- economic (경제): Hybrid style (SEO optimized first paragraph + Rogi tone body).' : ''}
+${category === 'stock' ? '- stock (주식): Hybrid style linking DRAM/HBM server demand trends to Samsung Electronics & SK Hynix.' : ''}
+${category === 'bitgetCoin' ? '- bitgetCoin (Bitget 코인): Card block style focusing on Bitget exchange, leverage futures stats, trending coins and benefits.' : ''}
+${category === 'okxCoin' ? '- okxCoin (OKX 코인): Narrative style focusing on OKX exchange, dex trends, global altcoin flows.' : ''}
+${category === 'realestate' ? '- realestate (부동산): Column format (Phenomenon -> Cause -> Influence -> Outlook).' : ''}
+
+## Post Structure Sequence:
+You MUST return raw, valid JSON only. Do not wrap in markdown \`\`\`json blocks.
+The JSON must follow this exact structure:
+{
+  "category": "${category}",
+  "titles": ["title1", "title2", "title3"],
+  "recommendedTitle": "recommended_title_with_emoji",
+  "thumbnailText": "short_thumbnail_phrase",
+  "aeoSummary": "one_line_aeo_summary",
+  "previewBox": {
+    "trailerText": "curiosity_triggering_trailer_text",
+    "todoSteps": ["step1", "step2", "step3"]
+  },
+  "body": "Full body text conforming to SEO 2,000-character requirement. MUST start with [IMAGE_1] immediately on the first line. Blend 💡 Term Definitions organically. Include [IMAGE_2] in the middle. Checklist of '주인장이 하고 있는 것들' where the 3rd step explains the crypto hedging necessity using the specific category's affiliate bridge narrative below: ${
+    category === 'economic' ? '유가가 오르고 금리가 묶이면 예금·적금으로는 물가를 못 따라가요. 주인장은 이럴 때 코인 시장을 병행 수익 채널로 쓰는데 생각보다 진입 장벽이 낮아요. 거래소 선택만 잘 해도 수수료를 아킬 수 있어서 정리해뒀어요. [리틀리 링크]' :
+    category === 'stock' ? '환율이 1,500원을 넘나들 때는 주식 하나만 보고 있으면 리스크를 다 짊어지는 셈이에요. 글로벌 자본이 주식 시장에서 빠질 때 일부는 코인 시장으로 이동하거든요. 주인장도 주식이 이렇게 흔들릴 때 코인을 병행하면서 분산하고 있어요. 마침 수수료 아끼면서 시작하기 좋은 거래소 혜택을 정리해뒀으니 참고해보세요. [리틀리 링크]' :
+    category === 'realestate' ? '금리가 안 내려오는 동안 부동산 하나만 바라보고 있으면 현금흐름이 막혀요. 주인장은 그래서 부동산 외에 코인 시장도 같이 굴려요. 작은 돈부터 시작할 수 있고 수수료 아끼는 방법도 있으니 아래 참고해보세요. [리틀리 링크]' :
+    'Blend in a highly persuasive rationale about starting crypto investments now with their specific exchange benefits, concluding with [리틀리 링크].'
+  }\\n\\nInclude exactly 1 question at the end.\\n\\nInclude exactly these 3 internal links at the bottom:\\n[내부 링크 1] 머니로그랩 이전 관련 분석글 보러가기\\n[내부 링크 2] 머니로그랩 추천 재테크 정보\\n[내부 링크 3] 로기가 물어다 준 경제 도토리",
+  "hashtags": ["tag1", "tag2", "tag3..."],
+  "imageKeywords": ["keyword1", "keyword2"]
+}
+`;
+
+            const userPrompt = `
+Here is today's gathered data:
+- KOSPI: ${indices.kospi.price} (${indices.kospi.changePercent}%)
+- KOSDAQ: ${indices.kosdaq.price} (${indices.kosdaq.changePercent}%)
+- USD/KRW Rate: ${indices.usdKrw.price} (${indices.usdKrw.changePercent}%)
+- Bitget Hot Coin: ${coinData?.bitget?.formattedName || 'WIF'} (${coinData?.bitget?.changePercent || '12.85'}%) - Price: ${coinData?.bitget?.price || '2.84'}$
+- OKX Hot Coin: ${coinData?.okx?.formattedName || 'NOT'} (${coinData?.okx?.changePercent || '24.11'}%) - Price: ${coinData?.okx?.price || '0.018'}$
+- News Headlines:
+${news.map((n, idx) => `${idx+1}. ${n.title}`).join('\n')}
+
+Generate the detailed 2000-character Naver Blog post for the category "${category}".
+`;
+
+            const parsedPost = await callGemini(systemPrompt, userPrompt, config.geminiApiKey);
+            posts.push(parsedPost);
+            console.log(`✅ [Gemini Multi-Call] "${category}" 집필 및 JSON 파싱 완료!`);
+          } catch (postErr) {
+            console.warn(`⚠️ [Gemini Multi-Call] "${category}" 생성 실패, 모의 데이터로 대체합니다:`, postErr.message);
+            const mockPost = customizedMock.posts.find(p => p.category === category);
+            posts.push({ ...mockPost });
+          }
+          await sleep(1500); // 1.5-second delay between requests to prevent rate limits
+        }
+        
+        console.log("🔮 [Gemini Multi-Call] 카드뉴스 및 뉴스레터 생성 중...");
+        let metaData;
+        try {
+          const systemPromptMeta = `
+You are the Squirrel Researcher "Rogi" (다람쥐 연구원 로기) - the official brand mascot of the financial blog "머니로그랩" (Money Log Lab).
+Generate a 5-slide Card News series and an Email Newsletter based on the provided live daily financial data.
+
+## Tone and Style:
+- Speaking Style: Use 반말 (friendly informal Korean) easy for middle schoolers to understand.
+
+## JSON Output Structure:
+You MUST return raw, valid JSON only. Do not wrap in markdown \`\`\`json blocks.
+The JSON must follow this exact structure:
+{
+  "cardNews": [
+    {
+      "slideNumber": 1,
+      "title": "slide_title",
+      "description": "slide_desc_exactly_one_sentence",
+      "keyword": "slide_keyword"
+    },
+    {
+      "slideNumber": 2,
+      "title": "slide_title",
+      "description": "slide_desc_exactly_one_sentence",
+      "keyword": "slide_keyword"
+    },
+    {
+      "slideNumber": 3,
+      "title": "slide_title",
+      "description": "slide_desc_exactly_one_sentence",
+      "keyword": "slide_keyword"
+    },
+    {
+      "slideNumber": 4,
+      "title": "slide_title",
+      "description": "slide_desc_exactly_one_sentence",
+      "keyword": "slide_keyword"
+    },
+    {
+      "slideNumber": 5,
+      "title": "slide_title",
+      "description": "slide_desc_exactly_one_sentence",
+      "keyword": "slide_keyword"
+    }
+  ],
+  "newsletter": {
+    "subject": "newsletter_subject_with_emoji",
+    "htmlBody": "beautifully_styled_html_newsletter"
+  }
+}
+`;
+          const userPromptMeta = `
+Today's indices and headlines:
+- KOSPI: ${indices.kospi.price} (${indices.kospi.changePercent}%)
+- KOSDAQ: ${indices.kosdaq.price} (${indices.kosdaq.changePercent}%)
+- USD/KRW Rate: ${indices.usdKrw.price} (${indices.usdKrw.changePercent}%)
+- Bitget Hot Coin: ${coinData?.bitget?.formattedName || 'WIF'} (${coinData?.bitget?.changePercent || '12.85'}%) - Price: ${coinData?.bitget?.price || '2.84'}$
+- OKX Hot Coin: ${coinData?.okx?.formattedName || 'NOT'} (${coinData?.okx?.changePercent || '24.11'}%) - Price: ${coinData?.okx?.price || '0.018'}$
+- News:
+${news.map(n => `- ${n.title}`).join('\n')}
+
+Generate the Card News and Newsletter.
+`;
+          metaData = await callGemini(systemPromptMeta, userPromptMeta, config.geminiApiKey);
+          console.log("✅ [Gemini Multi-Call] 카드뉴스 및 뉴스레터 생성 완료!");
+        } catch (metaErr) {
+          console.warn("⚠️ [Gemini Multi-Call] 카드뉴스/뉴스레터 생성 실패, 모의 데이터로 대체합니다:", metaErr.message);
+          metaData = {
+            cardNews: customizedMock.cardNews,
+            newsletter: customizedMock.newsletter
+          };
+        }
+        
+        return {
+          posts,
+          cardNews: metaData.cardNews,
+          newsletter: metaData.newsletter,
+          engine: 'Gemini (gemini-2.5-flash - Multi-Call Engine)',
+          error: null
+        };
+      } catch (err) {
+        console.error("❌ [Gemini Multi-Call Engine] 완전 실패:", err.message);
+        lastError = err.message;
+      }
+    }
+    
+    // Ultimate mock fallback
     customizedMock.engine = '시나리오 모의 모드 (API 키 오류 또는 미등록)';
     customizedMock.error = lastError || 'API 키가 설정되어 있지 않습니다.';
     return customizedMock;
