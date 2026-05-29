@@ -45,7 +45,7 @@ export default function DashboardHome() {
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[1, 2, 3].map(i => (
           <div key={i} className="glass-card" style={{ width: '200px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="w-6 h-6 border-2 border-slate-700 border-t-emerald-400 rounded-full animate-spin"></div>
+            <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>로기가 지표 가져오는 중...</span>
           </div>
         ))}
       </div>
