@@ -1,27 +1,29 @@
 import axios from 'axios';
 
-// Google News RSS feed for Korean economic news
-const NEWS_RSS_URL = 'https://news.google.com/rss/search?q=%EA%B2%BD%EC%A0%9C+when:24h&hl=ko&gl=KR&ceid=KR:ko';
+// Google News RSS feeds for distinct Korean economic sectors
+const RSS_FEEDS = {
+  economy: 'https://news.google.com/rss/search?q=%EA%B2%BD%EC%A0%9C+when:24h&hl=ko&gl=KR&ceid=KR:ko',
+  realestate: 'https://news.google.com/rss/search?q=%EB%B6%80%EB%8F%99%EC%82%B0+when:24h&hl=ko&gl=KR&ceid=KR:ko',
+  coin: 'https://news.google.com/rss/search?q=%EA%B0%80%EC%83%81%EC%9E%90%EC%82%B0+OR+%EB%B9%85%EC%BD%94%EC%9D%B8+when:24h&hl=ko&gl=KR&ceid=KR:ko'
+};
 
 /**
- * Parses Google News XML RSS feed into JSON objects (simple XML parsing with regex for robustness)
+ * Parses Google News XML RSS feed into JSON objects with category tagging
  */
-function parseGoogleNewsRss(xmlText) {
+function parseGoogleNewsRss(xmlText, category = 'economy') {
   const items = [];
   const itemMatches = xmlText.match(/<item>([\s\S]*?)<\/item>/g) || [];
   
   for (const itemXml of itemMatches) {
-    if (items.length >= 8) break; // Limit to 8 fresh news
+    if (items.length >= 6) break; // Limit to 6 fresh news per feed
     const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/);
     const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/);
     const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
     const sourceMatch = itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/);
 
     let title = titleMatch ? titleMatch[1] : '경제 핵심 헤드라인';
-    // Clean CDATA and HTML entities if any
     title = title.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim();
-    // Google News RSS titles end with " - Source Name", let's clean it
-    title = title.split(' - ')[0];
+    title = title.split(' - ')[0]; // Strip source suffix from google news titles
 
     const link = linkMatch ? linkMatch[1] : 'https://news.google.com';
     const pubDate = pubDateMatch ? pubDateMatch[1] : new Date().toUTCString();
@@ -31,7 +33,8 @@ function parseGoogleNewsRss(xmlText) {
       title,
       link,
       pubDate,
-      source
+      source,
+      category
     });
   }
   return items;
@@ -74,11 +77,11 @@ async function fetchYahooFinanceQuote(symbol) {
  */
 export const financeService = {
   /**
-   * Fetches KOSPI, KOSDAQ, Exchange rates, and latest 24h news.
+   * Fetches KOSPI, KOSDAQ, Exchange rates, and multi-channel RSS feeds.
    * If real endpoints fail, provides high-fidelity simulated backup data.
    */
   getDailyAcorns: async () => {
-    console.log('🐿️ 로기가 경제 도토리(경제 데이터 및 뉴스)를 수집하는 중...');
+    console.log('🐿️ 로기가 경제 도토리(경제, 부동산, 코인 뉴스)를 수집하는 중...');
     
     // 1. Gather Economic Indices
     let kospi = await fetchYahooFinanceQuote('^KS11');
@@ -102,52 +105,75 @@ export const financeService = {
     }
 
     if (!usdKrw) {
-      usdKrw = { price: '1,365.50', change: '+4.50', changePercent: '0.33', status: 'UP' };
+      usdKrw = { price: '1,580.00', change: '+4.50', changePercent: '0.33', status: 'UP' };
     } else {
       usdKrw.price = Number(usdKrw.price).toLocaleString('ko-KR', { minimumFractionDigits: 2 });
       usdKrw.change = (Number(usdKrw.change) >= 0 ? '+' : '') + Number(usdKrw.change).toFixed(2);
     }
 
-    // 2. Gather News
+    // 2. Gather News from 3 distinct RSS feeds (General Economy, Real Estate, Crypto)
     let news = [];
-    try {
-      const response = await axios.get(NEWS_RSS_URL, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        },
-        timeout: 5000
-      });
-      news = parseGoogleNewsRss(response.data);
-    } catch (error) {
-      console.error('⚠️ 구글 뉴스 수집 오류로 로기가 대체 실시간 경제 브리핑 뉴스를 작성합니다:', error.message);
+    const feedsToFetch = ['economy', 'realestate', 'coin'];
+    for (const cat of feedsToFetch) {
+      try {
+        console.log(`📡 구글 뉴스 [${cat}] RSS 피드 수집 중...`);
+        const response = await axios.get(RSS_FEEDS[cat], {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          timeout: 4000
+        });
+        const parsed = parseGoogleNewsRss(response.data, cat);
+        news = news.concat(parsed);
+      } catch (error) {
+        console.error(`⚠️ 구글 뉴스 [${cat}] 수집 실패:`, error.message);
+      }
     }
 
     // High fidelity mock news backup if RSS is empty or blocked
     if (news.length === 0) {
       news = [
         {
-          title: "美 연준 통화정책 완화 기조 유지... 6월 금리 동결 유력에 글로벌 안도 랠리",
+          title: "美 연준 통화정책 완화 기조 유지... 금리 인하 기대감에 글로벌 리스크 온 랠리",
           link: "https://finance.yahoo.com",
           pubDate: new Date().toUTCString(),
-          source: "머니로그 금융부"
+          source: "머니로그 금융부",
+          category: "economy"
         },
         {
           title: "외국인 투자자, 삼성전자·SK하이닉스 반도체주 8거래일 만에 대규모 순매수 전환",
           link: "https://finance.yahoo.com",
           pubDate: new Date().toUTCString(),
-          source: "머니로그 증권팀"
+          source: "머니로그 증권팀",
+          category: "economy"
         },
         {
-          title: "원·달러 환율 1,360원대 박스권 등락... 수출 대기업 실적 개선에 긍정적 영향",
+          title: "원·달러 환율 1,580원 돌파 긴급 조정국면 진입... 외환 당국 미세조정 경계령",
           link: "https://finance.yahoo.com",
           pubDate: new Date().toUTCString(),
-          source: "외환동향보드"
+          source: "외환동향보드",
+          category: "economy"
         },
         {
           title: "수도권 부동산 거래량 3개월 연속 상승세... 서울 강남 3구 중심으로 완연한 회복세",
           link: "https://finance.yahoo.com",
           pubDate: new Date().toUTCString(),
-          source: "로기부동산연구실"
+          source: "로기부동산연구실",
+          category: "realestate"
+        },
+        {
+          title: "강남 빌딩 경매 매수세 전멸에 낙찰률 역대 최저 경신... 6%대 대출 고금리 직격탄",
+          link: "https://finance.yahoo.com",
+          pubDate: new Date().toUTCString(),
+          source: "부동산경매뉴스",
+          category: "realestate"
+        },
+        {
+          title: "글로벌 가상자산 시장 기관 예치금 폭증... 비트코인 9,800만 원 돌파 안착 시도",
+          link: "https://finance.yahoo.com",
+          pubDate: new Date().toUTCString(),
+          source: "코인동향연구소",
+          category: "coin"
         }
       ];
     }
