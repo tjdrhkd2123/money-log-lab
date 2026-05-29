@@ -306,6 +306,10 @@ Write exactly 5 premium Naver Blog posts, a 5-slide Card News series, and an Ema
 ## CRITICAL JSON FORMATTING RULES (MUST OBEY):
 - Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values like "body". If you want to quote a term or insert dialogue (e.g. "순환매" or "도토리"), you MUST use single quotes (') instead (e.g. '순환매' or '도토리'). Raw double quotes inside JSON string fields will break the JSON parser and are strictly forbidden.
 - Rule 2 (No Raw Line Breaks): Never output literal raw line breaks inside a JSON string value. If you need to start a new paragraph in the "body", represent it with a literal escaped "\\n" character on a single string line.
+- Rule 3 (Strict Conciseness to Prevent Truncation): Write each post body, card news slide, and email newsletter extremely concisely. If they are too long, the response will exceed the API token limit and be cut off mid-sentence, causing a parsing crash. Keep the total output lightweight:
+  * For each Blog Post "body": Limit the main text to exactly 3 short, punchy paragraphs (maximum 150 Korean words, or about 500-600 characters) before the checklist.
+  * For each "cardNews" slide description: Limit it to exactly 1 short sentence (maximum 20 Korean words).
+  * For the "newsletter" HTML body: Keep it very simple, clean, and short (under 800 characters).
 
 ## Tone and Style Guidelines:
 - Persona: Friendly, cute 2D squirrel researcher "Rogi" who gathers financial "acorns" (info) for readers.
