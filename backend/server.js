@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import util from 'util';
 
 import { config } from './config.js';
@@ -100,7 +100,7 @@ app.get('/api/public/indices', (req, res) => {
       indices: {
         kospi: { price: '2,680.50', change: '+24.15', changePercent: '0.91', status: 'UP' },
         kosdaq: { price: '845.20', change: '-3.10', changePercent: '-0.36', status: 'DOWN' },
-        usdKrw: { price: '1,365.50', change: '+4.50', changePercent: '0.33', status: 'UP' },
+        usdKrw: { price: '1,565.50', change: '+4.50', changePercent: '0.33', status: 'UP' },
         timestamp: new Date().toLocaleString('ko-KR')
       }
     });
@@ -133,7 +133,7 @@ app.get('/api/public/card-news', (req, res) => {
       },
       {
         slideNumber: 2,
-        title: "🚨 원달러 환율 1,360원 긴급 돌파!",
+        title: "🚨 원달러 환율 1,580원 긴급 돌파!",
         description: "미국 금리 인하 지연 우려에 환율이 급격히 상승하며 물가 폭등 비상이 걸렸어. 내 자산 방어 포트폴리오를 준비해야 해!",
         keyword: "환율 급등"
       },
