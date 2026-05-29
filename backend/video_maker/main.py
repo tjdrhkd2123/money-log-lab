@@ -1,4 +1,15 @@
 import os
+import sys
+
+# Dynamically append user site-packages and standard python library paths to sys.path
+# This guarantees that packages installed with "pip install --user" are fully imported on Render!
+try:
+    user_site_packages = os.path.expanduser('~/.local/lib/python{}.{}/site-packages'.format(sys.version_info.major, sys.version_info.minor))
+    if os.path.exists(user_site_packages) and user_site_packages not in sys.path:
+        sys.path.insert(0, user_site_packages)
+except Exception as e:
+    print(f"Warning: Failed to dynamically append user site-packages: {e}")
+
 import asyncio
 import edge_tts
 from PIL import Image, ImageDraw, ImageFont
