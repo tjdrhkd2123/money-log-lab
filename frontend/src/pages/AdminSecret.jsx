@@ -25,6 +25,15 @@ export default function AdminSecret({ onNavigateHome }) {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoError, setVideoError] = useState('');
   const [videoSuccessMsg, setVideoSuccessMsg] = useState('');
+  const [videoLog, setVideoLog] = useState('');
+  const logEndRef = React.useRef(null);
+
+  // Auto-scroll video generation log console
+  useEffect(() => {
+    if (logEndRef.current) {
+      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [videoLog]);
 
   // Auto load data if already authenticated
   useEffect(() => {
@@ -213,6 +222,7 @@ export default function AdminSecret({ onNavigateHome }) {
     setVideoError('');
     setVideoSuccessMsg('');
     setVideoUrl('');
+    setVideoLog('');
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/generate-video`, {
@@ -229,10 +239,18 @@ export default function AdminSecret({ onNavigateHome }) {
         return;
       }
 
-      // Start Polling Loop
-      console.log('🎬 비디오 생성 작업 시작됨. 상태 폴링 시작...');
+      // Start Polling Loop for both status & real-time log stream
+      console.log('🎬 비디오 생성 작업 시작됨. 상태 및 로그 실시간 폴링 시작...');
       const pollInterval = setInterval(async () => {
         try {
+          // 1. Fetch rendering log
+          const logRes = await fetch(`${API_BASE_URL}/api/public/debug-video`);
+          if (logRes.ok) {
+            const logText = await logRes.text();
+            setVideoLog(logText);
+          }
+
+          // 2. Fetch video status
           const statusRes = await fetch(`${API_BASE_URL}/api/admin/video-status`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -257,7 +275,7 @@ export default function AdminSecret({ onNavigateHome }) {
         } catch (pollErr) {
           console.error('Polling error:', pollErr);
         }
-      }, 3000); // Poll every 3 seconds
+      }, 1500); // Poll status & logs every 1.5 seconds for extremely fluid visual experience
 
     } catch (err) {
       setVideoError('서버 연결 중 치명적인 오류가 발생했습니다. 파이썬 환경을 점검해 주세요!');
@@ -656,7 +674,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             카드뉴스를 결합한 **유튜브 쇼츠 세로형(9:16) 동영상**을 서버에서 완전 자동으로 빌드하고 렌더링합니다!
           </p>
 
-          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
             <button
               onClick={handleGenerateVideo}
               disabled={generatingVideo || harvesting}
@@ -670,7 +688,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               }}
             >
               <RefreshCw size={14} className={generatingVideo ? 'animate-spin' : ''} />
-              {generatingVideo ? '서버에서 쇼츠 비디오 렌더링 중... (약 15초)' : '🐿️ 오늘의 경제 쇼츠 영상 제작하기 🎬'}
+              {generatingVideo ? '서버에서 쇼츠 비디오 렌더링 중... (1~2분 소요)' : '🐿️ 오늘의 경제 쇼츠 영상 제작하기 🎬'}
             </button>
 
             {generatingVideo && (
@@ -679,6 +697,43 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               </span>
             )}
           </div>
+
+          {/* Real-time Video Render Terminal Console */}
+          {generatingVideo && (
+            <div style={{
+              background: '#0b0f19',
+              border: '1px solid rgba(0, 245, 212, 0.2)',
+              borderRadius: '8px',
+              padding: '14px',
+              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-accent-emerald)', fontFamily: 'monospace' }}>
+                  LOGI-SHORTS-MAKER@SERVER-SHELL:~# tail -f debug_video_render.txt
+                </span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} className="pulse-glowing" />
+              </div>
+              <pre style={{
+                margin: 0,
+                maxHeight: '220px',
+                overflowY: 'auto',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: '#a9b2c3',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+                textAlign: 'left'
+              }}>
+                {videoLog || '서버 로그 버퍼 로딩 중... 로기 비서가 렌더링 콘솔을 연결하고 있어요! 🐿️'}
+                <div ref={logEndRef} />
+              </pre>
+            </div>
+          )}
 
           {videoSuccessMsg && (
             <div style={{ marginTop: '16px', color: 'var(--color-accent-emerald)', fontSize: '13px', fontWeight: '700' }}>

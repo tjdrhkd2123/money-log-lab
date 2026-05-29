@@ -203,6 +203,24 @@ app.get('/api/public/debug-python', (req, res) => {
 });
 
 /**
+ * 2.7 GET /api/public/debug-video
+ * Exposes the real-time render log of the python video maker.
+ */
+app.get('/api/public/debug-video', (req, res) => {
+  try {
+    const debugPath = path.join(__dirname, 'data/debug_video_render.txt');
+    if (!fs.existsSync(debugPath)) {
+      return res.status(200).send('아직 렌더링이 시작되지 않았거나 로그가 존재하지 않습니다.');
+    }
+    const logContent = fs.readFileSync(debugPath, 'utf-8');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.status(200).send(logContent);
+  } catch (error) {
+    return res.status(500).send(`로그를 읽는 도중 오류가 발생했습니다: ${error.message}`);
+  }
+});
+
+/**
  * 3. POST /api/subscribe
  * Registers a new email subscriber. Protected by Rate Limiting and strict validations.
  */
@@ -509,6 +527,14 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
     fs.writeFileSync(tempPyPath, mainPyContent, 'utf-8');
     console.log('💾 동적 씬이 장착된 main_temp.py 템플릿 임시 생성 완료!');
 
+    // Ensure data directory exists
+    const logDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+    const logPath = path.join(logDir, 'debug_video_render.txt');
+
+    // Initialize the real-time log file
+    fs.writeFileSync(logPath, `=== 로기 비디오 렌더링 로그 (${new Date().toLocaleString('ko-KR')}) ===\n`, 'utf-8');
+
     // Update state to processing
     videoGenerationState = {
       status: 'processing',
@@ -516,42 +542,77 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
       videoUrl: null
     };
 
-    // Run python rendering process completely asynchronously in the background!
-    console.log('🐍 파이썬 비디오 메이커 백그라운드 런처 실행...');
+    // Run python rendering process completely asynchronously in the background using spawn!
+    console.log('🐍 파이썬 비디오 메이커 백그라운드 런처 실행 (spawn)...');
     const execCwd = path.join(__dirname, 'video_maker');
     
-    execPromise('python main_temp.py', { cwd: execCwd })
-      .then(({ stdout, stderr }) => {
-        console.log('python stdout:', stdout);
-        if (stderr) console.error('python stderr:', stderr);
-        
-        try {
-          fs.unlinkSync(tempPyPath);
-        } catch (e) {}
+    const pyProcess = spawn('python', ['main_temp.py'], { cwd: execCwd });
 
+    pyProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log('python stdout:', output.trim());
+      fs.appendFileSync(logPath, output);
+    });
+
+    pyProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      console.error('python stderr:', output.trim());
+      fs.appendFileSync(logPath, output);
+    });
+
+    pyProcess.on('close', (code) => {
+      console.log(`🐍 파이썬 비디오 메이커 프로세스 종료. 코드: ${code}`);
+      
+      try {
+        if (fs.existsSync(tempPyPath)) {
+          fs.unlinkSync(tempPyPath);
+        }
+      } catch (e) {
+        console.error('main_temp.py 임시 파일 삭제 에러:', e);
+      }
+
+      if (code === 0) {
         const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
         const relativeVideoPath = `/shorts/logi_shorts_${todayStr}.mp4`;
         
         console.log(`🎉 성공적으로 유튜브 쇼츠 비디오 렌더링 완료! 주소: ${relativeVideoPath}`);
+        fs.appendFileSync(logPath, `\n🎉 [성공] 유튜브 쇼츠 비디오 렌더링이 성공적으로 완료되었습니다!\n`);
         
         videoGenerationState = {
           status: 'completed',
           error: null,
           videoUrl: relativeVideoPath
         };
-      })
-      .catch((err) => {
-        console.error('파이썬 쇼츠 렌더링 에러:', err.message);
-        try {
-          fs.unlinkSync(tempPyPath);
-        } catch (e) {}
-
+      } else {
+        const errMsg = `파이썬 비디오 렌더링 프로세스가 비정상 종료되었습니다. (종료 코드: ${code})`;
+        console.error(errMsg);
+        fs.appendFileSync(logPath, `\n❌ [실패] ${errMsg}\n`);
+        
         videoGenerationState = {
           status: 'failed',
-          error: err.message,
+          error: errMsg,
           videoUrl: null
         };
-      });
+      }
+    });
+
+    pyProcess.on('error', (err) => {
+      const errMsg = `파이썬 비디오 렌더링 프로세스 시작 에러: ${err.message}`;
+      console.error(errMsg);
+      fs.appendFileSync(logPath, `\n❌ [실패] ${errMsg}\n`);
+      
+      try {
+        if (fs.existsSync(tempPyPath)) {
+          fs.unlinkSync(tempPyPath);
+        }
+      } catch (e) {}
+
+      videoGenerationState = {
+        status: 'failed',
+        error: errMsg,
+        videoUrl: null
+      };
+    });
 
     return res.status(200).json({
       success: true,
