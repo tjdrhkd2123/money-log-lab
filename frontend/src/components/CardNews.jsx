@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Share2, Sparkles, BookOpen } from 'lucide-react';
+import { API_BASE_URL } from '../config.js';
 
 export default function CardNews() {
   const [slides, setSlides] = useState([]);
@@ -10,7 +11,7 @@ export default function CardNews() {
   useEffect(() => {
     async function loadCardNews() {
       try {
-        const response = await fetch('https://money-log-lab-backend.onrender.com/api/public/card-news');
+        const response = await fetch(`${API_BASE_URL}/api/public/card-news`);
         const data = await response.json();
         if (data.success && data.cardNews) {
           setSlides(data.cardNews);
@@ -38,9 +39,8 @@ export default function CardNews() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-        <div className="w-12 h-12 rounded-full border-4 border-slate-700 border-t-emerald-400 animate-spin mb-4"></div>
-        <p className="font-headers font-semibold animate-pulse">로기가 카드뉴스를 가져오는 중... 🐿️</p>
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>
+        <p style={{ fontFamily: 'var(--font-headers)', fontWeight: '600' }}>로기가 카드뉴스를 가져오는 중... 🐿️</p>
       </div>
     );
   }

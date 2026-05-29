@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, RefreshCw, Calendar, ShieldCheck, HelpCircle } from 'lucide-react';
+import { API_BASE_URL } from '../config.js';
 
 export default function DashboardHome() {
   const [indices, setIndices] = useState(null);
@@ -9,7 +10,7 @@ export default function DashboardHome() {
   async function loadIndices() {
     setRefreshing(true);
     try {
-      const response = await fetch('https://money-log-lab-backend.onrender.com/api/public/indices');
+      const response = await fetch(`${API_BASE_URL}/api/public/indices`);
       const data = await response.json();
       if (data.success) {
         setIndices(data.indices);
