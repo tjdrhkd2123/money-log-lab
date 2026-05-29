@@ -36,6 +36,14 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Disable caching for all API endpoints to guarantee real-time updates of harvested data in the frontend
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 // Serve generated shorts videos statically
 app.use('/shorts', express.static(path.join(__dirname, 'video_maker/output')));
 

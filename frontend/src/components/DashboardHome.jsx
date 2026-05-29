@@ -10,7 +10,7 @@ export default function DashboardHome() {
   async function loadIndices() {
     setRefreshing(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/public/indices`);
+      const response = await fetch(`${API_BASE_URL}/api/public/indices?t=${Date.now()}`);
       const data = await response.json();
       if (data.success) {
         setIndices(data.indices);

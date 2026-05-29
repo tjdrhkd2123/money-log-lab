@@ -11,7 +11,7 @@ export default function CardNews() {
   useEffect(() => {
     async function loadCardNews() {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/public/card-news`);
+        const response = await fetch(`${API_BASE_URL}/api/public/card-news?t=${Date.now()}`);
         const data = await response.json();
         if (data.success && data.cardNews) {
           setSlides(data.cardNews);
