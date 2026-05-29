@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardHome from '../components/DashboardHome.jsx';
 import CardNews from '../components/CardNews.jsx';
 import { Mail, Shield, ShieldCheck, Bell, Award, Coins } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [backendWaking, setBackendWaking] = useState(true);
 
   // 🐿️ 배포 서버 끈질기게 깨우기 (Wakeup Ping Loop)
-  React.useEffect(() => {
+  useEffect(() => {
     let intervalId;
     const wakeUpBackend = async () => {
       try {
