@@ -1,6 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from '../config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 // High-fidelity fallback content conforming exactly to the Naver Blog Master Prompt 2026.05
 const mockGeneratedData = {
@@ -486,6 +493,15 @@ Generate the fully complete JSON contents matching the master prompt specificati
           
           if (!responseText || responseText.trim() === '') {
             throw new Error("AI로부터 빈 응답을 받았습니다.");
+          }
+          
+          try {
+            const dataDir = path.join(__dirname, '../data');
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            fs.writeFileSync(path.join(dataDir, 'debug_gemini_response.txt'), `=== MODEL: ${geminiModel} ===\n${responseText}`, 'utf-8');
+            console.log(`💾 Raw response from ${geminiModel} successfully logged to debug_gemini_response.txt!`);
+          } catch (e) {
+            console.error("Failed to write debug file:", e);
           }
           
           let parsed;

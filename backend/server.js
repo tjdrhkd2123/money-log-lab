@@ -152,6 +152,24 @@ app.get('/api/public/card-news', (req, res) => {
 });
 
 /**
+ * 2.5 GET /api/public/debug-gemini
+ * Exposes the raw response of the last Gemini call for debugging.
+ */
+app.get('/api/public/debug-gemini', (req, res) => {
+  try {
+    const debugPath = path.join(__dirname, 'data/debug_gemini_response.txt');
+    if (!fs.existsSync(debugPath)) {
+      return res.status(404).send('No debug log found. Please trigger a harvest first.');
+    }
+    const logContent = fs.readFileSync(debugPath, 'utf-8');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.status(200).send(logContent);
+  } catch (error) {
+    return res.status(500).send(`Error reading debug log: ${error.message}`);
+  }
+});
+
+/**
  * 3. POST /api/subscribe
  * Registers a new email subscriber. Protected by Rate Limiting and strict validations.
  */
@@ -496,12 +514,41 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
   }
 });
 
+// Automatically install python requirements inside Render.com container environment
+async function installPythonRequirements() {
+  console.log('🐍 [Render Python Sync] 파이썬 패키지(requirements.txt) 설치 상태 동기화 중...');
+  try {
+    const reqPath = path.join(__dirname, 'video_maker/requirements.txt');
+    // Try python -m pip first, using --break-system-packages defensively for newer OS environments
+    const installCmd = `python -m pip install -r "${reqPath}" --user --break-system-packages`;
+    console.log(`🐍 Running: ${installCmd}`);
+    const { stdout, stderr } = await execPromise(installCmd);
+    console.log('🐍 [Render Python Sync] 파이썬 패키지 설치 완료!');
+    if (stdout) console.log(stdout);
+  } catch (err) {
+    console.warn('⚠️ [Render Python Sync] 1차 설치 실패, pip direct로 재시도...', err.message);
+    try {
+      const reqPath = path.join(__dirname, 'video_maker/requirements.txt');
+      const installCmdAlt = `pip install -r "${reqPath}" --user --break-system-packages`;
+      console.log(`🐍 Running alt: ${installCmdAlt}`);
+      const { stdout, stderr } = await execPromise(installCmdAlt);
+      console.log('🐍 [Render Python Sync] 파이썬 패키지 교체 성공!');
+      if (stdout) console.log(stdout);
+    } catch (e) {
+      console.error('❌ [Render Python Sync] 파이썬 패키지 설치 완전 실패:', e.message);
+    }
+  }
+}
+
 const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`🐿️  Money Log Lab - 로기 연구소 서버 가동 중...`);
   console.log(`🔗  로컬 API 호스트: http://localhost:${PORT}`);
   console.log(`=======================================================`);
+  
+  // Dynamically install Python requirements in the background on startup (Render env)
+  installPythonRequirements();
   
   // Launch the Cron Scheduler Daemon (7:00 AM)
   initScheduler();
