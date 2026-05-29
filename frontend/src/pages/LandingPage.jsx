@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardHome from '../components/DashboardHome.jsx';
 import CardNews from '../components/CardNews.jsx';
-import { Mail, Shield, ShieldCheck, Bell, Award, Coins } from 'lucide-react';
+import { Mail, Shield, ShieldCheck, Bell, Award, Coins, RefreshCw } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
 export default function LandingPage({ onNavigateToAdmin }) {
