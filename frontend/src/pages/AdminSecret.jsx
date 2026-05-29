@@ -554,8 +554,25 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             </div>
           </div>
 
+          {/* 💡 API 연동 에러 메시지 노출 */}
+          {dashboardData.diagnostics.resendError && (
+            <div style={{
+              marginTop: '16px',
+              padding: '14px',
+              borderRadius: '8px',
+              background: 'rgba(255, 159, 28, 0.08)',
+              border: '1px solid rgba(255, 159, 28, 0.2)',
+              fontSize: '13px',
+              color: 'var(--color-accent-orange)',
+              lineHeight: '1.6'
+            }}>
+              <strong style={{ display: 'block', marginBottom: '4px' }}>⚠️ Resend 클라우드 연동 실시간 에러 감지:</strong>
+              {dashboardData.diagnostics.resendError}
+            </div>
+          )}
+
           {/* 💡 API 연동 정상 가이드 */}
-          {(!dashboardData.diagnostics.resendApiKeyLoaded || !dashboardData.diagnostics.geminiApiKeyLoaded) && (
+          {(!dashboardData.diagnostics.resendApiKeyLoaded || !dashboardData.diagnostics.geminiApiKeyLoaded || !dashboardData.diagnostics.audienceId) && (
             <div style={{
               marginTop: '16px',
               padding: '14px',

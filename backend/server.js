@@ -170,6 +170,24 @@ app.get('/api/public/debug-gemini', (req, res) => {
 });
 
 /**
+ * 2.6 GET /api/public/debug-python
+ * Exposes the log of python package installation during startup.
+ */
+app.get('/api/public/debug-python', (req, res) => {
+  try {
+    const debugPath = path.join(__dirname, 'data/debug_python_install.txt');
+    if (!fs.existsSync(debugPath)) {
+      return res.status(404).send('No python install log found yet.');
+    }
+    const logContent = fs.readFileSync(debugPath, 'utf-8');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return res.status(200).send(logContent);
+  } catch (error) {
+    return res.status(500).send(`Error reading python install log: ${error.message}`);
+  }
+});
+
+/**
  * 3. POST /api/subscribe
  * Registers a new email subscriber. Protected by Rate Limiting and strict validations.
  */
@@ -288,7 +306,8 @@ app.get('/api/admin/daily-acorns', authenticateAdminToken, async (req, res) => {
       resendApiKeyLoaded: !!config.resendApiKey,
       senderEmail: config.senderEmail,
       audienceId: audienceId,
-      isResendActive: isResendActive
+      isResendActive: isResendActive,
+      resendError: mailService.getResendLastError()
     };
     
     return res.status(200).json({
@@ -342,7 +361,8 @@ app.post('/api/admin/sync-subscribers', authenticateAdminToken, async (req, res)
       resendApiKeyLoaded: !!config.resendApiKey,
       senderEmail: config.senderEmail,
       audienceId: audienceId,
-      isResendActive: !!audienceId
+      isResendActive: !!audienceId,
+      resendError: mailService.getResendLastError()
     };
 
     return res.status(200).json({
@@ -517,26 +537,72 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
 // Automatically install python requirements inside Render.com container environment
 async function installPythonRequirements() {
   console.log('🐍 [Render Python Sync] 파이썬 패키지(requirements.txt) 설치 상태 동기화 중...');
+  
+  const logDir = path.join(__dirname, 'data');
+  if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+  const logPath = path.join(logDir, 'debug_python_install.txt');
+  
+  let logContent = `=== Python Package Install Sync started at ${new Date().toISOString()} ===\n`;
+  fs.writeFileSync(logPath, logContent, 'utf-8');
+
+  const appendLog = (msg) => {
+    console.log(msg);
+    logContent += msg + '\n';
+    fs.writeFileSync(logPath, logContent, 'utf-8');
+  };
+
   try {
     const reqPath = path.join(__dirname, 'video_maker/requirements.txt');
-    // Try python -m pip first, using --break-system-packages defensively for newer OS environments
-    const installCmd = `python -m pip install -r "${reqPath}" --user --break-system-packages`;
-    console.log(`🐍 Running: ${installCmd}`);
-    const { stdout, stderr } = await execPromise(installCmd);
-    console.log('🐍 [Render Python Sync] 파이썬 패키지 설치 완료!');
-    if (stdout) console.log(stdout);
-  } catch (err) {
-    console.warn('⚠️ [Render Python Sync] 1차 설치 실패, pip direct로 재시도...', err.message);
+    const libsDir = path.join(__dirname, 'video_maker/libs');
+    if (!fs.existsSync(libsDir)) fs.mkdirSync(libsDir, { recursive: true });
+    
+    // Command 1: Try local target library install (Targeting libs folder, highly reliable on Render!)
+    const cmd1 = `python -m pip install -r "${reqPath}" -t "${libsDir}" --break-system-packages`;
+    appendLog(`🐍 Command 1: ${cmd1}`);
     try {
-      const reqPath = path.join(__dirname, 'video_maker/requirements.txt');
-      const installCmdAlt = `pip install -r "${reqPath}" --user --break-system-packages`;
-      console.log(`🐍 Running alt: ${installCmdAlt}`);
-      const { stdout, stderr } = await execPromise(installCmdAlt);
-      console.log('🐍 [Render Python Sync] 파이썬 패키지 교체 성공!');
-      if (stdout) console.log(stdout);
-    } catch (e) {
-      console.error('❌ [Render Python Sync] 파이썬 패키지 설치 완전 실패:', e.message);
+      const { stdout, stderr } = await execPromise(cmd1);
+      appendLog(`✅ Command 1 Success:\nStdout: ${stdout}\nStderr: ${stderr}`);
+      return;
+    } catch (err1) {
+      appendLog(`⚠️ Command 1 Failed: ${err1.message}`);
     }
+
+    // Command 2: Fallback to simple pip -t libs
+    const cmd2 = `pip install -r "${reqPath}" -t "${libsDir}" --break-system-packages`;
+    appendLog(`🐍 Command 2: ${cmd2}`);
+    try {
+      const { stdout, stderr } = await execPromise(cmd2);
+      appendLog(`✅ Command 2 Success:\nStdout: ${stdout}\nStderr: ${stderr}`);
+      return;
+    } catch (err2) {
+      appendLog(`⚠️ Command 2 Failed: ${err2.message}`);
+    }
+
+    // Command 3: Fallback to user site-packages
+    const cmd3 = `python -m pip install -r "${reqPath}" --user --break-system-packages`;
+    appendLog(`🐍 Command 3: ${cmd3}`);
+    try {
+      const { stdout, stderr } = await execPromise(cmd3);
+      appendLog(`✅ Command 3 Success:\nStdout: ${stdout}\nStderr: ${stderr}`);
+      return;
+    } catch (err3) {
+      appendLog(`⚠️ Command 3 Failed: ${err3.message}`);
+    }
+
+    // Command 4: Direct pip user site-packages
+    const cmd4 = `pip install -r "${reqPath}" --user --break-system-packages`;
+    appendLog(`🐍 Command 4: ${cmd4}`);
+    try {
+      const { stdout, stderr } = await execPromise(cmd4);
+      appendLog(`✅ Command 4 Success:\nStdout: ${stdout}\nStderr: ${stderr}`);
+      return;
+    } catch (err4) {
+      appendLog(`❌ Command 4 Failed: ${err4.message}`);
+    }
+
+    appendLog('❌ [Render Python Sync] 모든 설치 방법이 실패했습니다. 비디오 생성 패키지를 수동으로 확인해야 할 수 있습니다.');
+  } catch (globalErr) {
+    appendLog(`❌ [Render Python Sync] 글로벌 오류: ${globalErr.message}`);
   }
 }
 

@@ -1,14 +1,22 @@
 import os
 import sys
 
-# Dynamically append user site-packages and standard python library paths to sys.path
-# This guarantees that packages installed with "pip install --user" are fully imported on Render!
+# Dynamically append local libs and user site-packages to sys.path
+# This guarantees that packages installed in local "libs" or via "pip install --user" are fully imported on Render!
 try:
+    # 1. Local libs directory (highly reliable target directory install)
+    libs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libs')
+    if os.path.exists(libs_dir) and libs_dir not in sys.path:
+        sys.path.insert(0, libs_dir)
+        print(f"DEBUG: Appended local libs to sys.path: {libs_dir}")
+
+    # 2. Expand user site-packages (pip install --user)
     user_site_packages = os.path.expanduser('~/.local/lib/python{}.{}/site-packages'.format(sys.version_info.major, sys.version_info.minor))
     if os.path.exists(user_site_packages) and user_site_packages not in sys.path:
         sys.path.insert(0, user_site_packages)
+        print(f"DEBUG: Appended user site-packages to sys.path: {user_site_packages}")
 except Exception as e:
-    print(f"Warning: Failed to dynamically append user site-packages: {e}")
+    print(f"Warning: Failed to dynamically append search paths: {e}")
 
 import asyncio
 import edge_tts
