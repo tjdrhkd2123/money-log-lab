@@ -493,54 +493,61 @@ Generate the fully complete JSON contents matching the master prompt specificati
             // 1. Defensively clean potential markdown wrapper text
             let cleanedText = responseText.replace(/^```json/, '').replace(/```$/, '').trim();
             
-            // 2. Fix unescaped characters inside JSON fields defensively
-            let repaired = "";
-            let openQuote = false;
-            for (let i = 0; i < cleanedText.length; i++) {
-              const char = cleanedText[i];
-              if (char === '"') {
-                let backslashes = 0;
-                let idx = i - 1;
-                while (idx >= 0 && cleanedText[idx] === '\\') {
-                  backslashes++;
-                  idx--;
-                }
-                if (backslashes % 2 === 0) {
-                  const prevChar = cleanedText.slice(0, i).trim().slice(-1);
-                  const nextChar = cleanedText.slice(i + 1).trim().slice(0, 1);
-                  
-                  const isStructural = 
-                    prevChar === '{' || prevChar === '}' || 
-                    prevChar === '[' || prevChar === ']' || 
-                    prevChar === ',' || prevChar === ':' ||
-                    nextChar === '}' || nextChar === ']' || 
-                    nextChar === ',' || nextChar === ':';
-                  
-                  if (!isStructural && openQuote) {
-                    repaired += "'";
-                    continue;
-                  }
-                  openQuote = !openQuote;
-                }
-              }
+            try {
+              // Try direct parsing first to avoid corrupting already-valid JSON
+              parsed = JSON.parse(cleanedText);
+            } catch (directParseError) {
+              console.warn(`⚠️ Gemini (${geminiModel}) direct JSON parse failed, attempting defensive repair...`);
               
-              if ((char === '\n' || char === '\r') && openQuote) {
-                repaired += '\\n';
-              } else {
-                repaired += char;
+              // 2. Fix unescaped characters inside JSON fields defensively
+              let repaired = "";
+              let openQuote = false;
+              for (let i = 0; i < cleanedText.length; i++) {
+                const char = cleanedText[i];
+                if (char === '"') {
+                  let backslashes = 0;
+                  let idx = i - 1;
+                  while (idx >= 0 && cleanedText[idx] === '\\') {
+                    backslashes++;
+                    idx--;
+                  }
+                  if (backslashes % 2 === 0) {
+                    const prevChar = cleanedText.slice(0, i).trim().slice(-1);
+                    const nextChar = cleanedText.slice(i + 1).trim().slice(0, 1);
+                    
+                    const isStructural = 
+                      prevChar === '{' || prevChar === '}' || 
+                      prevChar === '[' || prevChar === ']' || 
+                      prevChar === ',' || prevChar === ':' ||
+                      nextChar === '}' || nextChar === ']' || 
+                      nextChar === ',' || nextChar === ':';
+                    
+                    if (!isStructural && openQuote) {
+                      repaired += "'";
+                      continue;
+                    }
+                    openQuote = !openQuote;
+                  }
+                }
+                
+                if ((char === '\n' || char === '\r') && openQuote) {
+                  repaired += '\\n';
+                } else {
+                  repaired += char;
+                }
               }
+              cleanedText = repaired;
+              
+              // 3. Fix missing commas between properties dynamically
+              cleanedText = cleanedText
+                .replace(/}\s*"/g, '},\n"')       // missing comma after }
+                .replace(/]\s*"/g, '],\n"')       // missing comma after ]
+                .replace(/([^\\]")\s*"([a-zA-Z0-9_]+)"\s*\:/g, '$1,\n"$2":'); // missing comma after "
+              
+              parsed = JSON.parse(cleanedText);
             }
-            cleanedText = repaired;
-            
-            // 3. Fix missing commas between properties dynamically
-            cleanedText = cleanedText
-              .replace(/}\s*"/g, '},\n"')       // missing comma after }
-              .replace(/]\s*"/g, '],\n"')       // missing comma after ]
-              .replace(/([^\\]")\s*"([a-zA-Z0-9_]+)"\s*\:/g, '$1,\n"$2":'); // missing comma after "
-            
-            parsed = JSON.parse(cleanedText);
           } catch (parseError) {
-            console.warn(`⚠️ Gemini (${geminiModel}) 1차 JSON 파싱 실패, 구조 파싱 시도...`);
+            console.warn(`⚠️ Gemini (${geminiModel}) JSON 파싱 실패, 구조 추출 재시도...`);
             
             // Extract brace block if wrapped in other text
             const firstBrace = responseText.indexOf('{');
