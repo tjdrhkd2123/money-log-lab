@@ -50,30 +50,31 @@ function validateCoinStats(coin) {
 
 export const coinValidator = {
   /**
-   * Identifies, validates and pairs Bitget (Futures) and OKX (DEX) coins dynamically.
+   * Identifies, validates and pairs Bitget (Futures) and OKX (DEX) coins dynamically from Bitget API.
    */
   getValidatedCoins: async () => {
     console.log('🪙 로기가 Bitget 선물 및 OKX DEX 코인 데이터를 검증하는 중...');
     
     let candidateCoins = [];
     try {
-      console.log('📡 바이낸스 실시간 시세 API 연동 기동 (https://api.binance.com)...');
-      const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr', {
+      console.log('📡 비트겟 실시간 시세 API 연동 기동 (https://api.bitget.com)...');
+      const response = await axios.get('https://api.bitget.com/api/v2/spot/market/tickers', {
         headers: {
           'User-Agent': 'Mozilla/5.0'
         },
         timeout: 4000
       });
       
-      const tickers = response.data;
+      const tickers = response.data?.data;
       const targetSymbols = Object.keys(COIN_NAMES_DICT);
       
       if (Array.isArray(tickers)) {
         for (const ticker of tickers) {
           const symbolWithoutUsdt = ticker.symbol.replace('USDT', '');
           if (ticker.symbol.endsWith('USDT') && targetSymbols.includes(symbolWithoutUsdt)) {
-            const changePercent = parseFloat(ticker.priceChangePercent);
-            const price = parseFloat(ticker.lastPrice);
+            // Multiply by 100 because change24h is represented as decimal fraction where 0.01 = 1%
+            const changePercent = parseFloat(ticker.change24h || ticker.changeUtc24h || '0') * 100;
+            const price = parseFloat(ticker.lastPr || '0');
             
             // Estimate market caps based on standard project sizes
             let seedMarketCap = 1500000000; // Default $1.5B
@@ -108,10 +109,10 @@ export const coinValidator = {
         }
       }
     } catch (apiErr) {
-      console.warn('⚠️ 바이낸스 실시간 시세 API 호출 오류로 고품질 로컬 모의 지표로 롤백합니다:', apiErr.message);
+      console.warn('⚠️ 비트겟 실시간 시세 API 호출 오류로 고품질 로컬 모의 지표로 롤백합니다:', apiErr.message);
     }
 
-    // High fidelity hardcoded candidates fallback in case Binance API is rate-limited or times out
+    // High fidelity hardcoded candidates fallback in case Bitget API is rate-limited or times out
     if (candidateCoins.length === 0) {
       console.log('ℹ️ 로컬 고정 시세 테이블을 탑재하여 코인 검증 프로세스를 지속합니다.');
       candidateCoins = [
@@ -143,7 +144,7 @@ export const coinValidator = {
           marketCap: 2100000000,
           price: 1.68,
           source: 'Bitget 선물',
-          description: 'AI 토큰 3사 합병 이후 첫 상승세를 타며 선물 미결제약정이 급속도로 증가하고 있습니다.'
+          description: 'AI 토큰 3사 합변 이후 첫 상승세를 타며 선물 미결제약정이 급속도로 증가하고 있습니다.'
         },
         {
           symbol: 'NOT',
