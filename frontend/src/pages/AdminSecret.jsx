@@ -207,7 +207,7 @@ export default function AdminSecret({ onNavigateHome }) {
     }
   };
 
-  // Asynchronously requests the backend to render the shorts mp4 using moviepy & edge-tts
+  // Asynchronously requests the backend to render the shorts mp4 using moviepy & edge-tts (Asynchronous Polling Architecture)
   const handleGenerateVideo = async () => {
     setGeneratingVideo(true);
     setVideoError('');
@@ -222,15 +222,45 @@ export default function AdminSecret({ onNavigateHome }) {
         }
       });
       const data = await response.json();
-      if (response.ok && data.success) {
-        setVideoUrl(`${API_BASE_URL}${data.videoUrl}`);
-        setVideoSuccessMsg('🐿️ 로기의 경제 도토리 유튜브 쇼츠 비디오 렌더링에 성공했습니다!');
-      } else {
-        setVideoError(data.message || '비디오 렌더링 중 서버 오류가 발생했습니다.');
+      
+      if (!response.ok || !data.success) {
+        setVideoError(data.message || '비디오 렌더링 시작 실패!');
+        setGeneratingVideo(false);
+        return;
       }
+
+      // Start Polling Loop
+      console.log('🎬 비디오 생성 작업 시작됨. 상태 폴링 시작...');
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`${API_BASE_URL}/api/admin/video-status`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const statusData = await statusRes.json();
+          
+          if (statusRes.ok && statusData.success) {
+            const { status, error, videoUrl } = statusData.state;
+            
+            if (status === 'completed') {
+              clearInterval(pollInterval);
+              setGeneratingVideo(false);
+              setVideoUrl(`${API_BASE_URL}${videoUrl}`);
+              setVideoSuccessMsg('🐿️ 로기의 경제 도토리 유튜브 쇼츠 비디오 렌더링에 성공했습니다!');
+            } else if (status === 'failed') {
+              clearInterval(pollInterval);
+              setGeneratingVideo(false);
+              setVideoError(error || '비디오 렌더링 중 오류가 발생했습니다.');
+            }
+          }
+        } catch (pollErr) {
+          console.error('Polling error:', pollErr);
+        }
+      }, 3000); // Poll every 3 seconds
+
     } catch (err) {
-      setVideoError('서버 연결 중 치명적인 요류가 발생했습니다. 파이썬 환경을 점검해 주세요!');
-    } finally {
+      setVideoError('서버 연결 중 치명적인 오류가 발생했습니다. 파이썬 환경을 점검해 주세요!');
       setGeneratingVideo(false);
     }
   };

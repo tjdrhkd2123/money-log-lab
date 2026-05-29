@@ -61,6 +61,13 @@ function writeDb(data) {
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
+// Asynchronous background video generation status holder
+let videoGenerationState = {
+  status: 'idle',
+  error: null,
+  videoUrl: null
+};
+
 // 2. Pre-hash password on start to prepare fast comparisons
 let hashedAdminPassword = '';
 async function prepareHashedPassword() {
@@ -132,7 +139,7 @@ app.get('/api/public/card-news', (req, res) => {
       },
       {
         slideNumber: 3,
-        title: "📈 삼성전자 7만 원 깨지자 8조 순매수!",
+        title: "📈 삼성전자 30만 원 깨지자 8조 순매수!",
         description: "개인들이 외인들의 패닉 투매 물량을 받아내며 대규모 8조 원을 사들였어. 반도체 HBM 시장의 숨은 상승 뇌관이 폭발할 조짐일까?",
         keyword: "삼성전자"
       },
@@ -409,11 +416,18 @@ app.post('/api/admin/trigger-harvest', authenticateAdminToken, async (req, res) 
 
 /**
  * 8. POST /api/admin/generate-video
- * Dynamically updates SCENES with today's harvested AI data and executes video_maker script.
+ * Dynamically updates SCENES with today's harvested AI data and executes video_maker script asynchronously in the background.
  */
 app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) => {
   try {
-    console.log('🎬 유튜브 쇼츠 비디오 동적 제작 시퀀스 개시!');
+    if (videoGenerationState.status === 'processing') {
+      return res.status(400).json({
+        success: false,
+        message: '🐿️ 이미 유튜브 쇼츠 비디오가 렌더링 중입니다. 완료될 때까지 기다려 주세요!'
+      });
+    }
+
+    console.log('🎬 유튜브 쇼츠 비디오 동적 제작 시퀀스 개시 (비동기 처리)!');
     const db = getDb();
     
     if (!db.dailyAcorns || !db.dailyAcorns.generated || !db.dailyAcorns.generated.posts) {
@@ -495,18 +509,22 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
     fs.writeFileSync(tempPyPath, mainPyContent, 'utf-8');
     console.log('💾 동적 씬이 장착된 main_temp.py 템플릿 임시 생성 완료!');
 
-    // Execute python script
-    console.log('🐍 파이썬 비디오 메이커 실행 중...');
+    // Update state to processing
+    videoGenerationState = {
+      status: 'processing',
+      error: null,
+      videoUrl: null
+    };
+
+    // Run python rendering process completely asynchronously in the background!
+    console.log('🐍 파이썬 비디오 메이커 백그라운드 런처 실행...');
     const execCwd = path.join(__dirname, 'video_maker');
     
-    // Run asynchronously
-    const runPython = async () => {
-      try {
-        const { stdout, stderr } = await execPromise('python main_temp.py', { cwd: execCwd });
-        console.log('stdout:', stdout);
-        if (stderr) console.error('stderr:', stderr);
+    execPromise('python main_temp.py', { cwd: execCwd })
+      .then(({ stdout, stderr }) => {
+        console.log('python stdout:', stdout);
+        if (stderr) console.error('python stderr:', stderr);
         
-        // Clean up temp python file
         try {
           fs.unlinkSync(tempPyPath);
         } catch (e) {}
@@ -515,31 +533,53 @@ app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) =
         const relativeVideoPath = `/shorts/logi_shorts_${todayStr}.mp4`;
         
         console.log(`🎉 성공적으로 유튜브 쇼츠 비디오 렌더링 완료! 주소: ${relativeVideoPath}`);
-        return relativeVideoPath;
-      } catch (err) {
+        
+        videoGenerationState = {
+          status: 'completed',
+          error: null,
+          videoUrl: relativeVideoPath
+        };
+      })
+      .catch((err) => {
         console.error('파이썬 쇼츠 렌더링 에러:', err.message);
         try {
           fs.unlinkSync(tempPyPath);
         } catch (e) {}
-        throw err;
-      }
-    };
 
-    // Return response
-    const videoUrl = await runPython();
-    
+        videoGenerationState = {
+          status: 'failed',
+          error: err.message,
+          videoUrl: null
+        };
+      });
+
     return res.status(200).json({
       success: true,
-      message: '🐿️ 로기의 경제 도토리 유튜브 쇼츠 비디오가 성공적으로 렌더링되었습니다!',
-      videoUrl: videoUrl
+      message: '🎬 유튜브 쇼츠 비디오 생성을 백그라운드에서 안전하게 시작했습니다!'
     });
 
   } catch (error) {
+    videoGenerationState = {
+      status: 'failed',
+      error: error.message,
+      videoUrl: null
+    };
     res.status(500).json({
       success: false,
-      message: `쇼츠 비디오 생성 에러: ${error.message}`
+      message: `쇼츠 비디오 생성 개시 실패: ${error.message}`
     });
   }
+});
+
+/**
+ * 8.5 GET /api/admin/video-status
+ * Retrieves the current status of the background video generation.
+ */
+app.get('/api/admin/video-status', authenticateAdminToken, (req, res) => {
+  return res.status(200).json({
+    success: true,
+    state: videoGenerationState
+  });
 });
 
 // Automatically install python requirements inside Render.com container environment
