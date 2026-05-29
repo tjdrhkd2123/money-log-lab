@@ -557,7 +557,7 @@ async function installPythonRequirements() {
     if (!fs.existsSync(libsDir)) fs.mkdirSync(libsDir, { recursive: true });
     
     // Command 1: Try local target library install (Targeting libs folder, highly reliable on Render!)
-    const cmd1 = `python -m pip install -r "${reqPath}" -t "${libsDir}" --break-system-packages`;
+    const cmd1 = `python -m pip install -r "${reqPath}" -t "${libsDir}" --upgrade --break-system-packages`;
     appendLog(`🐍 Command 1: ${cmd1}`);
     try {
       const { stdout, stderr } = await execPromise(cmd1);
@@ -568,7 +568,7 @@ async function installPythonRequirements() {
     }
 
     // Command 2: Fallback to simple pip -t libs
-    const cmd2 = `pip install -r "${reqPath}" -t "${libsDir}" --break-system-packages`;
+    const cmd2 = `pip install -r "${reqPath}" -t "${libsDir}" --upgrade --break-system-packages`;
     appendLog(`🐍 Command 2: ${cmd2}`);
     try {
       const { stdout, stderr } = await execPromise(cmd2);
@@ -579,7 +579,7 @@ async function installPythonRequirements() {
     }
 
     // Command 3: Fallback to user site-packages
-    const cmd3 = `python -m pip install -r "${reqPath}" --user --break-system-packages`;
+    const cmd3 = `python -m pip install -r "${reqPath}" --user --upgrade --break-system-packages`;
     appendLog(`🐍 Command 3: ${cmd3}`);
     try {
       const { stdout, stderr } = await execPromise(cmd3);
@@ -590,7 +590,7 @@ async function installPythonRequirements() {
     }
 
     // Command 4: Direct pip user site-packages
-    const cmd4 = `pip install -r "${reqPath}" --user --break-system-packages`;
+    const cmd4 = `pip install -r "${reqPath}" --user --upgrade --break-system-packages`;
     appendLog(`🐍 Command 4: ${cmd4}`);
     try {
       const { stdout, stderr } = await execPromise(cmd4);
