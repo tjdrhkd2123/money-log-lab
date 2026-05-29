@@ -8,6 +8,29 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
+  const [backendWaking, setBackendWaking] = useState(true);
+
+  // 🐿️ 배포 서버 끈질기게 깨우기 (Wakeup Ping Loop)
+  React.useEffect(() => {
+    let intervalId;
+    const wakeUpBackend = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/public/indices`);
+        if (res.ok) {
+          console.log("🟢 배포 서버 기상 완료! 아침 7시 수집 자동 트리거 활성화.");
+          setBackendWaking(false);
+          clearInterval(intervalId);
+        }
+      } catch (err) {
+        console.log("⏳ 배포 서버가 아직 쿨쿨 자고 있어 로기가 흔들어 깨우는 중...");
+      }
+    };
+
+    wakeUpBackend();
+    intervalId = setInterval(wakeUpBackend, 3000); // 완전히 일어날 때까지 3초 간격 노크
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -204,9 +227,40 @@ export default function LandingPage({ onNavigateToAdmin }) {
             철벽 보안 데이터 보호 적용 및 스팸 방지 실시간 검증 완료
           </div>
 
+          {/* 🐿️ 배포 서버 기상 상태 인디케이터 */}
+          <div className="glass-card pulse-glowing" style={{
+            marginTop: '16px',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            background: 'rgba(5, 10, 20, 0.6)',
+            border: '1px solid',
+            borderColor: backendWaking ? 'rgba(255, 159, 28, 0.25)' : 'rgba(0, 245, 212, 0.25)',
+            fontSize: '12px',
+            fontWeight: '600',
+            textAlign: 'center',
+            color: backendWaking ? 'var(--color-accent-orange)' : 'var(--color-accent-emerald)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            width: '100%',
+            boxShadow: backendWaking ? '0 0 10px rgba(255,159,28,0.05)' : '0 0 10px rgba(0,245,212,0.05)'
+          }}>
+            {backendWaking ? (
+              <>
+                <RefreshCw size={12} className="animate-spin" />
+                <span>🐿️ 로기가 잠든 배포 서버를 힘껏 흔들어 깨우고 있어! (약 15초 소요)</span>
+              </>
+            ) : (
+              <>
+                <span>🟢 로기 연구소 서버 활성화 완료! 실시간 듀얼 동기화 레이어 작동 중</span>
+              </>
+            )}
+          </div>
+
           {/* Success/Error Feedbacks */}
           {status.message && (
-            <div className="glass-card pulse-glowing" style={{
+            <div className="glass-card" style={{
               marginTop: '20px',
               padding: '12px 18px',
               borderRadius: 'var(--border-radius-md)',

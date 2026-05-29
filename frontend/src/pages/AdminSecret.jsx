@@ -695,6 +695,75 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
         </div>
       )}
 
+      {/* ⏰ 아침 7시 정시 수집 보장! 크론(Wakeup) 연동 가이드 */}
+      {dashboardData && (
+        <div className="glass-card" style={{
+          marginBottom: '30px',
+          padding: '24px',
+          borderRadius: 'var(--border-radius-md)',
+          background: 'rgba(13, 22, 39, 0.4)',
+          border: '1px solid rgba(255, 159, 28, 0.15)',
+          boxShadow: '0 0 15px rgba(255, 159, 28, 0.03)'
+        }}>
+          <h3 style={{
+            fontSize: '15px',
+            color: '#ffffff',
+            fontWeight: '800',
+            fontFamily: 'var(--font-headers)',
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            ⏰ 매일 아침 7시 경제 도토리 자동 수집 & 뉴스레터 100% 보장하는 비법
+          </h3>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: '1.6' }}>
+            Render.com의 무료 플랜 서버는 15분간 요청이 없으면 깊은 잠에 빠져듭니다. 
+            아래 **1분 가이드**를 설정해 두시면, 매일 아침 7시 정각에 서버가 자고 있더라도 **외부 무료 기상 비서가 서버를 알아서 깨워 정시 수집을 완벽하게 수행**합니다!
+          </p>
+
+          <div style={{
+            background: 'rgba(5, 10, 20, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.04)',
+            padding: '16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            lineHeight: '1.7',
+            color: 'var(--color-text-secondary)'
+          }}>
+            <strong style={{ color: 'var(--color-accent-orange)', display: 'block', marginBottom: '8px' }}>🛠️ 초간단 3단계 정시 기상 예약법:</strong>
+            <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px', margin: 0 }}>
+              <li>
+                무료 크론 서비스 웹사이트 <strong><a href="https://cron-job.org" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-blue)', textDecoration: 'underline' }}>cron-job.org (여기를 클릭)</a></strong> 에 가입해 주세요.
+              </li>
+              <li>
+                <strong>Create Cronjob</strong> 버튼을 누르고 아래와 같이 적어주세요:
+                <ul style={{ paddingLeft: '20px', marginTop: '4px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <li>• Title: <code>머니로그랩 서버 깨우기 및 아침 수집</code></li>
+                  <li>• URL: <code style={{ color: 'var(--color-accent-emerald)' }}>{`${API_BASE_URL}/api/admin/trigger-harvest`}</code> (꼭 POST 방식으로 선택해줘!)</li>
+                  <li>• Schedule: **매일 아침 07:00** (Asia/Seoul 시간대 기준 설정)</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Headers</strong> 탭을 누르고 아래 보안 인증용 헤더를 한 줄 추가해 주면 끝!
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  marginTop: '4px',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  color: 'var(--color-accent-emerald)',
+                  border: '1px solid rgba(0, 245, 212, 0.1)'
+                }}>
+                  Key: <code style={{color: '#ffffff'}}>Authorization</code> &nbsp;|&nbsp; Value: <code style={{color: '#ffffff'}}>Bearer rogi1234</code>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      )}
+
       {/* API Error Warning Badge */}
       {dashboardData?.dailyAcorns?.generated?.error && (
         <div className="glass-card" style={{

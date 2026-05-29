@@ -448,29 +448,50 @@ Generate the fully complete JSON contents matching the master prompt specificati
         'gemini-1.5-pro'
       ];
       
+      const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+      
       for (const geminiModel of geminiModels) {
         console.log(`🔮 Gemini (${geminiModel}) AI 엔진을 통해 포스팅 생성 시도 중...`);
+        // 1.5-second cooldown delay to dodge consecutive 429 Rate Limits
+        await sleep(1500);
+        
         try {
           const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-          const model = genAI.getGenerativeModel({ 
-            model: geminiModel,
-            generationConfig: {
-              responseMimeType: "application/json",
-              maxOutputTokens: 8192
-            }
-          });
-          const result = await model.generateContent([systemPrompt, userPrompt]);
-          const response = await result.response;
-          let text = response.text();
           
-          if (!text || text.trim() === '') {
+          // Hybrid Config: try JSON mime type first, fallback to text mode if it fails
+          let responseText = '';
+          try {
+            const model = genAI.getGenerativeModel({ 
+              model: geminiModel,
+              generationConfig: {
+                responseMimeType: "application/json",
+                maxOutputTokens: 8192
+              }
+            });
+            const result = await model.generateContent([systemPrompt, userPrompt]);
+            const response = await result.response;
+            responseText = response.text();
+          } catch (jsonConfigError) {
+            console.warn(`⚠️ Gemini MimeType JSON 설정 에러로 일반 텍스트 모드로 우회 찔러보기...`);
+            const model = genAI.getGenerativeModel({ 
+              model: geminiModel,
+              generationConfig: {
+                maxOutputTokens: 8192
+              }
+            });
+            const result = await model.generateContent([systemPrompt, userPrompt + "\nIMPORTANT: Return RAW, VALID JSON only! Do not wrap in markdown blocks."]);
+            const response = await result.response;
+            responseText = response.text();
+          }
+          
+          if (!responseText || responseText.trim() === '') {
             throw new Error("AI로부터 빈 응답을 받았습니다.");
           }
           
           let parsed;
           try {
             // 1. Defensively clean potential markdown wrapper text
-            let cleanedText = text.replace(/^```json/, '').replace(/```$/, '').trim();
+            let cleanedText = responseText.replace(/^```json/, '').replace(/```$/, '').trim();
             
             // 2. Fix unescaped characters inside JSON fields defensively
             let repaired = "";
@@ -522,20 +543,20 @@ Generate the fully complete JSON contents matching the master prompt specificati
             console.warn(`⚠️ Gemini (${geminiModel}) 1차 JSON 파싱 실패, 구조 파싱 시도...`);
             
             // Extract brace block if wrapped in other text
-            const firstBrace = text.indexOf('{');
-            const lastBrace = text.lastIndexOf('}');
+            const firstBrace = responseText.indexOf('{');
+            const lastBrace = responseText.lastIndexOf('}');
             if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-              const candidate = text.slice(firstBrace, lastBrace + 1);
+              const candidate = responseText.slice(firstBrace, lastBrace + 1);
               try {
                 parsed = JSON.parse(candidate);
               } catch (innerError) {
                 console.error("❌ Gemini 원본 텍스트 파싱 불가. 로그를 위해 원본을 일부 출력합니다:");
-                console.error("앞부분 (300자):", text.substring(0, 300));
-                console.error("뒷부분 (300자):", text.substring(text.length - 300));
+                console.error("앞부분 (300자):", responseText.substring(0, 300));
+                console.error("뒷부분 (300자):", responseText.substring(responseText.length - 300));
                 throw new Error(`JSON 분석 실패: ${innerError.message}`);
               }
             } else {
-              console.error("❌ JSON 괄호({ }) 구조를 찾을 수 없습니다. 원본 텍스트:", text.substring(0, 300));
+              console.error("❌ JSON 괄호({ }) 구조를 찾을 수 없습니다. 원본 텍스트:", responseText.substring(0, 300));
               throw parseError;
             }
           }
