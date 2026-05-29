@@ -1,7 +1,8 @@
+import { API_BASE_URL } from '../config.js';
 import React, { useState, useEffect } from 'react';
 import { 
   Lock, KeyRound, ArrowLeft, RefreshCw, Copy, Check, Users, 
-  FileText, Activity, AlertCircle, FileCheck, ExternalLink, Image
+  FileText, Activity, AlertCircle, FileCheck, ExternalLink, Image, Video
 } from 'lucide-react';
 
 export default function AdminSecret({ onNavigateHome }) {
@@ -19,6 +20,12 @@ export default function AdminSecret({ onNavigateHome }) {
   const [progress, setProgress] = useState(0);
   const [progressStatus, setProgressStatus] = useState('');
 
+  // Video generation states
+  const [generatingVideo, setGeneratingVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoError, setVideoError] = useState('');
+  const [videoSuccessMsg, setVideoSuccessMsg] = useState('');
+
   // Auto load data if already authenticated
   useEffect(() => {
     if (token) {
@@ -34,7 +41,7 @@ export default function AdminSecret({ onNavigateHome }) {
     setError('');
 
     try {
-      const response = await fetch('https://money-log-lab-backend.onrender.com/api/admin/login', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -47,7 +54,7 @@ export default function AdminSecret({ onNavigateHome }) {
         localStorage.setItem('admin_token', data.token);
         setToken(data.token);
       } else {
-        setError(data.message || '패스워드가 유효하지 않아!');
+        setError(data.message || '패스워드가 올바르지 않아!');
       }
     } catch (err) {
       setError('서버 연결에 실패했어. 백엔드가 켜져있는지 확인해줘!');
@@ -65,7 +72,7 @@ export default function AdminSecret({ onNavigateHome }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://money-log-lab-backend.onrender.com/api/admin/daily-acorns', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/daily-acorns`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -96,7 +103,7 @@ export default function AdminSecret({ onNavigateHome }) {
           const missingOnServer = localBackups.filter(email => !serverSubscribers.includes(email));
           if (missingOnServer.length > 0) {
             console.log(`🔄 서버에서 누락된 구독자 ${missingOnServer.length}명 감지. 자동 복원 중...`);
-            const syncResponse = await fetch('https://money-log-lab-backend.onrender.com/api/admin/sync-subscribers', {
+            const syncResponse = await fetch(`${API_BASE_URL}/api/admin/sync-subscribers`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -161,7 +168,7 @@ export default function AdminSecret({ onNavigateHome }) {
     }, 250); // 98% reached in ~25 seconds
 
     try {
-      const response = await fetch('https://money-log-lab-backend.onrender.com/api/admin/trigger-harvest', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/trigger-harvest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -197,6 +204,34 @@ export default function AdminSecret({ onNavigateHome }) {
         setProgress(0);
         setProgressStatus('');
       }, 5000);
+    }
+  };
+
+  // Asynchronously requests the backend to render the shorts mp4 using moviepy & edge-tts
+  const handleGenerateVideo = async () => {
+    setGeneratingVideo(true);
+    setVideoError('');
+    setVideoSuccessMsg('');
+    setVideoUrl('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/generate-video`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setVideoUrl(`${API_BASE_URL}${data.videoUrl}`);
+        setVideoSuccessMsg('🐿️ 로기의 경제 도토리 유튜브 쇼츠 비디오 렌더링에 성공했습니다!');
+      } else {
+        setVideoError(data.message || '비디오 렌더링 중 서버 오류가 발생했습니다.');
+      }
+    } catch (err) {
+      setVideoError('서버 연결 중 치명적인 요류가 발생했습니다. 파이썬 환경을 점검해 주세요!');
+    } finally {
+      setGeneratingVideo(false);
     }
   };
 
@@ -541,6 +576,120 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               <span style={{ fontSize: '11px', display: 'block', marginTop: '6px', color: 'var(--color-accent-blue)' }}>
                 * 환경변수를 수정 및 저장하면 Render 서버가 자동으로 다시 빌드되며, 약 1~2분 뒤 적용 완료된 상태(초록불)로 확인할 수 있어!
               </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 🎬 유튜브 쇼츠 비디오 자동 생성 패널 */}
+      {dashboardData && dashboardData.dailyAcorns && (
+        <div className="glass-card" style={{
+          marginBottom: '30px',
+          padding: '24px',
+          borderRadius: 'var(--border-radius-md)',
+          background: 'rgba(5, 15, 30, 0.4)',
+          border: '1px solid rgba(0, 245, 212, 0.12)',
+          boxShadow: '0 0 15px rgba(0, 245, 212, 0.05)'
+        }}>
+          <h3 style={{
+            fontSize: '16px',
+            color: '#ffffff',
+            fontWeight: '800',
+            fontFamily: 'var(--font-headers)',
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Video size={20} style={{ color: 'var(--color-accent-emerald)' }} />
+            로기의 유튜브 쇼츠(Shorts) AI 비디오 오토메이션
+          </h3>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: '1.5' }}>
+            오늘 아침 AI가 도출해 낸 최신 경제 요약 데이터를 대본 삼아, 다람쥐 로기의 귀여운 친근한 목소리(TTS)와 
+            카드뉴스를 결합한 **유튜브 쇼츠 세로형(9:16) 동영상**을 서버에서 완전 자동으로 빌드하고 렌더링합니다!
+          </p>
+
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleGenerateVideo}
+              disabled={generatingVideo || harvesting}
+              className="btn-primary"
+              style={{
+                fontSize: '13px',
+                padding: '10px 22px',
+                background: 'linear-gradient(135deg, #00b4d8 0%, #00f5d4 100%)',
+                borderColor: 'transparent',
+                boxShadow: '0 0 10px rgba(0, 245, 212, 0.2)'
+              }}
+            >
+              <RefreshCw size={14} className={generatingVideo ? 'animate-spin' : ''} />
+              {generatingVideo ? '서버에서 쇼츠 비디오 렌더링 중... (약 15초)' : '🐿️ 오늘의 경제 쇼츠 영상 제작하기 🎬'}
+            </button>
+
+            {generatingVideo && (
+              <span style={{ fontSize: '13px', color: 'var(--color-accent-emerald)', fontWeight: '600' }} className="pulse-glowing">
+                ⚙️ 로기가 대본을 다듬고 배경을 합성해 영화를 굽고 있어요...
+              </span>
+            )}
+          </div>
+
+          {videoSuccessMsg && (
+            <div style={{ marginTop: '16px', color: 'var(--color-accent-emerald)', fontSize: '13px', fontWeight: '700' }}>
+              🎉 {videoSuccessMsg}
+            </div>
+          )}
+
+          {videoError && (
+            <div style={{ marginTop: '16px', color: 'var(--color-accent-orange)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertCircle size={14} />
+              {videoError}
+            </div>
+          )}
+
+          {/* Video Player Display */}
+          {videoUrl && (
+            <div style={{
+              marginTop: '20px',
+              padding: '20px',
+              borderRadius: '8px',
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '14px'
+            }}>
+              <span style={{ fontSize: '13px', color: '#ffffff', fontWeight: '700' }}>🎬 완성된 쇼츠 미리보기 (세로형)</span>
+              
+              <video
+                src={videoUrl}
+                controls
+                style={{
+                  width: '280px',
+                  height: '497px',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                  border: '2px solid rgba(0, 245, 212, 0.2)'
+                }}
+              />
+
+              <a
+                href={videoUrl}
+                download
+                className="btn-secondary"
+                style={{
+                  textDecoration: 'none',
+                  fontSize: '13px',
+                  padding: '8px 20px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: 'var(--color-accent-emerald)',
+                  borderColor: 'rgba(0, 245, 212, 0.3)'
+                }}
+              >
+                📥 내 컴퓨터로 비디오 다운로드 받기
+              </a>
             </div>
           )}
         </div>

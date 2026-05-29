@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DashboardHome from '../components/DashboardHome.jsx';
 import CardNews from '../components/CardNews.jsx';
 import { Mail, Shield, ShieldCheck, Bell, Award, Coins } from 'lucide-react';
+import { API_BASE_URL } from '../config.js';
 
 export default function LandingPage({ onNavigateToAdmin }) {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://money-log-lab-backend.onrender.com/api/subscribe', {
+      const response = await fetch(`${API_BASE_URL}/api/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

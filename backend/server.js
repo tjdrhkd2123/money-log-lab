@@ -5,6 +5,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import { exec } from 'child_process';
+import util from 'util';
 
 import { config } from './config.js';
 import { initScheduler, triggerDailyHarvest } from './services/scheduler.js';
@@ -18,6 +20,7 @@ import {
   cryptoHelper
 } from './services/security.js';
 
+const execPromise = util.promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_PATH = path.join(__dirname, 'data/db.json');
@@ -32,6 +35,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+
+// Serve generated shorts videos statically
+app.use('/shorts', express.static(path.join(__dirname, 'video_maker/output')));
 
 // Load or initialize DB helper
 function getDb() {
@@ -355,9 +361,140 @@ app.post('/api/admin/trigger-harvest', authenticateAdminToken, async (req, res) 
   }
 });
 
-// ==========================================
-// START SERVER
-// ==========================================
+/**
+ * 8. POST /api/admin/generate-video
+ * Dynamically updates SCENES with today's harvested AI data and executes video_maker script.
+ */
+app.post('/api/admin/generate-video', authenticateAdminToken, async (req, res) => {
+  try {
+    console.log('🎬 유튜브 쇼츠 비디오 동적 제작 시퀀스 개시!');
+    const db = getDb();
+    
+    if (!db.dailyAcorns || !db.dailyAcorns.generated || !db.dailyAcorns.generated.posts) {
+      return res.status(400).json({
+        success: false,
+        message: '오늘 날짜의 수집 정보 및 AI 작성 글이 아직 존재하지 않습니다. 먼저 뉴스 수집을 진행해 주세요!'
+      });
+    }
+
+    const posts = db.dailyAcorns.generated.posts;
+    const findPostText = (category) => {
+      const post = posts.find(p => p.category === category);
+      if (post) {
+        return post.aeoSummary || post.recommendedTitle || '';
+      }
+      return '';
+    };
+
+    // Extract raw summaries for each scene
+    const ecoSummary = findPostText('economic');
+    const stockSummary = findPostText('stock');
+    const coinSummary = findPostText('bitgetCoin') || findPostText('okxCoin');
+    const realestateSummary = findPostText('realestate');
+
+    // Make clean, conversational TTS speech text
+    const cleanSpeech = (text) => {
+      return text.replace(/[✅🚨🪙📈📊🏠⚠️🐿️🌰]/g, '').replace(/\[IMAGE_[0-9]+\]/g, '').replace(/\s+/g, ' ').replace(/"/g, "'").trim();
+    };
+
+    const introText = "안녕하세요! 다람쥐 연구원 로기에요. 오늘 아침 수집된 따끈따끈한 경제 도토리 소식 지금 바로 브리핑해 드릴게요!";
+    const coinText = coinSummary 
+      ? `첫 번째로, 가상자산 소식입니다. ${cleanSpeech(coinSummary)}`
+      : "첫 번째로, 코인 마켓 소식입니다. 글로벌 가상자산 시장으로 대규모 자금이 활발히 유입되고 있습니다.";
+    const stockText = stockSummary
+      ? `두 번째는 국내 주식 시장 소식입니다. ${cleanSpeech(stockSummary)}`
+      : "다음은 주식 뉴스입니다. 반도체 수급이 점차 회복세를 나타내며 활력을 되찾고 있습니다.";
+    const ecoText = ecoSummary
+      ? `세 번째로 거시 경제 및 글로벌 소식 볼까요? ${cleanSpeech(ecoSummary)}`
+      : "세 번째로 경제 지표입니다. 고금리 기조가 이어지며 달러 자산이 강세를 나타내고 있습니다.";
+    const realestateText = realestateSummary
+      ? `네 번째는 부동산 트렌드 소식입니다. ${cleanSpeech(realestateSummary)}`
+      : "네 번째로 부동산 동향입니다. 대출 보유세 부담 가중으로 인해 시장 거래량 흐름 변화가 뚜렷합니다.";
+    const outroText = "오늘 로기가 준비한 경제 도토리는 여기까지에요! 더 자세한 분석은 로기의 머니로그랩에서 만나볼 수 있어요. 구독과 좋아요 부탁드려요! 안녕!";
+
+    // Define color palettes
+    const coinBgColor = "(245, 158, 11)";
+    const stockBgColor = "(59, 130, 246)";
+    const ecoBgColor = "(16, 185, 129)";
+    const realestateBgColor = "(139, 92, 246)";
+
+    // Read video_maker/main.py as template
+    const mainPyPath = path.join(__dirname, 'video_maker/main.py');
+    const tempPyPath = path.join(__dirname, 'video_maker/main_temp.py');
+    
+    if (!fs.existsSync(mainPyPath)) {
+      return res.status(500).json({
+        success: false,
+        message: '서버 내에 비디오 메이커 스크립트(main.py)가 존재하지 않습니다.'
+      });
+    }
+
+    let mainPyContent = fs.readFileSync(mainPyPath, 'utf-8');
+
+    // Construct dynamically updated SCENES block
+    const dynamicScenesBlock = `SCENES = [
+    {"type": "intro", "text": "${introText}", "bg_color": (255, 240, 230)},
+    {"type": "coin", "text": "${coinText}", "bg_color": ${coinBgColor}},
+    {"type": "stock", "text": "${stockText}", "bg_color": ${stockBgColor}},
+    {"type": "economy", "text": "${ecoText}", "bg_color": ${ecoBgColor}},
+    {"type": "real_estate", "text": "${realestateText}", "bg_color": ${realestateBgColor}},
+    {"type": "outro", "text": "${outroText}", "bg_color": (255, 240, 230)}
+]`;
+
+    // Swap SCENES block in python file
+    const scenesRegex = /SCENES\s*=\s*\[[\s\S]*?\]/;
+    mainPyContent = mainPyContent.replace(scenesRegex, dynamicScenesBlock);
+    
+    // Save to main_temp.py
+    fs.writeFileSync(tempPyPath, mainPyContent, 'utf-8');
+    console.log('💾 동적 씬이 장착된 main_temp.py 템플릿 임시 생성 완료!');
+
+    // Execute python script
+    console.log('🐍 파이썬 비디오 메이커 실행 중...');
+    const execCwd = path.join(__dirname, 'video_maker');
+    
+    // Run asynchronously
+    const runPython = async () => {
+      try {
+        const { stdout, stderr } = await execPromise('python main_temp.py', { cwd: execCwd });
+        console.log('stdout:', stdout);
+        if (stderr) console.error('stderr:', stderr);
+        
+        // Clean up temp python file
+        try {
+          fs.unlinkSync(tempPyPath);
+        } catch (e) {}
+
+        const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const relativeVideoPath = `/shorts/logi_shorts_${todayStr}.mp4`;
+        
+        console.log(`🎉 성공적으로 유튜브 쇼츠 비디오 렌더링 완료! 주소: ${relativeVideoPath}`);
+        return relativeVideoPath;
+      } catch (err) {
+        console.error('파이썬 쇼츠 렌더링 에러:', err.message);
+        try {
+          fs.unlinkSync(tempPyPath);
+        } catch (e) {}
+        throw err;
+      }
+    };
+
+    // Return response
+    const videoUrl = await runPython();
+    
+    return res.status(200).json({
+      success: true,
+      message: '🐿️ 로기의 경제 도토리 유튜브 쇼츠 비디오가 성공적으로 렌더링되었습니다!',
+      videoUrl: videoUrl
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `쇼츠 비디오 생성 에러: ${error.message}`
+    });
+  }
+});
 
 const PORT = config.port;
 app.listen(PORT, () => {
