@@ -79,13 +79,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
       
       {/* Navigation Header */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '60px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <header className="app-header">
+        <div className="app-header-logo">
           <div style={{
             background: 'linear-gradient(135deg, var(--color-accent-orange) 0%, var(--color-accent-emerald) 100%)',
             width: '40px',
@@ -145,16 +140,12 @@ export default function LandingPage({ onNavigateToAdmin }) {
           매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
         </div>
         
-        <h1 style={{
-          fontSize: 'clamp(32px, 5vw, 48px)',
-          fontWeight: '800',
-          fontFamily: 'var(--font-headers)',
-          lineHeight: '1.2',
-          marginBottom: '20px',
-          marginTop: '30px',
+        <h1 className="hero-title" style={{
           background: 'linear-gradient(to right, #ffffff 40%, var(--color-accent-emerald) 100%)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '20px',
+          marginTop: '30px'
         }}>
           경제 뉴스가 어렵니?<br/>
           다람쥐 연구원 로기가 쉽게 풀어줄게!
@@ -221,9 +212,9 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </div>
 
           {/* 🐿️ 배포 서버 기상 상태 인디케이터 */}
-          <div className="glass-card pulse-glowing" style={{
+          <div className="glass-card pulse-glowing no-mobile-padding" style={{
             marginTop: '16px',
-            padding: '8px 16px',
+            padding: '12px 16px',
             borderRadius: '20px',
             background: 'rgba(5, 10, 20, 0.6)',
             border: '1px solid',
@@ -232,7 +223,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
             fontWeight: '600',
             textAlign: 'center',
             color: backendWaking ? 'var(--color-accent-orange)' : 'var(--color-accent-emerald)',
-            display: 'inline-flex',
+            display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',

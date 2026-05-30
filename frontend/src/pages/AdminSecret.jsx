@@ -397,11 +397,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
       
       {/* Header Controls */}
-      <header style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.05)',
-        paddingBottom: '20px'
-      }}>
+      <header className="admin-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button 
             onClick={onNavigateHome}
@@ -423,7 +419,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="admin-buttons-container">
           <button 
             onClick={handleManualHarvest} 
             disabled={harvesting}
@@ -446,10 +442,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
       {/* Quick Statistics Banner */}
       {dashboardData && (
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px', marginBottom: '30px'
-        }}>
+        <div className="stats-grid">
           <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px' }}>
             <div style={{ color: 'var(--color-accent-emerald)' }}><Users size={24} /></div>
             <div>
@@ -517,11 +510,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             ⚙️ 로기 연구소 API & 클라우드 연동 상태 정밀 진단
           </h3>
           
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '16px'
-          }}>
+          <div className="diagnostics-grid">
             {/* Resend API Key Status */}
             <div style={{
               background: 'rgba(255,255,255,0.02)',
@@ -959,9 +948,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
       {/* Main Board Panel */}
       {dashboardData && dashboardData.dailyAcorns && dashboardData.dailyAcorns.generated ? (
-        <div style={{
-          display: 'grid', gridTemplateColumns: '260px 1fr', gap: '30px', alignItems: 'start'
-        }}>
+        <div className="admin-grid">
           
           {/* Post Tabs list (Left column) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1125,7 +1112,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                   </div>
 
                   {/* Pixabay Images keywords helper & hashtags */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div className="helper-grid">
                     <div style={{
                       background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)',
                       padding: '16px', borderRadius: 'var(--border-radius-md)'

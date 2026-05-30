@@ -93,7 +93,7 @@ export default function CardNews() {
       </div>
 
       {/* Main Card Viewport */}
-      <div className="glass-card" style={{
+      <div className="glass-card no-mobile-padding" style={{
         padding: '0',
         minHeight: '380px',
         display: 'flex',

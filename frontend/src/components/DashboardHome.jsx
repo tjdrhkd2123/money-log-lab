@@ -58,12 +58,7 @@ export default function DashboardHome() {
   return (
     <div>
       {/* Real-time Indicator Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '20px',
-        marginBottom: '24px'
-      }}>
+      <div className="indices-grid">
         {/* KOSPI CARD */}
         <div className="glass-card" style={{
           position: 'relative',

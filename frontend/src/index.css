@@ -226,7 +226,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Prevent body text & card news overlapping on mobile */
-  .glass-card {
+  .glass-card:not(.no-mobile-padding) {
     padding: 16px !important;
     border-radius: 16px !important;
   }
@@ -255,4 +255,163 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 40px !important;
   }
 }
+
+/* ==========================================
+   GLOBAL APP RESPONSIVE LAYOUT CLASSES
+   ========================================== */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
+  width: 100%;
+}
+
+.app-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 800;
+  font-family: var(--font-headers);
+  line-height: 1.2;
+}
+
+.indices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 20px;
+  width: 100%;
+}
+
+.admin-buttons-container {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .admin-header {
+    flex-direction: column !important;
+    gap: 20px !important;
+    text-align: center !important;
+    align-items: center !important;
+    margin-bottom: 30px !important;
+  }
+  
+  .admin-header > div {
+    display: flex;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .admin-buttons-container {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .admin-buttons-container button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Navbar header stack on mobile */
+  .app-header {
+    flex-direction: column !important;
+    gap: 20px !important;
+    text-align: center !important;
+    margin-bottom: 35px !important;
+  }
+  .app-header div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .app-header button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Hero title downscale to prevent wrapping text crash */
+  .hero-title {
+    font-size: 26px !important;
+    line-height: 1.35 !important;
+    margin-top: 15px !important;
+  }
+
+  /* Compact grid structures for small screens */
+  .indices-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .diagnostics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .glass-card h3 {
+    font-size: 18px !important;
+  }
+}
+
+.helper-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .helper-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+
 
