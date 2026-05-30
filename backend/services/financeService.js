@@ -105,7 +105,7 @@ export const financeService = {
     }
 
     if (!usdKrw) {
-      usdKrw = { price: '1,580.00', change: '+4.50', changePercent: '0.33', status: 'UP' };
+      usdKrw = { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' };
     } else {
       usdKrw.price = Number(usdKrw.price).toLocaleString('ko-KR', { minimumFractionDigits: 2 });
       usdKrw.change = (Number(usdKrw.change) >= 0 ? '+' : '') + Number(usdKrw.change).toFixed(2);
@@ -148,7 +148,7 @@ export const financeService = {
           category: "economy"
         },
         {
-          title: "원·달러 환율 1,580원 돌파 긴급 조정국면 진입... 외환 당국 미세조정 경계령",
+          title: "원·달러 환율 1,507원 돌파 긴급 조정국면 진입... 외환 당국 미세조정 경계령",
           link: "https://finance.yahoo.com",
           pubDate: new Date().toUTCString(),
           source: "외환동향보드",

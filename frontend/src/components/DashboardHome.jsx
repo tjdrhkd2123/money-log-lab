@@ -32,8 +32,10 @@ export default function DashboardHome() {
     const usd = Number(indices.usdKrw.price.replace(/,/g, ''));
     const kospiChange = Number(indices.kospi.changePercent);
 
-    if (usd >= 1360) {
-      return "🐿️ 로기 분석: 원·달러 환율이 도토리 무게보다 무겁게 1,360원을 돌파하며 치솟고 있어! 수입 물가가 비상이니, 글로벌 위험 헷지를 위해 안전자산과 가상자산 병행을 꼭 살펴봐야 해!";
+    if (usd >= 1500) {
+      return `🐿️ 로기 분석: 원·달러 환율이 도토리 무게보다 무겁게 ${indices.usdKrw.price}원을 긴급 돌파하며 치솟고 있어! 수입 물가가 비상이니, 글로벌 위험 헷지를 위해 안전자산과 가상자산 병행을 꼭 살펴봐야 해!`;
+    } else if (usd >= 1360) {
+      return `🐿️ 로기 분석: 원·달러 환율이 도토리 무게보다 무겁게 ${indices.usdKrw.price}원을 돌파하며 치솟고 있어! 수입 물가가 비상이니, 글로벌 위험 헷지를 위해 안전자산과 가상자산 병행을 꼭 살펴봐야 해!`;
     } else if (kospiChange < 0) {
       return "🐿️ 로기 분석: 코스피 지수가 조금 주저앉고 있어. 외인들이 물량을 던지고 있는 소나기 구간이니, 조급히 상투 잡지 말고 반도체 D-RAM 업황 회복 시기를 여유롭게 기다려 봐!";
     } else {
