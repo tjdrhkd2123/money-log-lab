@@ -46,8 +46,8 @@ async def generate_tts(text, output_path):
     await communicate.save(output_path)
 
 def create_bg_image(scene_type, color, output_path):
-    # 간단한 배경색 + 텍스트 생성 (사용자가 나중에 진짜 이미지로 교체 가능)
-    img = Image.new('RGB', (1080, 1920), color=color)
+    # 간단한 배경색 + 텍스트 생성 (720x1280 해상도로 RAM 최적화)
+    img = Image.new('RGB', (720, 1280), color=color)
     draw = ImageDraw.Draw(img)
     # 텍스트 추가는 폰트가 필요하므로 생략하거나 시스템 폰트 사용 가능하지만 생략
     img.save(output_path)
@@ -75,12 +75,12 @@ async def main():
         audio_clip = AudioFileClip(audio_path)
         duration = audio_clip.duration
         
-        # 1080x1920 쇼츠 세로 해상도
-        img_clip = ImageClip(bg_path).set_duration(duration).resize((1080, 1920))
+        # 720x1280 쇼츠 세로 해상도로 RAM 최적화 (512MB Render 컨테이너 안전지대 진입)
+        img_clip = ImageClip(bg_path).set_duration(duration).resize((720, 1280))
         
         # 로기 캐릭터 추가 (캐릭터 이미지가 있으면 덮어쓰기)
         if os.path.exists(LOGI_IMAGE):
-            logi_clip = ImageClip(LOGI_IMAGE).resize(width=800).set_position(('center', 'bottom')).set_duration(duration)
+            logi_clip = ImageClip(LOGI_IMAGE).resize(width=500).set_position(('center', 'bottom')).set_duration(duration)
             final_clip = CompositeVideoClip([img_clip, logi_clip]).set_audio(audio_clip)
         else:
             final_clip = img_clip.set_audio(audio_clip)
@@ -95,8 +95,21 @@ async def main():
     today_str = datetime.datetime.now().strftime("%Y%m%d")
     output_filename = os.path.join(OUTPUT_DIR, f"logi_shorts_{today_str}.mp4")
     
-    final_video.write_videofile(output_filename, fps=24, codec="libx264", audio_codec="aac")
+    # 초경량 단일 스레드 + ultrafast 프리셋을 적용해 Render.com 512MB RAM 오버플로우 영구 예방
+    final_video.write_videofile(
+        output_filename, 
+        fps=24, 
+        codec="libx264", 
+        audio_codec="aac", 
+        threads=1, 
+        preset="ultrafast"
+    )
     print(f"🎉 성공적으로 영상이 생성되었습니다: {output_filename}")
+    
+    # 메모리 누수 원천 차단을 위한 명시적 클립 닫기 (NumPy 가비지 컬렉션 트리거)
+    final_video.close()
+    for clip in clips:
+        clip.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
