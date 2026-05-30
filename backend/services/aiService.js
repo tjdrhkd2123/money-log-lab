@@ -436,9 +436,10 @@ Write a premium, SEO-optimized, highly detailed Naver Blog post for the category
 ## 2,000-CHARACTER SEO REQUIREMENT (CRITICAL):
 - The "body" of the post MUST be extremely detailed and long, around 1,500 to 2,000 Korean characters (excluding the checklists/links). Use rich explanations, step-by-step reasoning, and deep analysis of the provided data to ensure it ranks high on Naver Blog SEO. This is a strict quality requirement from the blog master!
 
-## CRITICAL JSON FORMATTING RULES (MUST OBEY):
+## CRITICAL FORMATTING & HUMAN-WRITING RULES (MUST OBEY):
 - Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values. Use single quotes (') instead.
 - Rule 2 (No Raw Line Breaks): Represent paragraph breaks in "body" with literal escaped "\\n" characters. Do not output literal raw line breaks inside JSON strings.
+- Rule 3 (NO MARKDOWN BOLDING ** OR HEADERS #): NEVER use double asterisks (**) anywhere in the titles, recommendedTitle, previewBox.trailerText, or body for bolding. NEVER use hash headings (### or ##). This is for a Naver Blog copy-paste draft where raw markdown wrappers look highly robotic and scream 'AI-generated'. Write clean, plain text and make headings organic and paragraphs flow naturally!
 
 ## Tone and Style:
 - Persona: Friendly, cute 2D squirrel researcher "Rogi" who gathers financial "acorns" (info).
@@ -495,8 +496,32 @@ Generate the detailed 2000-character Naver Blog post for the category "${categor
 `;
 
             const parsedPost = await callGemini(systemPrompt, userPrompt, config.geminiApiKey);
+            
+            // Post-processing filter to strip out all ugly AI Markdown indicators (like **, ###) to make it look 100% human-written
+            const cleanMarkdownText = (txt) => {
+              if (typeof txt !== 'string') return txt;
+              return txt.replace(/\*\*/g, '').replace(/###\s*/g, '').replace(/##\s*/g, '').replace(/#\s*/g, '').trim();
+            };
+
+            if (parsedPost) {
+              if (parsedPost.body) parsedPost.body = cleanMarkdownText(parsedPost.body);
+              if (parsedPost.recommendedTitle) parsedPost.recommendedTitle = cleanMarkdownText(parsedPost.recommendedTitle);
+              if (parsedPost.aeoSummary) parsedPost.aeoSummary = cleanMarkdownText(parsedPost.aeoSummary);
+              if (parsedPost.titles && Array.isArray(parsedPost.titles)) {
+                parsedPost.titles = parsedPost.titles.map(cleanMarkdownText);
+              }
+              if (parsedPost.previewBox) {
+                if (parsedPost.previewBox.trailerText) {
+                  parsedPost.previewBox.trailerText = cleanMarkdownText(parsedPost.previewBox.trailerText);
+                }
+                if (parsedPost.previewBox.todoSteps && Array.isArray(parsedPost.previewBox.todoSteps)) {
+                  parsedPost.previewBox.todoSteps = parsedPost.previewBox.todoSteps.map(cleanMarkdownText);
+                }
+              }
+            }
+
             posts.push(parsedPost);
-            console.log(`✅ [Gemini Multi-Call] "${category}" 집필 및 JSON 파싱 완료!`);
+            console.log(`✅ [Gemini Multi-Call] "${category}" 집필 및 JSON 파싱 완료 (마크다운 클렌징 완료)!`);
           } catch (postErr) {
             console.warn(`⚠️ [Gemini Multi-Call] "${category}" 생성 실패, 모의 데이터로 대체합니다:`, postErr.message);
             const mockPost = customizedMock.posts.find(p => p.category === category);
@@ -570,7 +595,25 @@ ${news.map(n => `- ${n.title}`).join('\n')}
 Generate the Card News and Newsletter.
 `;
           metaData = await callGemini(systemPromptMeta, userPromptMeta, config.geminiApiKey);
-          console.log("✅ [Gemini Multi-Call] 카드뉴스 및 뉴스레터 생성 완료!");
+          
+          // Post-processing filter to strip out all ugly AI Markdown indicators (like **) from Card News
+          const cleanMarkdownText = (txt) => {
+            if (typeof txt !== 'string') return txt;
+            return txt.replace(/\*\*/g, '').replace(/###\s*/g, '').replace(/##\s*/g, '').replace(/#\s*/g, '').trim();
+          };
+
+          if (metaData) {
+            if (metaData.cardNews && Array.isArray(metaData.cardNews)) {
+              metaData.cardNews = metaData.cardNews.map(slide => ({
+                ...slide,
+                title: cleanMarkdownText(slide.title),
+                description: cleanMarkdownText(slide.description),
+                keyword: cleanMarkdownText(slide.keyword)
+              }));
+            }
+          }
+
+          console.log("✅ [Gemini Multi-Call] 카드뉴스 및 뉴스레터 생성 완료 (마크다운 클렌징 완료)!");
         } catch (metaErr) {
           console.warn("⚠️ [Gemini Multi-Call] 카드뉴스/뉴스레터 생성 실패, 모의 데이터로 대체합니다:", metaErr.message);
           metaData = {

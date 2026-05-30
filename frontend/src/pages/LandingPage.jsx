@@ -174,14 +174,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
         {/* Dynamic Email Newsletter Form */}
         <div style={{ maxWidth: '540px', margin: '0 auto' }}>
-          <form onSubmit={handleSubscribe} className="glass-card" style={{
-            padding: '8px',
-            borderRadius: '40px',
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            background: 'rgba(13, 22, 39, 0.8)'
-          }}>
+          <form onSubmit={handleSubscribe} className="glass-card newsletter-form">
             <div style={{ paddingLeft: '16px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center' }}>
               <Mail size={18} />
             </div>

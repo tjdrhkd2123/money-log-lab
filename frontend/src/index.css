@@ -187,3 +187,72 @@ h1, h2, h3, h4, h5, h6 {
 .pulse-glowing {
   animation: pulse-soft 2s infinite ease-in-out;
 }
+
+/* ==========================================
+   MOBILE RESPONSIVE SYSTEM (OOM/OVERLAP FIX)
+   ========================================== */
+.newsletter-form {
+  padding: 8px;
+  border-radius: 40px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(13, 22, 39, 0.8);
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  /* Newsletter Subscription Form stacking on mobile */
+  .newsletter-form {
+    flex-direction: column;
+    border-radius: 20px !important;
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+  .newsletter-form div {
+    display: none !important; /* Hide icon on tiny screens */
+  }
+  .newsletter-form input {
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    height: 36px !important;
+  }
+  .newsletter-form button {
+    width: 100% !important;
+    justify-content: center !important;
+    height: 44px !important;
+    font-size: 13px !important;
+  }
+
+  /* Prevent body text & card news overlapping on mobile */
+  .glass-card {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .card-content-area {
+    padding: 24px 20px 16px 20px !important; /* Downscale padding to maximize space */
+  }
+
+  .card-title {
+    font-size: 18px !important; /* Lower title font size to prevent character overlap */
+    line-height: 1.35 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .card-description {
+    font-size: 13px !important; /* Lower description size for tight screens */
+    line-height: 1.6 !important;
+  }
+
+  /* Spacing adjustment */
+  header {
+    margin-bottom: 30px !important;
+  }
+  
+  section {
+    margin-bottom: 40px !important;
+  }
+}
+

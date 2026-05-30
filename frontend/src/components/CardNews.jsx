@@ -119,7 +119,7 @@ export default function CardNews() {
         }}></div>
 
         {/* Card Content Area */}
-        <div style={{ padding: '36px 36px 20px 36px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="card-content-area" style={{ padding: '36px 36px 20px 36px', flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           {/* Tag */}
           <div style={{
             fontFamily: 'var(--font-headers)',
@@ -134,7 +134,7 @@ export default function CardNews() {
           </div>
           
           {/* Slide Title */}
-          <h2 style={{
+          <h2 className="card-title" style={{
             fontSize: '24px',
             fontWeight: '800',
             color: '#ffffff',
@@ -146,7 +146,7 @@ export default function CardNews() {
           </h2>
           
           {/* Slide Description */}
-          <p style={{
+          <p className="card-description" style={{
             fontSize: '16px',
             color: 'var(--color-text-secondary)',
             lineHeight: '1.7',
