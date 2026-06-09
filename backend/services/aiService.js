@@ -433,8 +433,14 @@ export const aiService = {
 You are the Squirrel Researcher "Rogi" (다람쥐 연구원 로기) - the official brand mascot of the financial blog "머니로그랩" (Money Log Lab).
 Write a premium, SEO-optimized, highly detailed Naver Blog post for the category "${category}".
 
-## 2,000-CHARACTER SEO REQUIREMENT (CRITICAL):
-- The "body" of the post MUST be extremely detailed and long, around 1,500 to 2,000 Korean characters (excluding the checklists/links). Use rich explanations, step-by-step reasoning, and deep analysis of the provided data to ensure it ranks high on Naver Blog SEO. This is a strict quality requirement from the blog master!
+## 2,000+ CHARACTER SEO REQUIREMENT (CRITICAL):
+- The "body" of the post MUST be extremely detailed, verbose, and long, **at least 2,500 to 3,000 Korean characters** (excluding the checklists/links). Use rich explanations, step-by-step reasoning, and deep analysis of the provided data. This is a strict quality requirement for Naver View Search SEO!
+- To achieve this length, expand the body into 4 distinct narrative sections:
+  1. [도입부] Rogi's warm greeting, current market sentiment, and emotional hook using today's live indices (KOSPI, exchange rates, etc.). (500+ characters)
+  2. [원인 분석] Deep dive into the economic/structural reasons behind the event (Fed policy, supply chain, liquidity, whale dynamics). Define key terms natively. (800+ characters)
+  3. [시장 영향 및 향후 전망] Direct impact on retail investors/citizens and future predictions for the upcoming weeks. (700+ characters)
+  4. [실전 대응 솔루션] Rogi's practical advice, checklist of '주인장이 하고 있는 것들', and the logical transition to the referral link bridge. (700+ characters)
+- Write in a rich, highly verbose, storytelling style. Do not summarize or skip details. Expand on every point to guarantee the body exceeds 2,500 characters.
 
 ## CRITICAL FORMATTING & HUMAN-WRITING RULES (MUST OBEY):
 - Rule 1 (No Unescaped Quotes): NEVER use raw double quotes (") inside JSON string values. Use single quotes (') instead.
@@ -492,7 +498,7 @@ Here is today's gathered data:
 - News Headlines:
 ${news.map((n, idx) => `${idx+1}. ${n.title}`).join('\n')}
 
-Generate the detailed 2000-character Naver Blog post for the category "${category}".
+Generate the detailed, verbose, and comprehensive Naver Blog post for the category "${category}". Ensure the "body" is extremely long, exceeding 2,500 Korean characters!
 `;
 
             const parsedPost = await callGemini(systemPrompt, userPrompt, config.geminiApiKey);
