@@ -58,7 +58,12 @@ export function sanitizeInput(str) {
 // 4. JWT Authorization middleware to protect secret routes (Security Rule 3)
 export function authenticateAdminToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+  let token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+
+  // Support query parameter token/apiKey for easy cron webhook integration (e.g. cron-job.org)
+  if (!token) {
+    token = req.query.token || req.query.apiKey;
+  }
 
   if (!token) {
     return res.status(401).json({

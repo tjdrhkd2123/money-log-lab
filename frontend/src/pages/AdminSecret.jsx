@@ -822,33 +822,19 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             lineHeight: '1.7',
             color: 'var(--color-text-secondary)'
           }}>
-            <strong style={{ color: 'var(--color-accent-orange)', display: 'block', marginBottom: '8px' }}>🛠️ 초간단 3단계 정시 기상 예약법:</strong>
+            <strong style={{ color: 'var(--color-accent-orange)', display: 'block', marginBottom: '8px' }}>🛠️ 초간단 2단계 정시 기상 예약법 (GET 지원):</strong>
             <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px', margin: 0 }}>
               <li>
                 무료 크론 서비스 웹사이트 <strong><a href="https://cron-job.org" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-blue)', textDecoration: 'underline' }}>cron-job.org (여기를 클릭)</a></strong> 에 가입해 주세요.
               </li>
               <li>
-                <strong>Create Cronjob</strong> 버튼을 누르고 아래와 같이 적어주세요:
+                <strong>Create Cronjob</strong> 버튼을 누르고 아래와 같이 기본값 그대로 입력해 주면 완료!
                 <ul style={{ paddingLeft: '20px', marginTop: '4px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <li>• Title: <code>머니로그랩 서버 깨우기 및 아침 수집</code></li>
-                  <li>• URL: <code style={{ color: 'var(--color-accent-emerald)' }}>{`${API_BASE_URL}/api/admin/trigger-harvest`}</code> (꼭 POST 방식으로 선택해줘!)</li>
+                  <li>• URL: <code style={{ color: 'var(--color-accent-emerald)', wordBreak: 'break-all' }}>{`${API_BASE_URL}/api/admin/trigger-harvest?token=rogi1234`}</code> (기본 GET 방식 그대로 사용!)</li>
                   <li>• Schedule: **매일 아침 07:00** (Asia/Seoul 시간대 기준 설정)</li>
+                  <li style={{ fontSize: '11px', color: 'var(--color-accent-blue)' }}>* 만약 관리자 시크릿 비밀번호를 변경하셨다면 <code>token=비밀번호</code>로 적어주시면 됩니다.</li>
                 </ul>
-              </li>
-              <li>
-                <strong>Headers</strong> 탭을 누르고 아래 보안 인증용 헤더를 한 줄 추가해 주면 끝!
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  marginTop: '4px',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  color: 'var(--color-accent-emerald)',
-                  border: '1px solid rgba(0, 245, 212, 0.1)'
-                }}>
-                  Key: <code style={{color: '#ffffff'}}>Authorization</code> &nbsp;|&nbsp; Value: <code style={{color: '#ffffff'}}>Bearer rogi1234</code>
-                </div>
               </li>
             </ol>
           </div>

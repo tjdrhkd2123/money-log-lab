@@ -411,17 +411,22 @@ app.post('/api/admin/sync-subscribers', authenticateAdminToken, async (req, res)
 });
 
 /**
- * 6. POST /api/admin/trigger-harvest
- * Manually starts a complete gather & AI writing cycle (Rule 19 trigger "수집해줘").
+ * 6. GET & POST /api/admin/trigger-harvest
+ * Starts a complete gather & AI writing cycle (triggers "수집해줘").
+ * Supports GET for easy integration with basic external cron services.
  */
-app.post('/api/admin/trigger-harvest', authenticateAdminToken, async (req, res) => {
+app.route('/api/admin/trigger-harvest')
+  .get(authenticateAdminToken, handleTriggerHarvest)
+  .post(authenticateAdminToken, handleTriggerHarvest);
+
+async function handleTriggerHarvest(req, res) {
   try {
-    console.log('⚡ 관리자 강제 수집 트리거 ("수집해줘" 시퀀스 실행)');
+    console.log('⚡ 자동화 수집 트리거 시퀀스 실행 ("수집해줘")');
     const dailyAcorns = await triggerDailyHarvest();
     
     return res.status(200).json({
       success: true,
-      message: '⚡ 오늘의 뉴스 수집 및 AI 4대 포스팅 글쓰기 + 독자 메일 발송이 성공적으로 완료되었습니다!',
+      message: '⚡ 오늘의 뉴스 수집 및 AI 5대 포스팅 글쓰기 + 독자 메일 발송이 성공적으로 완료되었습니다!',
       dailyAcorns
     });
   } catch (error) {
@@ -430,7 +435,7 @@ app.post('/api/admin/trigger-harvest', authenticateAdminToken, async (req, res) 
       message: `자동화 수집 실행 중 실패: ${error.message}`
     });
   }
-});
+}
 
 /**
  * 8. POST /api/admin/generate-video

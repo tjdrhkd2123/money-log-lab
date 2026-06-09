@@ -88,7 +88,7 @@ export function initScheduler() {
   initializeDb();
   
   // Schedule a daily task at 7:00 AM (0 7 * * *) (Rule 21 & Schedule trigger)
-  console.log('⏰ 로기 연구실 크론 스케줄러 활성화: 매일 아침 07:00 AM 자동 수집 예약 완료.');
+  console.log('⏰ 로기 연구실 크론 스케줄러 활성화: 매일 아침 07:00 AM 자동 수집 예약 완료. (Asia/Seoul 기준)');
   
   cron.schedule('0 7 * * *', async () => {
     try {
@@ -96,6 +96,9 @@ export function initScheduler() {
     } catch (err) {
       console.error('스케줄러 자동 실행 오류:', err.message);
     }
+  }, {
+    scheduled: true,
+    timezone: "Asia/Seoul"
   });
 
   // [Zero-Click 자동화] 서버 구동 시 오늘자 수집 데이터가 없거나 하루가 지난 상태라면 구동 즉시 백그라운드 수집 자동 실행
