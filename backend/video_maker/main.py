@@ -28,7 +28,19 @@ import datetime
 ASSETS_DIR = "assets"
 OUTPUT_DIR = "output"
 LOGI_IMAGE = os.path.join(ASSETS_DIR, "logi_anchor.png") # 로기 캐릭터 (배경투명 권장)
+FONT_PATH = os.path.join(ASSETS_DIR, "NanumGothic-Bold.ttf")
 VOICE = "ko-KR-SunHiNeural" # 밝은 여성(연구원/친근한 느낌) 목소리
+
+def ensure_korean_font():
+    if not os.path.exists(FONT_PATH):
+        print("📥 Downloading Korean Font (NanumGothic-Bold)...")
+        try:
+            import urllib.request
+            url = "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Bold.ttf"
+            urllib.request.urlretrieve(url, FONT_PATH)
+            print("✅ Font downloaded successfully!")
+        except Exception as e:
+            print(f"⚠️ Failed to download font: {e}. Will fallback to default font.")
 
 # 뉴스 스크립트 예시 (6개 씬)
 SCENES = [
@@ -75,16 +87,88 @@ async def main():
         audio_clip = AudioFileClip(audio_path)
         duration = audio_clip.duration
         
-        # 720x1280 쇼츠 세로 해상도로 RAM 최적화 (512MB Render 컨테이너 안전지대 진입)
-        img_clip = ImageClip(bg_path).set_duration(duration).resize((720, 1280))
+        # 1. Load background image and compose in PIL
+        ensure_korean_font()
         
-        # 로기 캐릭터 추가 (캐릭터 이미지가 있으면 덮어쓰기)
+        bg_img = Image.open(bg_path).convert('RGBA')
+        bg_img = bg_img.resize((720, 1280), Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.ANTIALIAS)
+        
+        # 2. Paste logi mascot character in the middle
         if os.path.exists(LOGI_IMAGE):
-            logi_clip = ImageClip(LOGI_IMAGE).resize(width=500).set_position(('center', 'bottom')).set_duration(duration)
-            final_clip = CompositeVideoClip([img_clip, logi_clip]).set_audio(audio_clip)
-        else:
-            final_clip = img_clip.set_audio(audio_clip)
+            logi_img = Image.open(LOGI_IMAGE).convert('RGBA')
+            w, h = logi_img.size
+            new_w = 500
+            new_h = int(h * (new_w / w))
+            resample_filter = Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.ANTIALIAS
+            logi_img = logi_img.resize((new_w, new_h), resample_filter)
             
+            x = (720 - new_w) // 2
+            y = (1280 - new_h) // 2
+            bg_img.alpha_composite(logi_img, (x, y))
+            
+        # 3. Draw subtitles at the bottom
+        draw = ImageDraw.Draw(bg_img)
+        font_size = 28
+        try:
+            font = ImageFont.truetype(FONT_PATH, font_size)
+        except Exception:
+            font = ImageFont.load_default()
+            
+        text = scene['text']
+        words = text.split(' ')
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            test_line = current_line + " " + word if current_line else word
+            try:
+                bbox = draw.textbbox((0, 0), test_line, font=font)
+                line_w = bbox[2] - bbox[0]
+            except AttributeError:
+                line_w, _ = draw.textsize(test_line, font=font)
+                
+            if line_w <= 600:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        if current_line:
+            lines.append(current_line)
+            
+        line_height = font_size + 10
+        total_height = len(lines) * line_height
+        box_padding = 15
+        box_y1 = 1100 - total_height - box_padding
+        box_y2 = 1100 + box_padding
+        
+        # Draw dark background overlay for subtitle readability
+        overlay = Image.new('RGBA', bg_img.size, (0, 0, 0, 0))
+        overlay_draw = ImageDraw.Draw(overlay)
+        try:
+            overlay_draw.rounded_rectangle([60 - box_padding, box_y1, 660 + box_padding, box_y2], fill=(0, 0, 0, 160), radius=10)
+        except AttributeError:
+            overlay_draw.rectangle([60 - box_padding, box_y1, 660 + box_padding, box_y2], fill=(0, 0, 0, 160))
+            
+        bg_img = Image.alpha_composite(bg_img, overlay)
+        draw = ImageDraw.Draw(bg_img)
+        
+        current_y = box_y1 + box_padding
+        for line in lines:
+            try:
+                bbox = draw.textbbox((0, 0), line, font=font)
+                w = bbox[2] - bbox[0]
+            except AttributeError:
+                w, _ = draw.textsize(line, font=font)
+            x = (720 - w) // 2
+            draw.text((x, current_y), line, font=font, fill=(255, 255, 255, 255))
+            current_y += line_height
+            
+        # Save composed frame image
+        composed_frame_path = os.path.join(OUTPUT_DIR, f"frame_{i}.png")
+        bg_img.convert('RGB').save(composed_frame_path)
+        
+        # Create MoviePy clip directly from the single pre-composed frame
+        final_clip = ImageClip(composed_frame_path).set_duration(duration).set_audio(audio_clip)
         clips.append(final_clip)
         print(f"✅ 씬 {i+1} 준비 완료!")
 
@@ -110,6 +194,15 @@ async def main():
     final_video.close()
     for clip in clips:
         clip.close()
+        
+    # 임시 이미지 프레임 파일 삭제 청소
+    for i in range(len(SCENES)):
+        try:
+            frame_path = os.path.join(OUTPUT_DIR, f"frame_{i}.png")
+            if os.path.exists(frame_path):
+                os.remove(frame_path)
+        except Exception as e:
+            print(f"Warning: 임시 프레임 파일 삭제 실패: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
