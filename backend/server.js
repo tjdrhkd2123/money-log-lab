@@ -420,8 +420,27 @@ app.route('/api/admin/trigger-harvest')
   .post(authenticateAdminToken, handleTriggerHarvest);
 
 async function handleTriggerHarvest(req, res) {
+  const isAsync = req.query.async === 'true' || 
+                  (req.user && req.user.isCron) || 
+                  req.query.token === 'rogi1234' || 
+                  req.query.token === 'rogi_secret_key_squirrel_acorn_2026';
+  
+  if (isAsync) {
+    console.log('⚡ [백그라운드 수집] 외부 자동화 크론 감지. 즉각 200 OK 반환 후 백그라운드 수집을 가동합니다!');
+    
+    // Trigger in background to avoid any HTTP gateway timeout (e.g. 30s cron-job.org limits)
+    triggerDailyHarvest().catch(err => {
+      console.error('❌ 백그라운드 자동 수집 실패:', err.message);
+    });
+    
+    return res.status(200).json({
+      success: true,
+      message: '⚡ 아침 자동화 수집 및 AI 글쓰기를 백그라운드에서 즉시 실행했습니다. (약 30초 소요)'
+    });
+  }
+
   try {
-    console.log('⚡ 자동화 수집 트리거 시퀀스 실행 ("수집해줘")');
+    console.log('⚡ [동기식 수집] 관리자 수동 수집 트리거 ("수집해줘" 시퀀스 실행)');
     const dailyAcorns = await triggerDailyHarvest();
     
     return res.status(200).json({
