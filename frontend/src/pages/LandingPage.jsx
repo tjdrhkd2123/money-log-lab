@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardHome from '../components/DashboardHome.jsx';
 import CardNews from '../components/CardNews.jsx';
-import { Mail, Shield, ShieldCheck, Bell, Award, Coins, RefreshCw } from 'lucide-react';
+import { Mail, Shield, ShieldCheck, Bell, Award, Coins, RefreshCw, ArrowRight } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
 export default function LandingPage({ onNavigateToAdmin }) {
@@ -77,7 +77,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
       
       {/* Navigation Header */}
       <header className="app-header" style={{ borderBottom: '1px solid var(--color-card-border)', paddingBottom: '20px', marginBottom: '40px' }}>
@@ -162,81 +162,126 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
       {activeView === 'home' ? (
         <>
-          {/* Hero Section */}
+          {/* Fintech SaaS Style Hero Section (2-Column Hero) */}
           <section style={{
-            textAlign: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '40px',
+            alignItems: 'center',
             marginBottom: '60px',
-            position: 'relative'
+            textAlign: 'left'
           }}>
-            <div style={{
-              fontSize: '14px',
-              fontWeight: '700',
-              color: 'var(--color-accent-blue)',
-              fontFamily: 'var(--font-headers)',
-              background: 'rgba(59, 130, 246, 0.08)',
-              padding: '6px 16px',
-              borderRadius: '30px',
-              border: '1px solid rgba(59, 130, 246, 0.15)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginBottom: '24px'
-            }}>
-              <Award size={14} />
-              매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
+            <div>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: '700',
+                color: 'var(--color-accent-blue)',
+                fontFamily: 'var(--font-headers)',
+                background: 'rgba(37, 99, 235, 0.08)',
+                padding: '6px 14px',
+                borderRadius: '30px',
+                border: '1px solid rgba(37, 99, 235, 0.15)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '20px'
+              }}>
+                <Award size={13} />
+                매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
+              </div>
+              
+              <h1 className="hero-title" style={{
+                fontSize: 'clamp(28px, 4.5vw, 42px)',
+                lineHeight: '1.3',
+                background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                marginBottom: '20px'
+              }}>
+                경제 뉴스가 어렵니?<br/>
+                다람쥐 연구원 로기가<br/>
+                쉽고 빠르게 정리해줄게!
+              </h1>
+              
+              <p style={{
+                fontSize: '16px',
+                color: 'var(--color-text-secondary)',
+                lineHeight: '1.6',
+                marginBottom: '28px',
+                fontWeight: '400'
+              }}>
+                어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰
+              </p>
+
+              <button 
+                onClick={() => setActiveView('subscribe')}
+                className="btn-primary"
+                style={{ padding: '14px 28px', fontSize: '15px' }}
+              >
+                매일 아침 메일로 도토리 받기
+                <ArrowRight size={16} />
+              </button>
             </div>
-            
-            <h1 className="hero-title" style={{
-              background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '24px'
+
+            {/* Visual Callout Container */}
+            <div className="glass-card" style={{
+              background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)',
+              padding: '30px',
+              borderRadius: '24px',
+              borderLeft: '4px solid var(--color-accent-blue)',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-card)'
             }}>
-              경제 뉴스가 어렵니?<br/>
-              다람쥐 연구원 로기가 쉽게 풀어줄게!
-            </h1>
-            
-            <p style={{
-              fontSize: '18px',
-              color: 'var(--color-text-secondary)',
-              maxWidth: '650px',
-              margin: '0 auto',
-              lineHeight: '1.6',
-              fontWeight: '400'
-            }}>
-              환율 급등, 금리 폭탄, 코인 폭등까지 어려웠던 금융 상식들을<br/>
-              중학생도 이해 가능한 쉬운 언어로 요약해서 배달해 준다구! 🐿️🌰
-            </p>
+              <div style={{ fontSize: '50px', marginBottom: '16px' }}>🐿️📈🌰</div>
+              <h3 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>로기 금융 연구소 가동 중!</h3>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: '0 auto 16px auto', maxWidth: '380px' }}>
+                로기 비서가 국내 실시간 코스피 마켓과 글로벌 거시 경제 흐름을 쉼 없이 모니터링하고 분석하고 있어.
+              </p>
+              <span style={{
+                fontSize: '12px',
+                fontWeight: '700',
+                color: 'var(--color-accent-emerald)',
+                background: 'rgba(16, 185, 129, 0.08)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} />
+                실시간 인덱스 피드 가동 중
+              </span>
+            </div>
           </section>
 
-          {/* Main Content Area: Dashboard (Top) & Card News (Bottom) */}
+          {/* Service Grid Layout: 2-Column Dashboard (Left: Indices, Right: CardNews) */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '60px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '32px',
             marginTop: '20px'
           }}>
-            {/* Real-time Indicators Dashboard Widget (UPPER) */}
-            <section style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
-                  실시간 머니로그 금융 대시보드
+            {/* Left: Financial Indicators & Commentary */}
+            <section style={{ width: '100%' }}>
+              <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>
+                  📊 실시간 금융 대시보드
                 </h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
                   수집된 원화 대비 가치 및 주요 코스피 지수를 한눈에 파악해봐!
                 </p>
               </div>
               <DashboardHome />
             </section>
 
-            {/* Card News Slide Component (LOWER) */}
+            {/* Right: Rogi's Core Card News Slider */}
             <section style={{ width: '100%' }}>
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
-                  오늘의 로기 연구소 카드뉴스
+              <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>
+                  📰 로기의 오늘의 경제 도토리
                 </h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                  좌우로 넘겨보며 오늘의 경제 핵심 도토리를 확인해봐!
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                  좌우로 가볍게 넘겨보며 오늘의 경제 핵심 꿀팁을 스캔해봐!
                 </p>
               </div>
               <CardNews />
