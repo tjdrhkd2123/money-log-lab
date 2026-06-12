@@ -228,33 +228,33 @@ Q. 강남 빌딩마저 유찰되는 지금의 부동산 위기는 과연 언제�
   cardNews: [
     {
       slideNumber: 1,
-      title: "🚨 원달러 환율 1,507원 긴급 돌파!",
-      description: "미국 연준의 긴축 장기화 우려와 중동 리스크 폭발로 환율이 급격히 상승하며 물가 폭등 비상이 걸렸어. 내 지갑을 지킬 방어 대책이 필요해!",
-      keyword: "환율 급등"
+      title: "🐿️ 안녕! 다람쥐 연구원 로기야!",
+      description: "어려운 금융 뉴스를 다람쥐 로기가 쉽고 빠르게 요약해 줄게. 매일 아침 7시 신선한 경제 도토리 소식을 무료로 챙겨가라구!",
+      keyword: "로기의 시작"
     },
     {
       slideNumber: 2,
-      title: "📈 삼성전자 30만 원 깨지자 8조 순매수!",
-      description: "개인 투자자들이 공포의 외국인 투매를 받아내며 역대급 8조 원을 사들였어. 과연 반도체 순환매의 역대급 기회가 찾아온 걸까?",
-      keyword: "삼성전자"
+      title: "🇺🇸 미국 금리 인하와 내 자산 영향은?",
+      description: "미국 연준이 금리를 인하하면 시중 자금이 주식이나 채권 시장으로 유입될 가능성이 커져. 고금리 예적금 외의 대안도 고민해 볼 때야!",
+      keyword: "기준금리"
     },
     {
       slideNumber: 3,
-      title: "🚀 Bitget 선물 Notcoin(낫코인) +24% 폭등!",
-      description: "업비트에는 없는 TON 생태계 낫코인이 단 24시간 만에 엄청난 거래 대금과 함께 폭등했어. 글로벌 탑 거래소의 독점 혜택을 눈여겨볼 때야!",
-      keyword: "낫코인 급등"
+      title: "📈 요즘 핫한 AI 반도체 HBM이 뭘까?",
+      description: "HBM은 고성능 인공지능 연산에 꼭 필요한 초고속 메모리 반도체야. 글로벌 AI 반도체 시장이 커지면서 우리 수출의 핵심 주역이 되었어!",
+      keyword: "반도체 HBM"
     },
     {
       slideNumber: 4,
-      title: "🪙 OKX 거래소 글로벌 기관 자금 대유입!",
-      description: "주식시장을 이탈한 기관 유동성이 OKX로 유입되고 있어. 독점 수혜를 입을 신규 레이어2 알트코인을 매집하여 분산 투자하자!",
-      keyword: "OKX 코인"
+      title: "💡 13월의 보너스, 연말정산 절세 팁!",
+      description: "연금저축이나 개인형 IRP 계좌에 돈을 납입하면 최대 16.5%까지 세액공제를 받을 수 있어. 세금 환급 혜택을 미리 꼼꼼히 챙겨 두자!",
+      keyword: "연말정산"
     },
     {
       slideNumber: 5,
-      title: "🏠 강남 한복판 빌딩 무더기 유찰 비명!",
-      description: "연 6%대 주택 대출 금리 부담과 세금 폭탄으로 인해 부동산 불패 강남마저 경매 폭증세가 났어. 자산 다각화가 생존의 핵심이야!",
-      keyword: "강남 부동산"
+      title: "🐿️ 한 바구니에 도토리를 다 담지 마!",
+      description: "자산 변동성이 큰 시기일수록 주식, 채권, 외화 자산 등으로 골고루 돈을 쪼개어 투자하는 분산 투자가 자산 방어의 핵심 원칙이야!",
+      keyword: "분산 투자"
     }
   ],
   newsletter: {
@@ -551,6 +551,13 @@ Generate a 5-slide Card News series and an Email Newsletter based on the provide
 
 ## Tone and Style:
 - Speaking Style: Use 반말 (friendly informal Korean) easy for middle schoolers to understand.
+
+## Card News Content Rules:
+- Slide 1: Welcome or Rogi's friendly greeting summarizing the overall daily market vibe.
+- Slide 2: Real macroeconomics (exchange rates, US rates, KOSPI) and what it means for everyday people. Ensure numbers/prices are realistic (e.g. Samsung Electronics in 50k-80k KRW range, never 300k KRW).
+- Slide 3: Domestic stock trends or global business/tech news (semiconductors, HBM, global big tech).
+- Slide 4: Real-world financial knowledge or tax saving tips (e.g., 연말정산, 청년도약계좌, ISA, IRP).
+- Slide 5: Healthy financial advice / asset diversification principles (never promote specific crypto exchanges or offer pushy sign-up links). Keep it educational.
 
 ## JSON Output Structure:
 You MUST return raw, valid JSON only. Do not wrap in markdown \`\`\`json blocks.
