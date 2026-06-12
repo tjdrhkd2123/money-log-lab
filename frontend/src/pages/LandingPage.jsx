@@ -235,12 +235,15 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </div>
         </div>
 
-        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <button onClick={() => setActiveView('home')} style={{ background: 'none', border: 'none', color: activeView === 'home' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '15px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'home' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>금융 대시보드</button>
-          <button onClick={() => setActiveView('subscribe')} style={{ background: 'none', border: 'none', color: activeView === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '15px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>도토리 구독하기 🌰</button>
+        <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => setActiveView('home')} style={{ background: 'none', border: 'none', color: activeView === 'home' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'home' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>금융 대시보드</button>
+          <button onClick={() => setActiveView('news-clip')} style={{ background: 'none', border: 'none', color: activeView === 'news-clip' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'news-clip' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
+          <button onClick={() => setActiveView('calculators')} style={{ background: 'none', border: 'none', color: activeView === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
+          <button onClick={() => setActiveView('benefits')} style={{ background: 'none', border: 'none', color: activeView === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
+          <button onClick={() => setActiveView('subscribe')} style={{ background: 'none', border: 'none', color: activeView === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
 
           {isAdmin && (
-            <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '15px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '4px' }}>🔐 시크릿 룸</button>
+            <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '4px' }}>🔐 시크릿 룸</button>
           )}
 
           {currentUser ? (
@@ -259,20 +262,23 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
       {activeView === 'home' && (
         <>
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', alignItems: 'center', marginBottom: '60px', textAlign: 'left' }}>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(37, 99, 235, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
-              <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.3', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가<br/>쉽고 빠르게 정리해줄게!</h1>
-              <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
-              <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
-            </div>
-            <div className="glass-card" style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', padding: '30px', borderRadius: '24px', borderLeft: '4px solid var(--color-accent-blue)', textAlign: 'center', boxShadow: 'var(--shadow-card)' }}>
-              <div style={{ fontSize: '50px', marginBottom: '16px' }}>🐿️📈🌰</div>
-              <h3 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>로기 금융 연구소 가동 중!</h3>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: '0 auto 16px auto', maxWidth: '380px' }}>로기 비서가 국내 실시간 코스피 마켓과 글로벌 거시 경제 흐름을 쉼 없이 모니터링하고 분석하고 있어.</p>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', background: 'rgba(16, 185, 129, 0.08)', padding: '4px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} />실시간 인덱스 피드 가동 중</span>
-            </div>
+          <section style={{ maxWidth: '800px', margin: '0 auto 40px auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(37, 99, 235, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가<br/>쉽고 빠르게 정리해줄게!</h1>
+            <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400', maxWidth: '600px' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
+            <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px', marginBottom: '30px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
           </section>
+
+          <div className="glass-card" style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', padding: '24px 30px', borderRadius: '24px', borderLeft: '4px solid var(--color-accent-blue)', textAlign: 'center', boxShadow: 'var(--shadow-card)', maxWidth: '800px', margin: '0 auto 60px auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '32px' }}>🐿️📈</span>
+              <div style={{ textAlign: 'left' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '4px' }}>로기 금융 연구소 가동 중!</h3>
+                <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: '1.5' }}>로기 비서가 국내 실시간 코스피 마켓과 글로벌 거시 경제 흐름을 쉼 없이 모니터링하고 분석하고 있어.</p>
+              </div>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', background: 'rgba(16, 185, 129, 0.08)', padding: '6px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} />실시간 인덱스 피드 가동 중</span>
+            </div>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginTop: '20px' }}>
             <section style={{ width: '100%' }}>
@@ -290,92 +296,172 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <CardNews />
             </section>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginTop: '48px' }}>
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '12px', marginBottom: '20px' }}>
-                  <button onClick={() => setCalcTab('exchange')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '700', color: calcTab === 'exchange' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'exchange' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '6px' }}>💱 간편 환율 계산기</button>
-                  <button onClick={() => setCalcTab('savings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '700', color: calcTab === 'savings' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'savings' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '6px' }}>🌰 복리 도토리 저금통</button>
-                </div>
-                {calcTab === 'exchange' ? (
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: '180px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>원화 입력 (KRW)</label>
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '8px 12px', background: 'var(--bg-tertiary)' }}><input type="number" value={krwInput} onChange={(e) => setKrwInput(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '700' }} /><span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span></div>
-                    </div>
-                    <div style={{ fontSize: '20px', color: 'var(--color-text-muted)', paddingTop: '18px' }}>⇄</div>
-                    <div style={{ flex: 1, minWidth: '180px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>달러 변환 (USD)</label>
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '8px 12px', background: 'var(--bg-tertiary)' }}><input type="number" value={usdInput} onChange={(e) => handleUsdChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '700' }} /><span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>달러</span></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      <div style={{ flex: 1, minWidth: '110px' }}><label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>월 납입액</label><input type="number" value={monthlySavings} onChange={(e) => setMonthlySavings(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} /></div>
-                      <div style={{ flex: 1, minWidth: '110px' }}><label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>연 이자율 (%)</label><input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} /></div>
-                      <div style={{ flex: 1, minWidth: '80px' }}><label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>기간</label><select value={savingsPeriod} onChange={(e) => setSavingsPeriod(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }}><option value="1">1년</option><option value="2">2년</option><option value="3">3년</option><option value="5">5년</option><option value="10">10년</option></select></div>
-                    </div>
-                    <div style={{ background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--color-card-border)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}><span style={{ color: 'var(--color-text-secondary)' }}>총 납입 원금:</span><span style={{ fontWeight: '700', color: 'var(--color-text-primary)' }}>{savingsRes.principal.toLocaleString()} 원</span></div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}><span style={{ color: 'var(--color-text-secondary)' }}>예상 세후 이자:</span><span style={{ fontWeight: '700', color: 'var(--color-accent-emerald)' }}>+ {savingsRes.interest.toLocaleString()} 원</span></div>
-                      <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)' }}>최종 수령액 (월복리):</span><span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-accent-blue)' }}>{savingsRes.total.toLocaleString()} 원</span></div>
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>🐿️ 저금통 도토리: **{savingsRes.acorns.toLocaleString()}개 🌰**</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-headers)' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> 로기의 실시간 핫이슈 뉴스 클립</h3>
-                  <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-tertiary)', padding: '2px', borderRadius: '8px' }}>
-                    {['economy', 'realestate', 'coin'].map(tab => (
-                      <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '700', padding: '6px 10px', borderRadius: '6px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)' }}>{tab === 'economy' ? '금융' : tab === 'realestate' ? '부동산' : '가상자산'}</button>
-                    ))}
-                  </div>
-                </div>
-                {news.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {filteredNews.slice(0, 4).map((item, idx) => (
-                      <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--color-card-border)', background: 'var(--bg-secondary)', textDecoration: 'none', color: 'inherit' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', textAlign: 'left', paddingRight: '12px' }}>
-                          <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-text-primary)', lineHeight: '1.4', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: '1', WebkitBoxOrient: 'vertical' }}>{item.title}</span>
-                          <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)' }}>{item.source} • {new Date(item.pubDate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                        <ChevronRight size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', textAlign: 'center', padding: '20px' }}>지표 갱신을 완료하면 뉴스가 로드됩니다 🐿️</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '40px', marginBottom: '20px' }}>
-            <a href="https://litt.ly/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.03) 100%)', borderLeft: '4px solid var(--color-accent-orange)', transition: 'all 0.3s ease' }}>
-              <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-orange)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>🔥 EXCLUSIVE BENEFIT</span>
-                <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>🪙 거래소 혜택 바로가기</h4>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>로기가 챙겨주는 수수료 평생 할인 & 선물 거래 리워드 꿀혜택!</p>
-              </div>
-              <div style={{ background: 'rgba(217, 119, 6, 0.08)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-orange)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={16} /></div>
-            </a>
-            <a href="https://blog.naver.com/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.03) 100%)', borderLeft: '4px solid var(--color-accent-emerald)', transition: 'all 0.3s ease' }}>
-              <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-emerald)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>📝 DETAILED ARTICLES</span>
-                <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>💚 네이버 블로그로 뉴스 자세히 보기</h4>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>5대 분야 AI 매칭 포스팅 원고와 깊이 있는 상세 분석글을 읽어봐!</p>
-              </div>
-              <div style={{ background: 'rgba(16, 185, 129, 0.08)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-emerald)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={16} /></div>
-            </a>
-          </div>
         </>
+      )}
+
+      {activeView === 'news-clip' && (
+        <section style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>📰 로기의 실시간 핫이슈 뉴스 클립</h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>구글 뉴스 RSS에서 24시간 이내의 실시간 뉴스 헤드라인을 분야별로 수집해왔어! 🐿️</p>
+          </div>
+          
+          <div className="glass-card" style={{ padding: '30px', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', boxShadow: 'var(--shadow-card)', borderRadius: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> 분야별 핫이슈 목록</span>
+              <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '10px' }}>
+                {['economy', 'realestate', 'coin'].map(tab => (
+                  <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '700', padding: '8px 14px', borderRadius: '8px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', transition: 'all 0.2s' }}>{tab === 'economy' ? '금융/경제' : tab === 'realestate' ? '부동산' : '가상자산'}</button>
+                ))}
+              </div>
+            </div>
+
+            {news.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filteredNews.map((item, idx) => (
+                  <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderRadius: '12px', border: '1px solid var(--color-card-border)', background: 'var(--bg-secondary)', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent-blue)'} onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-card-border)'}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', paddingRight: '16px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', lineHeight: '1.4' }}>{item.title}</span>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>{item.source} • {new Date(item.pubDate).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
+                <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px auto', color: 'var(--color-accent-blue)' }} />
+                <p style={{ fontSize: '14px' }}>금융 대시보드 지표 갱신을 통해 뉴스를 실시간 로딩하고 있습니다 🐿️</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {activeView === 'calculators' && (
+        <section style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>💱 로기의 스마트 금융 계산기</h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>실시간 환율 계산과 미래 도토리 자산을 불려보는 복리 적금 시뮬레이터야! 🐿️</p>
+          </div>
+
+          <div className="glass-card" style={{ padding: '30px', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', boxShadow: 'var(--shadow-card)', borderRadius: '24px' }}>
+            <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '14px', marginBottom: '24px' }}>
+              <button onClick={() => setCalcTab('exchange')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'exchange' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'exchange' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>💱 간편 실시간 환율 계산기</button>
+              <button onClick={() => setCalcTab('savings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'savings' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'savings' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>🌰 복리 도토리 저금통 (적금 계산기)</button>
+            </div>
+
+            {calcTab === 'exchange' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '240px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>원화 입력 (KRW)</label>
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
+                      <input type="number" value={krwInput} onChange={(e) => setKrwInput(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '24px', color: 'var(--color-text-muted)', paddingTop: '22px' }}>⇄</div>
+                  <div style={{ flex: 1, minWidth: '240px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>달러 변환 (USD)</label>
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
+                      <input type="number" value={usdInput} onChange={(e) => handleUsdChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>달러</span>
+                    </div>
+                  </div>
+                </div>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'left' }}>* 1달러 기준 환율 1,370원으로 실시간 단순 계산식 기준이 적용되었습니다. 실제 환율과 미세한 오차가 있을 수 있습니다.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '160px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>월 납입액 (원)</label>
+                    <input type="number" value={monthlySavings} onChange={(e) => setMonthlySavings(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: '160px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>연 이자율 (%)</label>
+                    <input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: '120px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>적립 기간</label>
+                    <select value={savingsPeriod} onChange={(e) => setSavingsPeriod(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }}>
+                      <option value="1">1년 (12개월)</option>
+                      <option value="2">2년 (24개월)</option>
+                      <option value="3">3년 (36개월)</option>
+                      <option value="5">5년 (60개월)</option>
+                      <option value="10">10년 (120개월)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '16px', border: '1px solid var(--color-card-border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>총 납입 원금:</span>
+                    <span style={{ fontWeight: '700', color: 'var(--color-text-primary)' }}>{savingsRes.principal.toLocaleString()} 원</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>예상 세후 복리 이자:</span>
+                    <span style={{ fontWeight: '700', color: 'var(--color-accent-emerald)' }}>+ {savingsRes.interest.toLocaleString()} 원</span>
+                  </div>
+                  <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>최종 수령액 (월복리):</span>
+                    <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--color-accent-blue)' }}>{savingsRes.total.toLocaleString()} 원</span>
+                  </div>
+                  <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-text-muted)', textAlign: 'right' }}>
+                    🐿️ 저금통 도토리 환산: **{savingsRes.acorns.toLocaleString()}개 🌰**
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {activeView === 'benefits' && (
+        <section style={{ maxWidth: '1000px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>🪙 머니로그랩 파트너 혜택 & 분석</h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>로기가 제공하는 특별 혜택 리워드와 깊이 있는 분석 컬럼을 모아봤어! 🐿️</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px', marginBottom: '50px' }}>
+            <a href="https://litt.ly/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-orange)', transition: 'all 0.3s ease', boxShadow: 'var(--shadow-card)' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-orange)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>🔥 EXCLUSIVE BENEFIT</span>
+                <h4 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)' }}>🪙 거래소 혜택 바로가기</h4>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '6px', lineHeight: '1.4' }}>로기가 챙겨주는 글로벌 선물 거래 수수료 평생 할인 & 리워드 단독 꿀혜택!</p>
+              </div>
+              <div style={{ background: 'rgba(217, 119, 6, 0.08)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-orange)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={18} /></div>
+            </a>
+            <a href="https://blog.naver.com/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-emerald)', transition: 'all 0.3s ease', boxShadow: 'var(--shadow-card)' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-emerald)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}> Green NAVER BLOG</span>
+                <h4 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)' }}>💚 네이버 블로그로 뉴스 자세히 보기</h4>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '6px', lineHeight: '1.4' }}>5대 분야 AI 매칭 포스팅 원고와 깊이 있는 시황 상세 분석글을 읽어봐!</p>
+              </div>
+              <div style={{ background: 'rgba(16, 185, 129, 0.08)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-emerald)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={18} /></div>
+            </a>
+          </div>
+
+          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
+            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
+              <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Coins size={28} /></div>
+              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>글로벌 포트폴리오 다각화</h3>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>원화 자산의 감쇠 위기 속에서, 해외 선물 마켓 및 알트코인 지표를 적절히 병행하여 헷지 수단을 설계할 수 있도록 명료하게 분석합니다.</p>
+            </div>
+            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
+              <div style={{ color: 'var(--color-accent-orange)', marginBottom: '12px' }}><Bell size={28} /></div>
+              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>매일 아침 7시 이메일 발송</h3>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>바쁜 출근길이나 등교시간에도 3분 내에 글로벌 경제 흐름을 간편하게 스캔하고 시작할 수 있도록 요약된 이메일 뉴스레터를 배달해 드립니다.</p>
+            </div>
+            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
+              <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Shield size={28} /></div>
+              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>위협 공격 차단 보안</h3>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>최신 API Rate-Limiter 미들웨어와 철저한 이스케이프 보안 메커니즘을 가동하여 해커의 악의적 위협(XSS/SQL 인젝션)으로부터 구독자 개인정보를 철통 수호합니다.</p>
+            </div>
+          </section>
+        </section>
       )}
 
       {activeView === 'login' && (
