@@ -1,31 +1,31 @@
 /* Money Log Lab CSS Design System */
 
 :root {
-  /* Color Palette - Premium Slate & Classic Blue */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
+  /* Color Palette - Premium White & Classic Blue (Light Mode) */
+  --bg-primary: #f8fafc; /* Slate 50 */
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9; /* Slate 100 */
   
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  --color-text-primary: #0f172a; /* Slate 900 */
+  --color-text-secondary: #475569; /* Slate 600 */
+  --color-text-muted: #94a3b8; /* Slate 400 */
   
   --color-accent-emerald: #10b981; /* Premium Mint Green */
-  --color-accent-orange: #f59e0b; /* Professional Amber Gold */
-  --color-accent-blue: #3b82f6; /* Trustworthy Royal Blue */
+  --color-accent-orange: #d97706; /* Darker Amber Gold for high contrast on light bg */
+  --color-accent-blue: #2563eb; /* Trustworthy Royal Blue */
   
-  --color-card-bg: rgba(30, 41, 59, 0.7);
-  --color-card-border: rgba(255, 255, 255, 0.08);
-  --color-card-border-glow: rgba(59, 130, 246, 0.25);
+  --color-card-bg: #ffffff;
+  --color-card-border: #e2e8f0; /* Slate 200 */
+  --color-card-border-glow: rgba(37, 99, 235, 0.25);
   
   /* Fonts */
   --font-headers: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   /* Box Shadow & Glows - Corporate Drop Shadows */
-  --shadow-neon-emerald: 0 4px 12px rgba(16, 185, 129, 0.15);
-  --shadow-neon-orange: 0 4px 12px rgba(245, 158, 11, 0.15);
-  --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-neon-emerald: 0 4px 12px rgba(16, 185, 129, 0.1);
+  --shadow-neon-orange: 0 4px 12px rgba(217, 119, 6, 0.1);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 10px 25px -5px rgba(0, 0, 0, 0.05);
   
   /* Layout Constants */
   --border-radius-lg: 16px;
@@ -48,7 +48,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Gradient backgrounds - Toned down for elegance */
+/* Gradient backgrounds - Faint tints for light mode depth */
 .bg-glow-container {
   position: fixed;
   width: 100vw;
@@ -64,7 +64,7 @@ body {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, rgba(0, 0, 0, 0) 70%);
   top: -10%;
   right: -5%;
   border-radius: 50%;
@@ -75,7 +75,7 @@ body {
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.02) 0%, rgba(0, 0, 0, 0) 70%);
   bottom: -15%;
   left: -10%;
   border-radius: 50%;
@@ -102,8 +102,6 @@ h1, h2, h3, h4, h5, h6 {
 /* Glassmorphism card utility */
 .glass-card {
   background: var(--color-card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-card-border);
   border-radius: var(--border-radius-lg);
   padding: 24px;
@@ -113,11 +111,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-card:hover {
   border-color: var(--color-card-border-glow);
-  box-shadow: 0 12px 20px -8px rgba(59, 130, 246, 0.08), var(--shadow-card);
+  box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08), var(--shadow-card);
   transform: translateY(-2px);
 }
 
-/* High-fidelity Neon Scrollbars */
+/* High-fidelity Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -128,7 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
@@ -146,7 +144,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 30px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.2);
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
@@ -155,13 +153,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-primary:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.45);
+  box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.35);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.03);
+  background: #ffffff;
   color: var(--color-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #cbd5e1;
   font-family: var(--font-headers);
   font-weight: 600;
   padding: 12px 24px;
@@ -174,8 +172,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: #f1f5f9;
+  border-color: #94a3b8;
 }
 
 /* Shimmer animations */
@@ -197,7 +195,8 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   gap: 8px;
   align-items: center;
-  background: rgba(13, 22, 39, 0.8);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   transition: all 0.3s ease;
 }
 

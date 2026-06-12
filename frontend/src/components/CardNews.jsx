@@ -102,7 +102,7 @@ export default function CardNews() {
         position: 'relative',
         overflow: 'hidden',
         borderLeft: '4px solid var(--color-accent-blue)',
-        background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)'
+        background: 'linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)'
       }}>
         
         {/* Animated Background Rogi Mascot watermark */}
@@ -110,7 +110,7 @@ export default function CardNews() {
           position: 'absolute',
           right: '-20px',
           bottom: '-30px',
-          opacity: '0.04',
+          opacity: '0.06',
           pointerEvents: 'none',
           width: '240px',
           height: '240px',
@@ -137,7 +137,7 @@ export default function CardNews() {
           <h2 className="card-title" style={{
             fontSize: '24px',
             fontWeight: '800',
-            color: '#ffffff',
+            color: 'var(--color-text-primary)',
             lineHeight: '1.4',
             marginBottom: '16px',
             fontFamily: 'var(--font-headers)'
@@ -162,8 +162,8 @@ export default function CardNews() {
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '16px 24px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          background: 'rgba(5, 10, 20, 0.4)'
+          borderTop: '1px solid var(--color-card-border)',
+          background: 'rgba(241, 245, 249, 0.6)'
         }}>
           {/* Prev Button */}
           <button 
@@ -172,7 +172,7 @@ export default function CardNews() {
             style={{
               background: 'none',
               border: 'none',
-              color: activeIndex === 0 ? 'var(--color-text-muted)' : '#ffffff',
+              color: activeIndex === 0 ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
               cursor: activeIndex === 0 ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -212,7 +212,7 @@ export default function CardNews() {
             style={{
               background: 'none',
               border: 'none',
-              color: activeIndex === slides.length - 1 ? 'var(--color-text-muted)' : '#ffffff',
+              color: activeIndex === slides.length - 1 ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
               cursor: activeIndex === slides.length - 1 ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',

@@ -120,10 +120,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
         position: 'relative'
       }}>
         <div style={{
-          position: 'absolute',
-          top: '-30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
           fontSize: '14px',
           fontWeight: '700',
           color: 'var(--color-accent-blue)',
@@ -134,18 +130,18 @@ export default function LandingPage({ onNavigateToAdmin }) {
           border: '1px solid rgba(59, 130, 246, 0.15)',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px'
+          gap: '6px',
+          marginBottom: '24px'
         }}>
           <Award size={14} />
           매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
         </div>
         
         <h1 className="hero-title" style={{
-          background: 'linear-gradient(to right, #ffffff 50%, var(--color-accent-blue) 100%)',
+          background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '20px',
-          marginTop: '30px'
+          marginBottom: '24px'
         }}>
           경제 뉴스가 어렵니?<br/>
           다람쥐 연구원 로기가 쉽게 풀어줄게!
@@ -180,7 +176,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 background: 'none',
                 border: 'none',
                 outline: 'none',
-                color: '#ffffff',
+                color: 'var(--color-text-primary)',
                 fontSize: '15px',
                 flex: '1',
                 height: '40px',
@@ -216,7 +212,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
             marginTop: '16px',
             padding: '12px 16px',
             borderRadius: '20px',
-            background: 'rgba(15, 23, 42, 0.6)',
+            background: 'var(--bg-secondary)',
             border: '1px solid',
             borderColor: backendWaking ? 'rgba(245, 158, 11, 0.25)' : 'rgba(59, 130, 246, 0.25)',
             fontSize: '12px',
@@ -250,7 +246,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
               padding: '12px 18px',
               borderRadius: 'var(--border-radius-md)',
               borderLeft: status.type === 'success' ? '4px solid var(--color-accent-blue)' : '4px solid var(--color-accent-orange)',
-              background: 'rgba(15, 23, 42, 0.7)',
+              background: 'var(--bg-secondary)',
               fontSize: '14px',
               fontWeight: '600',
               textAlign: 'center',
@@ -273,7 +269,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         {/* Card News Slide Component */}
         <section style={{ width: '100%' }}>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '22px', color: '#ffffff', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
+            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
               오늘의 로기 연구소 카드뉴스
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
@@ -286,7 +282,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         {/* Real-time Indicators Dashboard Widget */}
         <section style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '22px', color: '#ffffff', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
+            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
               실시간 머니로그 금융 대시보드
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
@@ -303,12 +299,12 @@ export default function LandingPage({ onNavigateToAdmin }) {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
         gap: '30px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        borderTop: '1px solid #e2e8f0',
         paddingTop: '60px'
       }}>
-        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
           <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Coins size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
+          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             글로벌 포트폴리오 다각화
           </h3>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
@@ -316,9 +312,9 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </p>
         </div>
 
-        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
           <div style={{ color: 'var(--color-accent-orange)', marginBottom: '12px' }}><Bell size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
+          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             매일 아침 7시 이메일 발송
           </h3>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
@@ -326,9 +322,9 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </p>
         </div>
 
-        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
           <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Shield size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
+          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             위협 공격 차단 보안
           </h3>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>

@@ -343,7 +343,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             <Lock size={28} />
           </div>
           
-          <h2 style={{ fontSize: '20px', color: '#ffffff', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>
             로기 연구소 시크릿 룸
           </h2>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
@@ -353,7 +353,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{
               display: 'flex', alignItems: 'center', gap: '10px',
-              background: 'rgba(5, 10, 20, 0.5)', border: '1px solid rgba(255,255,255,0.06)',
+              background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)',
               borderRadius: '30px', padding: '10px 16px'
             }}>
               <KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} />
@@ -365,7 +365,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
                   background: 'none', border: 'none', outline: 'none',
-                  color: '#ffffff', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)'
+                  color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)'
                 }}
               />
             </div>
@@ -402,15 +402,15 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           <button 
             onClick={onNavigateHome}
             style={{
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              color: '#ffffff', borderRadius: '50%', width: '36px', height: '36px',
+              background: 'var(--bg-secondary)', border: '1px solid var(--color-card-border)',
+              color: 'var(--color-text-primary)', borderRadius: '50%', width: '36px', height: '36px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
             }}
           >
             <ArrowLeft size={16} />
           </button>
           <div>
-            <h1 style={{ fontSize: '22px', fontFamily: 'var(--font-headers)', color: '#ffffff' }}>
+            <h1 style={{ fontSize: '22px', fontFamily: 'var(--font-headers)', color: 'var(--color-text-primary)' }}>
               🐿️ 로기의 시크릿 연구 대시보드
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
@@ -493,13 +493,13 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--color-card-border)',
           boxShadow: 'var(--shadow-card)'
         }}>
           <h3 style={{
             fontSize: '15px',
-            color: '#ffffff',
+            color: 'var(--color-text-primary)',
             fontWeight: '800',
             fontFamily: 'var(--font-headers)',
             marginBottom: '16px',
@@ -513,8 +513,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           <div className="diagnostics-grid">
             {/* Resend API Key Status */}
             <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--color-card-border)',
               padding: '14px',
               borderRadius: '8px',
               display: 'flex',
@@ -533,8 +533,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
             {/* Resend Audience Status */}
             <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--color-card-border)',
               padding: '14px',
               borderRadius: '8px',
               display: 'flex',
@@ -555,8 +555,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
             {/* AI Engine Status */}
             <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--color-card-border)',
               padding: '14px',
               borderRadius: '8px',
               display: 'flex',
@@ -576,8 +576,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
             {/* Sender Email Status */}
             <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--color-card-border)',
               padding: '14px',
               borderRadius: '8px',
               display: 'flex',
@@ -585,7 +585,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               gap: '6px'
             }}>
               <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>발신자 이메일 (Sender Email)</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#ffffff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: 'var(--color-text-primary)' }}>
                 ✉️ {dashboardData.diagnostics.senderEmail || '미설정'}
               </div>
             </div>
@@ -641,13 +641,13 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(15, 23, 42, 0.4)',
-          border: '1px solid rgba(59, 130, 246, 0.15)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid rgba(59, 130, 246, 0.25)',
           boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)'
         }}>
           <h3 style={{
             fontSize: '16px',
-            color: '#ffffff',
+            color: 'var(--color-text-primary)',
             fontWeight: '800',
             fontFamily: 'var(--font-headers)',
             marginBottom: '10px',
@@ -743,14 +743,14 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               marginTop: '20px',
               padding: '20px',
               borderRadius: '8px',
-              background: 'rgba(0,0,0,0.3)',
-              border: '1px solid rgba(255,255,255,0.05)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--color-card-border)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '14px'
             }}>
-              <span style={{ fontSize: '13px', color: '#ffffff', fontWeight: '700' }}>🎬 완성된 쇼츠 미리보기 (세로형)</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '700' }}>🎬 완성된 쇼츠 미리보기 (세로형)</span>
               
               <video
                 src={videoUrl}
@@ -792,13 +792,13 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(15, 23, 42, 0.4)',
-          border: '1px solid rgba(59, 130, 246, 0.15)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid rgba(59, 130, 246, 0.25)',
           boxShadow: '0 4px 12px rgba(59, 130, 246, 0.03)'
         }}>
           <h3 style={{
             fontSize: '15px',
-            color: '#ffffff',
+            color: 'var(--color-text-primary)',
             fontWeight: '800',
             fontFamily: 'var(--font-headers)',
             marginBottom: '10px',
@@ -814,8 +814,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           </p>
 
           <div style={{
-            background: 'rgba(15, 23, 42, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--color-card-border)',
             padding: '16px',
             borderRadius: '8px',
             fontSize: '13px',
@@ -877,7 +877,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--color-accent-blue)' }} />
-              <span style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)' }}>
                 {progressStatus}
               </span>
             </div>
@@ -888,8 +888,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           
           {/* Progress track */}
           <div style={{
-            width: '100%', height: '10px', background: 'rgba(255,255,255,0.04)',
-            borderRadius: '5px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)'
+            width: '100%', height: '10px', background: 'var(--bg-tertiary)',
+            borderRadius: '5px', overflow: 'hidden', border: '1px solid var(--color-card-border)'
           }}>
             <div style={{
               width: `${progress}%`, height: '100%',
@@ -947,12 +947,12 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                 key={post.category}
                 onClick={() => setActiveTab(post.category)}
                 style={{
-                  background: activeTab === post.category ? 'rgba(0, 245, 212, 0.08)' : 'rgba(255,255,255,0.02)',
+                  background: activeTab === post.category ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-secondary)',
                   border: '1px solid',
-                  borderColor: activeTab === post.category ? 'var(--color-accent-emerald)' : 'rgba(255,255,255,0.06)',
+                  borderColor: activeTab === post.category ? 'var(--color-accent-blue)' : 'var(--color-card-border)',
                   borderRadius: 'var(--border-radius-md)',
                   padding: '16px',
-                  color: '#ffffff',
+                  color: 'var(--color-text-primary)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.3s ease',
@@ -992,14 +992,14 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                   {/* Category & Copy Header */}
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '20px',
+                    borderBottom: '1px solid var(--color-card-border)', paddingBottom: '20px',
                     marginBottom: '24px'
                   }}>
                     <div>
                       <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', textTransform: 'uppercase' }}>
                         로기의 맞춤형 SEO 포스팅 초안
                       </span>
-                      <h2 style={{ fontSize: '20px', color: '#ffffff', marginTop: '4px' }}>
+                      <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', marginTop: '4px' }}>
                         {activeTab === 'economic' ? '📊 경제·글로벌 포스팅' :
                          activeTab === 'stock' ? '📈 주식 분석 포스팅' :
                          activeTab === 'bitgetCoin' ? '🪙 Bitget 코인 포스팅' :
@@ -1034,11 +1034,12 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {activePost.titles.map((title, idx) => (
                         <div key={idx} style={{
-                          background: title.startsWith('✅') ? 'rgba(0, 245, 212, 0.04)' : 'rgba(255,255,255,0.01)',
+                          background: title.startsWith('✅') ? 'rgba(37, 99, 235, 0.04)' : 'var(--bg-tertiary)',
                           border: '1px solid',
-                          borderColor: title.startsWith('✅') ? 'rgba(0, 245, 212, 0.15)' : 'rgba(255,255,255,0.04)',
+                          borderColor: title.startsWith('✅') ? 'rgba(37, 99, 235, 0.15)' : 'var(--color-card-border)',
                           padding: '10px 16px', borderRadius: '8px', fontSize: '14px',
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          color: 'var(--color-text-primary)'
                         }}>
                           <span>{title}</span>
                           {title.startsWith('✅') && (
@@ -1051,7 +1052,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
                   {/* Upper Trailer box (스포일러 방지 오늘의 핵심 정리) */}
                   <div style={{
-                    background: 'rgba(0, 180, 216, 0.03)', border: '1px solid rgba(0, 180, 216, 0.15)',
+                    background: 'rgba(37, 99, 235, 0.03)', border: '1px solid rgba(37, 99, 235, 0.15)',
                     padding: '20px', borderRadius: 'var(--border-radius-md)', marginBottom: '24px'
                   }}>
                     <h4 style={{ fontSize: '14px', color: 'var(--color-accent-blue)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1060,7 +1061,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', marginBottom: '12px', fontWeight: '500' }}>
                       {activePost.previewBox.trailerText}
                     </p>
-                    <div style={{ borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '10px' }}>
+                    <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '10px' }}>
                       <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>지금 바로 할 것:</span>
                       <ul style={{ paddingLeft: '20px', marginTop: '6px', fontSize: '13px', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         {activePost.previewBox.todoSteps.map((step, i) => (
@@ -1072,9 +1073,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
                   {/* Body Text */}
                   <div style={{ marginBottom: '24px' }}>
-                    <h4 style={{ fontSize: '14px', color: '#ffffff', marginBottom: '10px' }}>📄 본문 초안 내용 (주인장 톤앤매너)</h4>
+                    <h4 style={{ fontSize: '14px', color: 'var(--color-text-primary)', marginBottom: '10px' }}>📄 본문 초안 내용 (주인장 톤앤매너)</h4>
                     <div style={{
-                      background: 'rgba(5, 10, 20, 0.4)', border: '1px solid rgba(255,255,255,0.04)',
+                      background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)',
                       padding: '20px', borderRadius: 'var(--border-radius-md)', maxHeight: '350px',
                       overflowY: 'auto', fontSize: '14px', color: 'var(--color-text-secondary)',
                       lineHeight: '1.8', whiteSpace: 'pre-wrap'
@@ -1100,7 +1101,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                   {/* Pixabay Images keywords helper & hashtags */}
                   <div className="helper-grid">
                     <div style={{
-                      background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)',
+                      background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)',
                       padding: '16px', borderRadius: 'var(--border-radius-md)'
                     }}>
                       <h5 style={{ fontSize: '13px', color: 'var(--color-accent-orange)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1130,7 +1131,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     </div>
 
                     <div style={{
-                      background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)',
+                      background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)',
                       padding: '16px', borderRadius: 'var(--border-radius-md)'
                     }}>
                       <h5 style={{ fontSize: '13px', color: 'var(--color-accent-blue)', marginBottom: '8px' }}>
@@ -1139,7 +1140,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {activePost.hashtags.map((tag, i) => (
                           <span key={i} style={{
-                            background: 'rgba(0, 180, 216, 0.08)', color: 'var(--color-accent-blue)',
+                            background: 'rgba(37, 99, 235, 0.08)', color: 'var(--color-accent-blue)',
                             fontSize: '11px', fontWeight: '600', padding: '4px 8px', borderRadius: '4px'
                           }}>
                             #{tag}
