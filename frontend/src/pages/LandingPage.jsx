@@ -287,6 +287,119 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <CardNews />
             </section>
           </div>
+
+          {/* External Navigation Banners (2-Column Premium Banners) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '24px',
+            marginTop: '40px',
+            marginBottom: '20px'
+          }}>
+            {/* Crypto Exchange Referral Banner */}
+            <a 
+              href="https://litt.ly/moneyloglab123" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="glass-card"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                textDecoration: 'none',
+                background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.03) 100%)',
+                borderLeft: '4px solid var(--color-accent-orange)',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <div>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  color: 'var(--color-accent-orange)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  display: 'block',
+                  marginBottom: '6px'
+                }}>
+                  🔥 EXCLUSIVE BENEFIT
+                </span>
+                <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>
+                  🪙 거래소 혜택 바로가기
+                </h4>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>
+                  로기가 챙겨주는 수수료 평생 할인 & 선물 거래 리워드 꿀혜택!
+                </p>
+              </div>
+              <div style={{
+                background: 'rgba(217, 119, 6, 0.08)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-accent-orange)',
+                flexShrink: 0,
+                marginLeft: '16px'
+              }}>
+                <ArrowRight size={16} />
+              </div>
+            </a>
+
+            {/* Naver Blog Link Banner */}
+            <a 
+              href="https://blog.naver.com/moneyloglab123" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="glass-card"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                textDecoration: 'none',
+                background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.03) 100%)',
+                borderLeft: '4px solid var(--color-accent-emerald)',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <div>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  color: 'var(--color-accent-emerald)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  display: 'block',
+                  marginBottom: '6px'
+                }}>
+                  📝 DETAILED ARTICLES
+                </span>
+                <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>
+                  💚 네이버 블로그로 뉴스 자세히 보기
+                </h4>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>
+                  5대 분야 AI 매칭 포스팅 원고와 깊이 있는 상세 분석글을 읽어봐!
+                </p>
+              </div>
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-accent-emerald)',
+                flexShrink: 0,
+                marginLeft: '16px'
+              }}>
+                <ArrowRight size={16} />
+              </div>
+            </a>
+          </div>
         </>
       ) : (
         /* Subscribe View (Dedicated Page) */
