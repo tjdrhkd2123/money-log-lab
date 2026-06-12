@@ -9,6 +9,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [backendWaking, setBackendWaking] = useState(true);
+  const [activeView, setActiveView] = useState('home'); // 'home' or 'subscribe'
 
   // 🐿️ 배포 서버 끈질기게 깨우기 (Wakeup Ping Loop)
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         setStatus({ type: 'error', message: data.message || '구독 신청 중 오류가 발생했어!' });
       }
     } catch (err) {
-      setStatus({ type: 'error', message: '로기 연구실 서버에 연결할 수 없어. 오률가 발생했어!' });
+      setStatus({ type: 'error', message: '로기 연구실 서버에 연결할 수 없어. 오류가 발생했어!' });
     } finally {
       setLoading(false);
     }
@@ -79,8 +80,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
       
       {/* Navigation Header */}
-      <header className="app-header">
-        <div className="app-header-logo">
+      <header className="app-header" style={{ borderBottom: '1px solid var(--color-card-border)', paddingBottom: '20px', marginBottom: '40px' }}>
+        <div className="app-header-logo" onClick={() => setActiveView('home')} style={{ cursor: 'pointer' }}>
           <div style={{
             background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)',
             width: '40px',
@@ -103,65 +104,192 @@ export default function LandingPage({ onNavigateToAdmin }) {
             </p>
           </div>
         </div>
-        
-        <button 
-          onClick={onNavigateToAdmin}
-          className="btn-secondary"
-          style={{ fontSize: '13px', padding: '8px 18px' }}
-        >
-          🔐 관리자 시크릿 룸
-        </button>
+
+        {/* Navigation Tabs */}
+        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <button 
+            onClick={() => setActiveView('home')} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: activeView === 'home' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', 
+              fontWeight: '700',
+              fontSize: '15px',
+              fontFamily: 'var(--font-headers)',
+              cursor: 'pointer', 
+              borderBottom: activeView === 'home' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', 
+              paddingBottom: '4px',
+              transition: 'all 0.2s'
+            }}
+          >
+            금융 대시보드
+          </button>
+          <button 
+            onClick={() => setActiveView('subscribe')} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: activeView === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', 
+              fontWeight: '700',
+              fontSize: '15px',
+              fontFamily: 'var(--font-headers)',
+              cursor: 'pointer', 
+              borderBottom: activeView === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', 
+              paddingBottom: '4px',
+              transition: 'all 0.2s'
+            }}
+          >
+            도토리 구독하기 🌰
+          </button>
+          <button 
+            onClick={onNavigateToAdmin}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--color-text-secondary)', 
+              fontWeight: '600',
+              fontSize: '14px',
+              fontFamily: 'var(--font-headers)',
+              cursor: 'pointer',
+              paddingBottom: '4px',
+              opacity: 0.8
+            }}
+          >
+            🔐 시크릿 룸
+          </button>
+        </nav>
       </header>
 
-      {/* Hero Section */}
-      <section style={{
-        textAlign: 'center',
-        marginBottom: '60px',
-        position: 'relative'
-      }}>
-        <div style={{
-          fontSize: '14px',
-          fontWeight: '700',
-          color: 'var(--color-accent-blue)',
-          fontFamily: 'var(--font-headers)',
-          background: 'rgba(59, 130, 246, 0.08)',
-          padding: '6px 16px',
-          borderRadius: '30px',
-          border: '1px solid rgba(59, 130, 246, 0.15)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          marginBottom: '24px'
-        }}>
-          <Award size={14} />
-          매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
-        </div>
-        
-        <h1 className="hero-title" style={{
-          background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '24px'
-        }}>
-          경제 뉴스가 어렵니?<br/>
-          다람쥐 연구원 로기가 쉽게 풀어줄게!
-        </h1>
-        
-        <p style={{
-          fontSize: '18px',
-          color: 'var(--color-text-secondary)',
-          maxWidth: '650px',
-          margin: '0 auto 36px auto',
-          lineHeight: '1.6',
-          fontWeight: '400'
-        }}>
-          환율 급등, 금리 폭탄, 코인 폭등까지 어려웠던 금융 상식들을<br/>
-          중학생도 이해 가능한 쉬운 언어로 요약해서 배달해 준다구! 🐿️🌰
-        </p>
+      {activeView === 'home' ? (
+        <>
+          {/* Hero Section */}
+          <section style={{
+            textAlign: 'center',
+            marginBottom: '60px',
+            position: 'relative'
+          }}>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '700',
+              color: 'var(--color-accent-blue)',
+              fontFamily: 'var(--font-headers)',
+              background: 'rgba(59, 130, 246, 0.08)',
+              padding: '6px 16px',
+              borderRadius: '30px',
+              border: '1px solid rgba(59, 130, 246, 0.15)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginBottom: '24px'
+            }}>
+              <Award size={14} />
+              매일 아침 07:00 AM 신선한 경제 도토리 무료 배달
+            </div>
+            
+            <h1 className="hero-title" style={{
+              background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              marginBottom: '24px'
+            }}>
+              경제 뉴스가 어렵니?<br/>
+              다람쥐 연구원 로기가 쉽게 풀어줄게!
+            </h1>
+            
+            <p style={{
+              fontSize: '18px',
+              color: 'var(--color-text-secondary)',
+              maxWidth: '650px',
+              margin: '0 auto',
+              lineHeight: '1.6',
+              fontWeight: '400'
+            }}>
+              환율 급등, 금리 폭탄, 코인 폭등까지 어려웠던 금융 상식들을<br/>
+              중학생도 이해 가능한 쉬운 언어로 요약해서 배달해 준다구! 🐿️🌰
+            </p>
+          </section>
 
-        {/* Dynamic Email Newsletter Form */}
-        <div style={{ maxWidth: '540px', margin: '0 auto' }}>
-          <form onSubmit={handleSubscribe} className="glass-card newsletter-form">
+          {/* Main Content Area: Dashboard (Top) & Card News (Bottom) */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '60px',
+            marginTop: '20px'
+          }}>
+            {/* Real-time Indicators Dashboard Widget (UPPER) */}
+            <section style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
+                  실시간 머니로그 금융 대시보드
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  수집된 원화 대비 가치 및 주요 코스피 지수를 한눈에 파악해봐!
+                </p>
+              </div>
+              <DashboardHome />
+            </section>
+
+            {/* Card News Slide Component (LOWER) */}
+            <section style={{ width: '100%' }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
+                  오늘의 로기 연구소 카드뉴스
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  좌우로 넘겨보며 오늘의 경제 핵심 도토리를 확인해봐!
+                </p>
+              </div>
+              <CardNews />
+            </section>
+          </div>
+        </>
+      ) : (
+        /* Subscribe View (Dedicated Page) */
+        <section style={{
+          textAlign: 'center',
+          maxWidth: '600px',
+          margin: '40px auto 60px auto',
+          position: 'relative'
+        }}>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: '700',
+            color: 'var(--color-accent-blue)',
+            fontFamily: 'var(--font-headers)',
+            background: 'rgba(59, 130, 246, 0.08)',
+            padding: '6px 16px',
+            borderRadius: '30px',
+            border: '1px solid rgba(59, 130, 246, 0.15)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginBottom: '24px'
+          }}>
+            <Mail size={14} />
+            로기의 스마트 이메일 뉴스레터
+          </div>
+          
+          <h1 className="hero-title" style={{
+            background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: '20px'
+          }}>
+            매일 아침 7시,<br/>
+            금융 도토리를 메일함에 쏙! 🐿️📬
+          </h1>
+          
+          <p style={{
+            fontSize: '16px',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '36px',
+            lineHeight: '1.6'
+          }}>
+            귀찮고 어려운 경제 뉴스 읽기 끝! 구독 버튼 하나로<br/>
+            세상 편한 이메일 요약본을 매일 공짜로 챙겨줄게!
+          </p>
+
+          <form onSubmit={handleSubscribe} className="glass-card newsletter-form" style={{ boxShadow: 'var(--shadow-card)', background: '#ffffff' }}>
             <div style={{ paddingLeft: '16px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center' }}>
               <Mail size={18} />
             </div>
@@ -201,7 +329,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
             gap: '6px',
             fontSize: '11px',
             color: 'var(--color-text-muted)',
-            marginTop: '10px'
+            marginTop: '12px'
           }}>
             <ShieldCheck size={12} style={{ color: 'var(--color-accent-blue)' }} />
             철벽 보안 데이터 보호 적용 및 스팸 방지 실시간 검증 완료
@@ -209,7 +337,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
           {/* 🐿️ 배포 서버 기상 상태 인디케이터 */}
           <div className="glass-card no-mobile-padding" style={{
-            marginTop: '16px',
+            marginTop: '24px',
             padding: '12px 16px',
             borderRadius: '20px',
             background: 'var(--bg-secondary)',
@@ -255,43 +383,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
               {status.message}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Main Grid: Card News & Live Indicators */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gap: '40px',
-        marginTop: '60px',
-        alignItems: 'start'
-      }}>
-        {/* Card News Slide Component */}
-        <section style={{ width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
-              오늘의 로기 연구소 카드뉴스
-            </h2>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-              좌우로 넘겨보며 오늘의 경제 핵심 도토리를 확인해봐!
-            </p>
-          </div>
-          <CardNews />
         </section>
-
-        {/* Real-time Indicators Dashboard Widget */}
-        <section style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '6px' }}>
-              실시간 머니로그 금융 대시보드
-            </h2>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-              수집된 원화 대비 가치 및 주요 코스피 지수를 한눈에 파악해봐!
-            </p>
-          </div>
-          <DashboardHome />
-        </section>
-      </div>
+      )}
 
       {/* Core Brand Value Section */}
       <section style={{
