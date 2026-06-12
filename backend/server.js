@@ -91,11 +91,14 @@ let lastIndicesFetchTime = 0;
 app.get('/api/public/indices', async (req, res) => {
   try {
     const now = Date.now();
+    const db = getDb();
+    
     // Smart Throttle Cache: 30 seconds
     if (cachedIndices && (now - lastIndicesFetchTime < 30000)) {
       return res.status(200).json({
         success: true,
-        indices: cachedIndices
+        indices: cachedIndices,
+        news: db.dailyAcorns?.news || []
       });
     }
 
@@ -105,11 +108,11 @@ app.get('/api/public/indices', async (req, res) => {
       cachedIndices = result.indices;
       lastIndicesFetchTime = now;
 
-      // Update database backup with live fetched indices
+      // Update database backup with live fetched indices & news
       try {
-        const db = getDb();
         if (!db.dailyAcorns) db.dailyAcorns = {};
         db.dailyAcorns.indices = result.indices;
+        db.dailyAcorns.news = result.news;
         saveDb(db);
       } catch (dbErr) {
         console.error("Failed to update database with live indices:", dbErr.message);
@@ -117,17 +120,18 @@ app.get('/api/public/indices', async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        indices: result.indices
+        indices: result.indices,
+        news: result.news
       });
     }
 
     // Fallback database indices
-    const db = getDb();
     if (db.dailyAcorns && db.dailyAcorns.indices) {
       cachedIndices = db.dailyAcorns.indices;
       return res.status(200).json({
         success: true,
-        indices: db.dailyAcorns.indices
+        indices: db.dailyAcorns.indices,
+        news: db.dailyAcorns.news || []
       });
     }
     
@@ -140,7 +144,8 @@ app.get('/api/public/indices', async (req, res) => {
     };
     return res.status(200).json({
       success: true,
-      indices: fallback
+      indices: fallback,
+      news: []
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
