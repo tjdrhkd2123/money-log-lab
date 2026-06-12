@@ -423,6 +423,7 @@ async function handleTriggerHarvest(req, res) {
   const isAsync = req.query.async === 'true' || 
                   (req.user && req.user.isCron) || 
                   req.query.token === 'rogi1234' || 
+                  req.query.token === 'money_log_lab_secret_trigger_2026' || 
                   req.query.token === 'rogi_secret_key_squirrel_acorn_2026';
   
   if (isAsync) {

@@ -82,7 +82,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
       <header className="app-header">
         <div className="app-header-logo">
           <div style={{
-            background: 'linear-gradient(135deg, var(--color-accent-orange) 0%, var(--color-accent-emerald) 100%)',
+            background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)',
             width: '40px',
             height: '40px',
             borderRadius: '12px',
@@ -90,13 +90,13 @@ export default function LandingPage({ onNavigateToAdmin }) {
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '20px',
-            boxShadow: 'var(--shadow-neon-orange)'
+            boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)'
           }}>
             🐿️
           </div>
           <div>
             <h1 style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>
-              머니로그랩 <span style={{ color: 'var(--color-accent-emerald)', fontWeight: '400' }}>Lab</span>
+              머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span>
             </h1>
             <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em' }}>
               ROGI'S FINANCIAL ACORNS
@@ -119,19 +119,19 @@ export default function LandingPage({ onNavigateToAdmin }) {
         marginBottom: '60px',
         position: 'relative'
       }}>
-        <div className="pulse-glowing" style={{
+        <div style={{
           position: 'absolute',
           top: '-30px',
           left: '50%',
           transform: 'translateX(-50%)',
           fontSize: '14px',
           fontWeight: '700',
-          color: 'var(--color-accent-emerald)',
+          color: 'var(--color-accent-blue)',
           fontFamily: 'var(--font-headers)',
-          background: 'rgba(0, 245, 212, 0.08)',
+          background: 'rgba(59, 130, 246, 0.08)',
           padding: '6px 16px',
           borderRadius: '30px',
-          border: '1px solid rgba(0, 245, 212, 0.15)',
+          border: '1px solid rgba(59, 130, 246, 0.15)',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px'
@@ -141,7 +141,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         </div>
         
         <h1 className="hero-title" style={{
-          background: 'linear-gradient(to right, #ffffff 40%, var(--color-accent-emerald) 100%)',
+          background: 'linear-gradient(to right, #ffffff 50%, var(--color-accent-blue) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           marginBottom: '20px',
@@ -207,38 +207,38 @@ export default function LandingPage({ onNavigateToAdmin }) {
             color: 'var(--color-text-muted)',
             marginTop: '10px'
           }}>
-            <ShieldCheck size={12} style={{ color: 'var(--color-accent-emerald)' }} />
+            <ShieldCheck size={12} style={{ color: 'var(--color-accent-blue)' }} />
             철벽 보안 데이터 보호 적용 및 스팸 방지 실시간 검증 완료
           </div>
 
           {/* 🐿️ 배포 서버 기상 상태 인디케이터 */}
-          <div className="glass-card pulse-glowing no-mobile-padding" style={{
+          <div className="glass-card no-mobile-padding" style={{
             marginTop: '16px',
             padding: '12px 16px',
             borderRadius: '20px',
-            background: 'rgba(5, 10, 20, 0.6)',
+            background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid',
-            borderColor: backendWaking ? 'rgba(255, 159, 28, 0.25)' : 'rgba(0, 245, 212, 0.25)',
+            borderColor: backendWaking ? 'rgba(245, 158, 11, 0.25)' : 'rgba(59, 130, 246, 0.25)',
             fontSize: '12px',
             fontWeight: '600',
             textAlign: 'center',
-            color: backendWaking ? 'var(--color-accent-orange)' : 'var(--color-accent-emerald)',
+            color: backendWaking ? 'var(--color-accent-orange)' : 'var(--color-accent-blue)',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
             width: '100%',
-            boxShadow: backendWaking ? '0 0 10px rgba(255,159,28,0.05)' : '0 0 10px rgba(0,245,212,0.05)'
+            boxShadow: backendWaking ? '0 4px 10px rgba(245, 158, 11, 0.05)' : '0 4px 10px rgba(59, 130, 246, 0.05)'
           }}>
             {backendWaking ? (
               <>
                 <RefreshCw size={12} className="animate-spin" />
-                <span>🐿️ 로기가 잠든 배포 서버를 힘껏 흔들어 깨우고 있어! (약 15초 소요)</span>
+                <span>🐿️ 로기가 잠든 배포 서버를 힘껏 깨우고 있어요! (약 15초 소요)</span>
               </>
             ) : (
               <>
-                <span>🟢 로기 연구소 서버 활성화 완료! 실시간 듀얼 동기화 레이어 작동 중</span>
+                <span>🟢 로기 연구소 서버 활성화 완료! 실시간 데이터 동기화 레이어 작동 중</span>
               </>
             )}
           </div>
@@ -249,12 +249,12 @@ export default function LandingPage({ onNavigateToAdmin }) {
               marginTop: '20px',
               padding: '12px 18px',
               borderRadius: 'var(--border-radius-md)',
-              borderLeft: status.type === 'success' ? '4px solid var(--color-accent-emerald)' : '4px solid var(--color-accent-orange)',
-              background: 'rgba(5, 10, 20, 0.7)',
+              borderLeft: status.type === 'success' ? '4px solid var(--color-accent-blue)' : '4px solid var(--color-accent-orange)',
+              background: 'rgba(15, 23, 42, 0.7)',
               fontSize: '14px',
               fontWeight: '600',
               textAlign: 'center',
-              color: status.type === 'success' ? 'var(--color-accent-emerald)' : 'var(--color-accent-orange)'
+              color: status.type === 'success' ? 'var(--color-accent-blue)' : 'var(--color-accent-orange)'
             }}>
               {status.message}
             </div>
@@ -306,8 +306,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         paddingTop: '60px'
       }}>
-        <div className="glass-card" style={{ background: 'rgba(5, 10, 20, 0.4)' }}>
-          <div style={{ color: 'var(--color-accent-emerald)', marginBottom: '12px' }}><Coins size={28} /></div>
+        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
+          <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Coins size={28} /></div>
           <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             글로벌 포트폴리오 다각화
           </h3>
@@ -316,7 +316,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </p>
         </div>
 
-        <div className="glass-card" style={{ background: 'rgba(5, 10, 20, 0.4)' }}>
+        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
           <div style={{ color: 'var(--color-accent-orange)', marginBottom: '12px' }}><Bell size={28} /></div>
           <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             매일 아침 7시 이메일 발송
@@ -326,7 +326,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </p>
         </div>
 
-        <div className="glass-card" style={{ background: 'rgba(5, 10, 20, 0.4)' }}>
+        <div className="glass-card" style={{ background: 'rgba(15, 23, 42, 0.4)' }}>
           <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Shield size={28} /></div>
           <h3 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>
             위협 공격 차단 보안

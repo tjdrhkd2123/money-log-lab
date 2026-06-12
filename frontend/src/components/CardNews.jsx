@@ -55,8 +55,8 @@ export default function CardNews() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
-            background: 'rgba(0, 245, 212, 0.1)',
-            color: 'var(--color-accent-emerald)',
+            background: 'rgba(59, 130, 246, 0.1)',
+            color: 'var(--color-accent-blue)',
             padding: '4px 10px',
             borderRadius: '20px',
             fontSize: '12px',
@@ -101,8 +101,8 @@ export default function CardNews() {
         justifyContent: 'space-between',
         position: 'relative',
         overflow: 'hidden',
-        borderLeft: '4px solid var(--color-accent-emerald)',
-        background: 'linear-gradient(145deg, rgba(13, 22, 39, 0.85) 0%, rgba(20, 33, 61, 0.6) 100%)'
+        borderLeft: '4px solid var(--color-accent-blue)',
+        background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)'
       }}>
         
         {/* Animated Background Rogi Mascot watermark */}
@@ -110,11 +110,11 @@ export default function CardNews() {
           position: 'absolute',
           right: '-20px',
           bottom: '-30px',
-          opacity: '0.05',
+          opacity: '0.04',
           pointerEvents: 'none',
           width: '240px',
           height: '240px',
-          background: 'radial-gradient(circle, var(--color-accent-emerald) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--color-accent-blue) 0%, transparent 70%)',
           borderRadius: '50%'
         }}></div>
 
@@ -197,7 +197,7 @@ export default function CardNews() {
                   width: activeIndex === i ? '24px' : '6px',
                   height: '6px',
                   borderRadius: '3px',
-                  background: activeIndex === i ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)',
+                  background: activeIndex === i ? 'var(--color-accent-blue)' : 'var(--color-text-muted)',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease'
                 }}

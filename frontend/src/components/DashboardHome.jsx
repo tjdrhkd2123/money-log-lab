@@ -68,7 +68,7 @@ export default function DashboardHome() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>KOSPI 지수</span>
             {indices.kospi.status === 'UP' ? (
-              <TrendingUp size={20} style={{ color: 'var(--color-accent-emerald)', filter: 'drop-shadow(var(--shadow-neon-emerald))' }} />
+              <TrendingUp size={20} style={{ color: 'var(--color-accent-emerald)' }} />
             ) : (
               <TrendingDown size={20} style={{ color: 'var(--color-accent-orange)' }} />
             )}
@@ -95,7 +95,7 @@ export default function DashboardHome() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>KOSDAQ 지수</span>
             {indices.kosdaq.status === 'UP' ? (
-              <TrendingUp size={20} style={{ color: 'var(--color-accent-emerald)', filter: 'drop-shadow(var(--shadow-neon-emerald))' }} />
+              <TrendingUp size={20} style={{ color: 'var(--color-accent-emerald)' }} />
             ) : (
               <TrendingDown size={20} style={{ color: 'var(--color-accent-orange)' }} />
             )}
@@ -122,7 +122,7 @@ export default function DashboardHome() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-headers)' }}>원·달러 환율</span>
             {indices.usdKrw.status === 'UP' ? (
-              <TrendingUp size={20} style={{ color: 'var(--color-accent-orange)', filter: 'drop-shadow(var(--shadow-neon-orange))' }} />
+              <TrendingUp size={20} style={{ color: 'var(--color-accent-orange)' }} />
             ) : (
               <TrendingDown size={20} style={{ color: 'var(--color-accent-emerald)' }} />
             )}
@@ -143,8 +143,8 @@ export default function DashboardHome() {
 
       {/* Rogi Live Commentary Panel */}
       <div className="glass-card" style={{
-        background: 'rgba(0, 180, 216, 0.05)',
-        borderColor: 'rgba(0, 180, 216, 0.15)',
+        background: 'rgba(59, 130, 246, 0.04)',
+        borderColor: 'rgba(59, 130, 246, 0.15)',
         padding: '16px 20px',
         marginBottom: '24px',
         display: 'flex',

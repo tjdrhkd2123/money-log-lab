@@ -493,9 +493,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(5, 15, 30, 0.6)',
+          background: 'rgba(15, 23, 42, 0.6)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: 'var(--shadow-neon-blue)'
+          boxShadow: 'var(--shadow-card)'
         }}>
           <h3 style={{
             fontSize: '15px',
@@ -641,9 +641,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(5, 15, 30, 0.4)',
-          border: '1px solid rgba(0, 245, 212, 0.12)',
-          boxShadow: '0 0 15px rgba(0, 245, 212, 0.05)'
+          background: 'rgba(15, 23, 42, 0.4)',
+          border: '1px solid rgba(59, 130, 246, 0.15)',
+          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.05)'
         }}>
           <h3 style={{
             fontSize: '16px',
@@ -655,7 +655,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             alignItems: 'center',
             gap: '8px'
           }}>
-            <Video size={20} style={{ color: 'var(--color-accent-emerald)' }} />
+            <Video size={20} style={{ color: 'var(--color-accent-blue)' }} />
             로기의 유튜브 쇼츠(Shorts) AI 비디오 오토메이션
           </h3>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '16px', lineHeight: '1.5' }}>
@@ -671,9 +671,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               style={{
                 fontSize: '13px',
                 padding: '10px 22px',
-                background: 'linear-gradient(135deg, #00b4d8 0%, #00f5d4 100%)',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                 borderColor: 'transparent',
-                boxShadow: '0 0 10px rgba(0, 245, 212, 0.2)'
+                boxShadow: '0 4px 10px rgba(59, 130, 246, 0.2)'
               }}
             >
               <RefreshCw size={14} className={generatingVideo ? 'animate-spin' : ''} />
@@ -681,7 +681,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
             </button>
 
             {generatingVideo && (
-              <span style={{ fontSize: '13px', color: 'var(--color-accent-emerald)', fontWeight: '600' }} className="pulse-glowing">
+              <span style={{ fontSize: '13px', color: 'var(--color-accent-blue)', fontWeight: '600' }} className="pulse-glowing">
                 ⚙️ 로기가 대본을 다듬고 배경을 합성해 영화를 굽고 있어요...
               </span>
             )}
@@ -691,7 +691,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           {generatingVideo && (
             <div style={{
               background: '#0b0f19',
-              border: '1px solid rgba(0, 245, 212, 0.2)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
               borderRadius: '8px',
               padding: '14px',
               boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
@@ -701,10 +701,10 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
               marginBottom: '20px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-accent-emerald)', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'monospace' }}>
                   LOGI-SHORTS-MAKER@SERVER-SHELL:~# tail -f debug_video_render.txt
                 </span>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} className="pulse-glowing" />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-accent-blue)' }} className="pulse-glowing" />
               </div>
               <pre style={{
                 margin: 0,
@@ -725,7 +725,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           )}
 
           {videoSuccessMsg && (
-            <div style={{ marginTop: '16px', color: 'var(--color-accent-emerald)', fontSize: '13px', fontWeight: '700' }}>
+            <div style={{ marginTop: '16px', color: 'var(--color-accent-blue)', fontSize: '13px', fontWeight: '700' }}>
               🎉 {videoSuccessMsg}
             </div>
           )}
@@ -760,7 +760,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                   height: '497px',
                   borderRadius: '12px',
                   boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                  border: '2px solid rgba(0, 245, 212, 0.2)'
+                  border: '2px solid rgba(59, 130, 246, 0.2)'
                 }}
               />
 
@@ -775,8 +775,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  color: 'var(--color-accent-emerald)',
-                  borderColor: 'rgba(0, 245, 212, 0.3)'
+                  color: 'var(--color-accent-blue)',
+                  borderColor: 'rgba(59, 130, 246, 0.3)'
                 }}
               >
                 📥 내 컴퓨터로 비디오 다운로드 받기
@@ -792,9 +792,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           marginBottom: '30px',
           padding: '24px',
           borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(13, 22, 39, 0.4)',
-          border: '1px solid rgba(255, 159, 28, 0.15)',
-          boxShadow: '0 0 15px rgba(255, 159, 28, 0.03)'
+          background: 'rgba(15, 23, 42, 0.4)',
+          border: '1px solid rgba(59, 130, 246, 0.15)',
+          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.03)'
         }}>
           <h3 style={{
             fontSize: '15px',
@@ -814,7 +814,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           </p>
 
           <div style={{
-            background: 'rgba(5, 10, 20, 0.5)',
+            background: 'rgba(15, 23, 42, 0.5)',
             border: '1px solid rgba(255, 255, 255, 0.04)',
             padding: '16px',
             borderRadius: '8px',
@@ -828,12 +828,12 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                 무료 크론 서비스 웹사이트 <strong><a href="https://cron-job.org" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-blue)', textDecoration: 'underline' }}>cron-job.org (여기를 클릭)</a></strong> 에 가입해 주세요.
               </li>
               <li>
-                <strong>Create Cronjob</strong> 버튼을 누르고 아래와 같이 기본값 그대로 입력해 주면 완료!
+                <strong>Create Cronjob</strong> 버튼을 누르고 아래와 같이 설정해 주면 완료!
                 <ul style={{ paddingLeft: '20px', marginTop: '4px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <li>• Title: <code>머니로그랩 서버 깨우기 및 아침 수집</code></li>
-                  <li>• URL: <code style={{ color: 'var(--color-accent-emerald)', wordBreak: 'break-all' }}>{`${API_BASE_URL}/api/admin/trigger-harvest?token=rogi1234`}</code> (기본 GET 방식 그대로 사용!)</li>
-                  <li>• Schedule: **매일 아침 07:00** (Asia/Seoul 시간대 기준 설정)</li>
-                  <li style={{ fontSize: '11px', color: 'var(--color-accent-blue)' }}>* 만약 관리자 시크릿 비밀번호를 변경하셨다면 <code>token=비밀번호</code>로 적어주시면 됩니다.</li>
+                  <li>• Title: <code>머니로그랩 서버 깨우기 (14분 주기)</code></li>
+                  <li>• URL: <code style={{ color: 'var(--color-accent-blue)', wordBreak: 'break-all' }}>{`${API_BASE_URL}/api/public/indices`}</code> (로그인 토큰이 필요 없는 공개 주소로, 인증 에러가 발생하지 않습니다!)</li>
+                  <li>• Schedule: **Every 14 minutes** (14분마다 한 번씩 신호를 보내 서버를 상시 활성화 상태로 유지합니다.)</li>
+                  <li style={{ fontSize: '11px', color: 'var(--color-accent-blue)' }}>* 이렇게 14분 주기로 설정해 두시면 서버가 절대 잠들지 않으며, 매일 아침 7시(KST)에 서버 내부 스케줄러가 알아서 뉴스 수집을 100% 정상 작동시킵니다.</li>
                 </ul>
               </li>
             </ol>
@@ -861,27 +861,27 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
       {/* Dynamic Progress Bar for Manual Harvesting */}
       {harvesting && (
-        <div className="glass-card pulse-glowing" style={{
+        <div className="glass-card" style={{
           marginBottom: '30px', padding: '24px', borderRadius: 'var(--border-radius-md)',
-          background: 'rgba(0, 245, 212, 0.03)', borderColor: 'var(--color-accent-emerald)',
+          background: 'rgba(59, 130, 246, 0.03)', borderColor: 'var(--color-accent-blue)',
           display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative',
           overflow: 'hidden'
         }}>
           {/* Neon animated background pulse */}
           <div style={{
             position: 'absolute', top: 0, left: 0, height: '3px',
-            width: `${progress}%`, background: 'linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-emerald))',
+            width: `${progress}%`, background: 'linear-gradient(90deg, var(--color-accent-blue), var(--bg-tertiary))',
             transition: 'width 0.3s ease-out'
           }} />
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--color-accent-emerald)' }} />
+              <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--color-accent-blue)' }} />
               <span style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
                 {progressStatus}
               </span>
             </div>
-            <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-accent-emerald)', fontFamily: 'var(--font-headers)' }}>
+            <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)' }}>
               {progress}%
             </span>
           </div>
@@ -893,27 +893,27 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           }}>
             <div style={{
               width: `${progress}%`, height: '100%',
-              background: 'linear-gradient(90deg, #00b4d8 0%, #00f5d4 100%)',
+              background: 'linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)',
               borderRadius: '5px', transition: 'width 0.3s ease-out',
-              boxShadow: '0 0 10px rgba(0, 245, 212, 0.5)'
+              boxShadow: '0 0 10px rgba(59, 130, 246, 0.2)'
             }} />
           </div>
           
           <div style={{ display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--color-text-secondary)', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 15 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 15 ? 'var(--color-accent-blue)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
               지표 수집 (15%)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 35 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 35 ? 'var(--color-accent-blue)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
               코인 탐색 (35%)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 85 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 85 ? 'var(--color-accent-blue)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
               AI 포스팅 작성 (85%)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 95 ? 'var(--color-accent-emerald)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: progress >= 95 ? 'var(--color-accent-blue)' : 'var(--color-text-muted)', transition: 'background 0.3s' }} />
               뉴스레터 디자인 (95%)
             </div>
           </div>

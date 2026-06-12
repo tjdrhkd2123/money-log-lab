@@ -75,6 +75,7 @@ export function authenticateAdminToken(req, res, next) {
   // Support Cron Bypass Key for 24/7 automated external cron triggers (e.g. cron-job.org)
   const isBypass = token === config.adminPassword || 
                    token === 'rogi1234' || 
+                   token === 'money_log_lab_secret_trigger_2026' || 
                    token === 'rogi_secret_key_squirrel_acorn_2026' ||
                    (process.env.CRON_SECRET && token === process.env.CRON_SECRET);
   if (isBypass) {
