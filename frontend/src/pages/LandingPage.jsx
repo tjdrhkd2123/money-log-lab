@@ -149,7 +149,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
       return;
     }
 
-    if (authEmail.toLowerCase() === 'admin') {
+    if (authEmail.toLowerCase() === 'tjdrhkd2123') {
       setLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
@@ -190,7 +190,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         setAuthSuccess('');
       }, 1200);
     } else {
-      setAuthError('이메일 주소 또는 비밀번호가 틀렸어! (어드민은 이메일에 admin 입력)');
+      setAuthError('이메일 주소 또는 비밀번호가 틀렸어!');
     }
   };
 
@@ -497,7 +497,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
           <div className="glass-card" style={{ textAlign: 'center', padding: '36px' }}>
             <div style={{ background: 'rgba(37, 99, 235, 0.08)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'var(--color-accent-blue)' }}><Lock size={28} /></div>
             <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>로그인</h2>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 금융 멤버십에 입장해줘! (관리자는 ID에 admin 입력)</p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 금융 멤버십에 입장해줘!</p>
             <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><Mail size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="text" placeholder="이메일 주소 입력" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="password" placeholder="비밀번호 입력" required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>

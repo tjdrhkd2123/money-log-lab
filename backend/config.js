@@ -15,6 +15,6 @@ export const config = {
   resendApiKey: process.env.RESEND_API_KEY || '',
   resendAudienceId: process.env.RESEND_AUDIENCE_ID || '',
   senderEmail: process.env.SENDER_EMAIL || 'newsletter@moneyloglab.com',
-  adminPassword: process.env.ADMIN_PASSWORD || 'rogi1234',
+  adminPassword: process.env.ADMIN_PASSWORD || 'skdml4fkd!',
   jwtSecret: process.env.JWT_SECRET || 'rogi_secret_key_squirrel_acorn_2026',
 };
