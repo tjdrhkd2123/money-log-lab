@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, RefreshCw, Calendar, Flame } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
-export default function DashboardHome({ onNewsLoaded }) {
+export default function DashboardHome({ onNewsLoaded, onIndicesLoaded }) {
   const [indices, setIndices] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,6 +59,9 @@ export default function DashboardHome({ onNewsLoaded }) {
         setIndices(data.indices);
         if (data.news && onNewsLoaded) {
           onNewsLoaded(data.news);
+        }
+        if (onIndicesLoaded) {
+          onIndicesLoaded(data.indices);
         }
         calculateMarketVibe(data.indices);
       }
@@ -181,20 +184,6 @@ export default function DashboardHome({ onNewsLoaded }) {
           <h3 style={{ fontSize: '24px', fontWeight: '800', fontFamily: 'var(--font-headers)', marginBottom: '4px' }}>{indices.usdKrw.price} 원</h3>
           <div style={{ fontSize: '13px', fontWeight: '600', color: indices.usdKrw.status === 'UP' ? 'var(--color-accent-orange)' : 'var(--color-accent-emerald)' }}>{indices.usdKrw.change} ({indices.usdKrw.changePercent}%)</div>
         </div>
-      </div>
-
-      {/* Rogi Live Commentary Panel */}
-      <div className="glass-card" style={{ background: 'rgba(37, 99, 235, 0.03)', borderColor: 'rgba(37, 99, 235, 0.15)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-headers)', fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Calendar size={14} /> 로기의 실시간 금융 브리핑
-          </span>
-          <button onClick={loadIndices} disabled={refreshing} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
-            <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} /> 새로고침
-          </button>
-        </div>
-        <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', fontWeight: '500' }}>{getRogiCommentary()}</p>
-        <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textAlign: 'right' }}>수집 기준 시각: {indices.timestamp}</span>
       </div>
     </div>
   );

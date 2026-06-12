@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardHome from '../components/DashboardHome.jsx';
 import CardNews from '../components/CardNews.jsx';
-import { Mail, Shield, ShieldCheck, Bell, Award, Coins, RefreshCw, ArrowRight, Lock, KeyRound, UserPlus, LogIn, LogOut, ChevronRight, FileText } from 'lucide-react';
+import { Mail, Shield, ShieldCheck, Bell, Award, Coins, RefreshCw, ArrowRight, Lock, KeyRound, UserPlus, LogIn, LogOut, ChevronRight, FileText, Calendar } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
 export default function LandingPage({ onNavigateToAdmin }) {
@@ -13,6 +13,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
   const [news, setNews] = useState([]);
   const [newsTab, setNewsTab] = useState('economy');
+  const [indices, setIndices] = useState(null);
 
   const [currentUser, setCurrentUser] = useState(localStorage.getItem('current_user') || null);
   const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('admin_token'));
@@ -220,6 +221,20 @@ export default function LandingPage({ onNavigateToAdmin }) {
     };
   };
 
+  const getRogiCommentary = () => {
+    if (!indices) return '';
+    const usd = Number(indices.usdKrw.price.replace(/,/g, ''));
+    const kospiChange = Number(indices.kospi.changePercent);
+
+    if (usd >= 1400) {
+      return `🐿️ 로기 분석: 원·달러 환율이 도토리 무게보다 무겁게 ${indices.usdKrw.price}원대를 넘보고 있어! 수입 물가 압박이 크니, 미 2년물 국채나 분산 자산 비중을 꼭 체크해봐!`;
+    } else if (kospiChange < 0) {
+      return "🐿️ 로기 분석: 코스피 지수가 다소 밀리고 있어. 외국인들이 포지션을 헤징하는 소나기 구간이니, 뇌동매매 하지 말고 차분히 실적 위주 대형주 반등을 기다리자!";
+    } else {
+      return "🐿️ 로기 분석: 순환매가 활발하게 돌고 있는 시장이야! 이럴 때일수록 로기가 아침마다 모아주는 핵심 지표들을 눈여겨보라구!";
+    }
+  };
+
   const savingsRes = getSavingsResult();
   const filteredNews = news.filter(item => item.category === newsTab);
 
@@ -264,7 +279,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
         <>
           <section style={{ maxWidth: '800px', margin: '0 auto 40px auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(37, 99, 235, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
-            <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가<br/>쉽고 빠르게 정리해줄게!</h1>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가 쉽고 빠르게 정리해줄게!</h1>
             <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400', maxWidth: '600px' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
             <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px', marginBottom: '30px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
           </section>
@@ -280,13 +295,26 @@ export default function LandingPage({ onNavigateToAdmin }) {
             </div>
           </div>
 
+          {/* 📅 로기의 실시간 금융 브리핑 */}
+          {indices && (
+            <div className="glass-card" style={{ background: 'rgba(37, 99, 235, 0.03)', borderColor: 'rgba(37, 99, 235, 0.15)', padding: '16px 20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '800px', margin: '-40px auto 60px auto', animation: 'fadeIn 0.3s ease-in-out' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'var(--font-headers)', fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={14} /> 로기의 실시간 금융 브리핑
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>수집 기준 시각: {indices.timestamp}</span>
+              </div>
+              <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', fontWeight: '500', margin: 0, textAlign: 'left' }}>{getRogiCommentary()}</p>
+            </div>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginTop: '20px' }}>
             <section style={{ width: '100%' }}>
               <div style={{ textAlign: 'left', marginBottom: '20px' }}>
                 <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>📊 실시간 금융 대시보드</h2>
                 <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>수집된 원화 대비 가치 및 주요 코스피 지수를 한눈에 파악해봐!</p>
               </div>
-              <DashboardHome onNewsLoaded={setNews} />
+              <DashboardHome onNewsLoaded={setNews} onIndicesLoaded={setIndices} />
             </section>
             <section style={{ width: '100%' }}>
               <div style={{ textAlign: 'left', marginBottom: '20px' }}>
