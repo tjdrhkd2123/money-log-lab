@@ -183,7 +183,7 @@ export const financeService = {
         kospi,
         kosdaq,
         usdKrw,
-        timestamp: new Date().toLocaleString('ko-KR')
+        timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
       },
       news
     };

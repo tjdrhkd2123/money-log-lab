@@ -140,7 +140,7 @@ app.get('/api/public/indices', async (req, res) => {
       kospi: { price: '2,680.50', change: '+24.15', changePercent: '0.91', status: 'UP' },
       kosdaq: { price: '845.20', change: '-3.10', changePercent: '-0.36', status: 'DOWN' },
       usdKrw: { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' },
-      timestamp: new Date().toLocaleString('ko-KR')
+      timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
     };
     return res.status(200).json({
       success: true,
