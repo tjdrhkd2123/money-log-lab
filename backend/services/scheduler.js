@@ -101,28 +101,40 @@ export function initScheduler() {
     timezone: "Asia/Seoul"
   });
 
+  // Helper to extract YYYY-MM-DD in KST (UTC+9)
+  const getKstDateStr = (dateOrStr) => {
+    try {
+      const date = new Date(dateOrStr);
+      // Offset by 9 hours for KST
+      const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+      return kstDate.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
   // [Zero-Click 자동화] 서버 구동 시 오늘자 수집 데이터가 없거나 하루가 지난 상태라면 구동 즉시 백그라운드 수집 자동 실행
   try {
     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getKstDateStr(new Date());
     
     let needsHarvest = false;
     if (!db.dailyAcorns || !db.dailyAcorns.timestamp) {
       needsHarvest = true;
     } else {
-      const lastHarvestDate = db.dailyAcorns.timestamp.split('T')[0];
+      const lastHarvestDate = getKstDateStr(db.dailyAcorns.timestamp);
       if (lastHarvestDate !== todayStr) {
         needsHarvest = true;
       }
     }
 
     if (needsHarvest) {
-      console.log('⚡ [자동 구동] 오늘 날짜의 최신 경제 데이터가 없습니다. 아침 7시 수집을 서버 기동 즉시 백그라운드에서 백그라운드 자동 수집합니다!');
+      console.log(`⚡ [자동 구동] 오늘 날짜(${todayStr})의 최신 경제 데이터가 없습니다. 아침 7시 수집을 서버 기동 즉시 백그라운드에서 자동 수집합니다!`);
       triggerDailyHarvest().catch(err => {
         console.error('서버 시작 즉시 자동 수집 실행 실패:', err.message);
       });
     } else {
-      console.log('✅ [데이터 확보] 오늘의 최신 아침 7시 경제 도토리 분석이 이미 안전하게 탑재되어 있습니다. 관리자 화면에 바로 로딩됩니다.');
+      console.log(`✅ [데이터 확보] 오늘의 최신 아침 7시 경제 도토리 분석(${todayStr})이 이미 안전하게 탑재되어 있습니다. 관리자 화면에 바로 로딩됩니다.`);
     }
   } catch (err) {
     console.error('서버 기동 자동 수집 검증 중 오류:', err.message);

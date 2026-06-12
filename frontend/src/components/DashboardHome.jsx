@@ -1,29 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, RefreshCw, Calendar, Flame, ChevronRight, FileText } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, Calendar, Flame } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
-export default function DashboardHome() {
+export default function DashboardHome({ onNewsLoaded }) {
   const [indices, setIndices] = useState(null);
-  const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fintech interactive states
-  const [newsTab, setNewsTab] = useState('economy'); // 'economy', 'realestate', 'coin'
+  // Fear & Greed index states
   const [marketTemp, setMarketTemp] = useState(50);
   const [marketVibe, setMarketVibe] = useState({ vibe: '중립 🐿️😐', desc: '시장 상황 분석 대기 중...' });
-  const [calcTab, setCalcTab] = useState('exchange'); // 'exchange', 'savings'
-  
-  // Exchange calculator inputs
-  const [krwInput, setKrwInput] = useState('1000000');
-  const [usdInput, setUsdInput] = useState('');
 
-  // Savings calculator inputs
-  const [monthlySavings, setMonthlySavings] = useState('300000');
-  const [interestRate, setInterestRate] = useState('4.5');
-  const [savingsPeriod, setSavingsPeriod] = useState('3');
-
-  // Calculates the Fear & Greed index dynamically based on indices changes
   const calculateMarketVibe = (latestIndices) => {
     try {
       const parsePercent = (val) => {
@@ -35,9 +22,8 @@ export default function DashboardHome() {
       const kd = parsePercent(latestIndices.kosdaq.changePercent);
       const ex = parsePercent(latestIndices.usdKrw.changePercent);
       
-      // Fear & Greed Formula: base 50. Kospi/Kosdaq UP is greed, Exchange rate UP is fear
       let score = 50 + (kp * 10) + (kd * 6) - (ex * 15);
-      score = Math.min(100, Math.max(0, score)); // clamp 0-100
+      score = Math.min(100, Math.max(0, score));
       const roundedScore = Math.round(score);
 
       let vibe = '중립 🐿️😐';
@@ -71,8 +57,8 @@ export default function DashboardHome() {
       const data = await response.json();
       if (data.success) {
         setIndices(data.indices);
-        if (data.news) {
-          setNews(data.news);
+        if (data.news && onNewsLoaded) {
+          onNewsLoaded(data.news);
         }
         calculateMarketVibe(data.indices);
       }
@@ -87,55 +73,6 @@ export default function DashboardHome() {
   useEffect(() => {
     loadIndices();
   }, []);
-
-  // Update exchange calculations
-  useEffect(() => {
-    if (!indices) return;
-    const rate = parseFloat(indices.usdKrw.price.replace(/,/g, '')) || 1350;
-    if (krwInput) {
-      const calculated = parseFloat(krwInput) / rate;
-      setUsdInput(calculated.toFixed(2));
-    } else {
-      setUsdInput('');
-    }
-  }, [krwInput, indices]);
-
-  const handleUsdChange = (val) => {
-    setUsdInput(val);
-    if (!indices) return;
-    const rate = parseFloat(indices.usdKrw.price.replace(/,/g, '')) || 1350;
-    if (val) {
-      const calculated = parseFloat(val) * rate;
-      setKrwInput(Math.round(calculated).toString());
-    } else {
-      setKrwInput('');
-    }
-  };
-
-  // Calculate compound interest savings results
-  const getSavingsResult = () => {
-    const p = parseFloat(monthlySavings) || 0;
-    const r = (parseFloat(interestRate) || 0) / 100 / 12;
-    const n = (parseInt(savingsPeriod) || 0) * 12;
-    
-    if (p <= 0 || n <= 0) return { principal: 0, total: 0, interest: 0, acorns: 0 };
-    
-    let total = 0;
-    for (let i = 1; i <= n; i++) {
-      total = (total + p) * (1 + r);
-    }
-    
-    const principal = p * n;
-    const interest = total - principal;
-    const acorns = Math.round(total / 10000); // 1만원당 도토리 1개 🌰
-
-    return {
-      principal: Math.round(principal),
-      total: Math.round(total),
-      interest: Math.round(interest),
-      acorns
-    };
-  };
 
   const getRogiCommentary = () => {
     if (!indices) return '';
@@ -162,9 +99,6 @@ export default function DashboardHome() {
       </div>
     );
   }
-
-  const savingsRes = getSavingsResult();
-  const filteredNews = news.filter(item => item.category === newsTab);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -262,97 +196,6 @@ export default function DashboardHome() {
         <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', fontWeight: '500' }}>{getRogiCommentary()}</p>
         <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textAlign: 'right' }}>수집 기준 시각: {indices.timestamp}</span>
       </div>
-
-      {/* Rogi's Smart Financial Calculators */}
-      <div className="glass-card" style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '12px', marginBottom: '20px' }}>
-          <button onClick={() => setCalcTab('exchange')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '700', color: calcTab === 'exchange' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'exchange' ? '2px solid var(--color-accent-blue)' : '2px solid transparent' }}>💱 간편 환율 계산기</button>
-          <button onClick={() => setCalcTab('savings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '700', color: calcTab === 'savings' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'savings' ? '2px solid var(--color-accent-blue)' : '2px solid transparent' }}>🌰 복리 도토리 저금통</button>
-        </div>
-        {calcTab === 'exchange' ? (
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '180px' }}>
-              <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>원화 입력 (KRW)</label>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '8px 12px', background: 'var(--bg-tertiary)' }}>
-                <input type="number" value={krwInput} onChange={(e) => setKrwInput(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span>
-              </div>
-            </div>
-            <div style={{ fontSize: '20px', color: 'var(--color-text-muted)', paddingTop: '18px' }}>⇄</div>
-            <div style={{ flex: 1, minWidth: '180px' }}>
-              <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>달러 변환 (USD)</label>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '8px 12px', background: 'var(--bg-tertiary)' }}>
-                <input type="number" value={usdInput} onChange={(e) => handleUsdChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>달러</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: '130px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>월 납입액</label>
-                <input type="number" value={monthlySavings} onChange={(e) => setMonthlySavings(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: '130px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>연 이자율 (%)</label>
-                <input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: '100px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>기간 (년)</label>
-                <select value={savingsPeriod} onChange={(e) => setSavingsPeriod(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }}>
-                  <option value="1">1년</option><option value="2">2년</option><option value="3">3년</option><option value="5">5년</option><option value="10">10년</option>
-                </select>
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--color-card-border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-                <span style={{ color: 'var(--color-text-secondary)' }}>총 납입 원금:</span>
-                <span style={{ fontWeight: '700', color: 'var(--color-text-primary)' }}>{savingsRes.principal.toLocaleString()} 원</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}>
-                <span style={{ color: 'var(--color-text-secondary)' }}>예상 세후 이자:</span>
-                <span style={{ fontWeight: '700', color: 'var(--color-accent-emerald)' }}>+ {savingsRes.interest.toLocaleString()} 원</span>
-              </div>
-              <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)' }}>최종 수령액 (월복리):</span>
-                <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-accent-blue)' }}>{savingsRes.total.toLocaleString()} 원</span>
-              </div>
-              <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>🐿️ 로기의 저금통에 모인 도토리: **{savingsRes.acorns.toLocaleString()}개 🌰**</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Rogi's Real-time Live RSS News Clip */}
-      {news.length > 0 && (
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-headers)' }}>
-              <FileText size={16} style={{ color: 'var(--color-accent-blue)' }} />
-              로기의 실시간 핫이슈 뉴스 클립
-            </h3>
-            <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-tertiary)', padding: '2px', borderRadius: '8px' }}>
-              {['economy', 'realestate', 'coin'].map(tab => (
-                <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '700', padding: '6px 12px', borderRadius: '6px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)' }}>
-                  {tab === 'economy' ? '금융·경제' : tab === 'realestate' ? '부동산' : '가상자산'}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {filteredNews.slice(0, 5).map((item, idx) => (
-              <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--color-card-border)', background: 'var(--bg-secondary)', textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left', paddingRight: '12px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-primary)', lineHeight: '1.4' }}>{item.title}</span>
-                  <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>{item.source} • {new Date(item.pubDate).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                <ChevronRight size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
