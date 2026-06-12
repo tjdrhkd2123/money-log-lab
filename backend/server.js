@@ -11,6 +11,7 @@ import util from 'util';
 import { config } from './config.js';
 import { initScheduler, triggerDailyHarvest } from './services/scheduler.js';
 import { mailService } from './services/mailService.js';
+import { financeService } from './services/financeService.js';
 import {
   subscriptionRateLimiter,
   adminLoginRateLimiter,
@@ -84,25 +85,62 @@ prepareHashedPassword();
  * 1. GET /api/public/indices
  * Fetches latest KOSPI, KOSDAQ, and USD/KRW indices for public landing page widgets.
  */
-app.get('/api/public/indices', (req, res) => {
+let cachedIndices = null;
+let lastIndicesFetchTime = 0;
+
+app.get('/api/public/indices', async (req, res) => {
   try {
+    const now = Date.now();
+    // Smart Throttle Cache: 30 seconds
+    if (cachedIndices && (now - lastIndicesFetchTime < 30000)) {
+      return res.status(200).json({
+        success: true,
+        indices: cachedIndices
+      });
+    }
+
+    console.log("📡 새로고침/지표 요청 감지: 야후 파이낸스 실시간 지표 크롤링 작동 중...");
+    const result = await financeService.getDailyAcorns();
+    if (result && result.indices) {
+      cachedIndices = result.indices;
+      lastIndicesFetchTime = now;
+
+      // Update database backup with live fetched indices
+      try {
+        const db = getDb();
+        if (!db.dailyAcorns) db.dailyAcorns = {};
+        db.dailyAcorns.indices = result.indices;
+        saveDb(db);
+      } catch (dbErr) {
+        console.error("Failed to update database with live indices:", dbErr.message);
+      }
+
+      return res.status(200).json({
+        success: true,
+        indices: result.indices
+      });
+    }
+
+    // Fallback database indices
     const db = getDb();
     if (db.dailyAcorns && db.dailyAcorns.indices) {
+      cachedIndices = db.dailyAcorns.indices;
       return res.status(200).json({
         success: true,
         indices: db.dailyAcorns.indices
       });
     }
     
-    // Base indices fallback if no harvest happened yet
+    // Final hardcoded fallback
+    const fallback = {
+      kospi: { price: '2,680.50', change: '+24.15', changePercent: '0.91', status: 'UP' },
+      kosdaq: { price: '845.20', change: '-3.10', changePercent: '-0.36', status: 'DOWN' },
+      usdKrw: { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' },
+      timestamp: new Date().toLocaleString('ko-KR')
+    };
     return res.status(200).json({
       success: true,
-      indices: {
-        kospi: { price: '2,680.50', change: '+24.15', changePercent: '0.91', status: 'UP' },
-        kosdaq: { price: '845.20', change: '-3.10', changePercent: '-0.36', status: 'DOWN' },
-        usdKrw: { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' },
-        timestamp: new Date().toLocaleString('ko-KR')
-      }
+      indices: fallback
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
