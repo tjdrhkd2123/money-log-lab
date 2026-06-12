@@ -280,7 +280,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
           <section style={{ maxWidth: '800px', margin: '0 auto 40px auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(37, 99, 235, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(37, 99, 235, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
             <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가 쉽고 빠르게 정리해줄게!</h1>
-            <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400', maxWidth: '600px' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
+            <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400', maxWidth: '800px' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
             <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px', marginBottom: '30px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
           </section>
 
