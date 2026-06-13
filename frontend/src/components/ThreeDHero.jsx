@@ -135,11 +135,11 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     acornGroup.add(capMesh);
     acornGroup.add(stemMesh);
 
-    // 6. Build Laboratory Interior Environment (Toned-down Stone Gray/Warm Gray Theme)
+    // 6. Build Laboratory Interior Environment (Warm Dark Cozy Lab Theme)
     const floorMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf3eedf, // Soft paper warm cream floor (matte, non-glaring)
-      roughness: 0.98, // Maximum roughness for organic paper/matte tile feel
-      metalness: 0.02,
+      color: 0xd5cca9, // Warm cozy kraft paper / matte tile shade (not bright/glaring)
+      roughness: 1.0, // Fully matte
+      metalness: 0.0,
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide
@@ -149,11 +149,11 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     floorMesh.position.y = -0.65;
     acornGroup.add(floorMesh);
 
-    // Enclosed Wall panels (Extended height 2.2 to block outer space/scaffolds)
+    // Enclosed Wall panels (Matte dark cozy stone gray to reduce glaring reflection)
     const wallMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd1d5db, // Soft stone gray panels
-      roughness: 0.95,
-      metalness: 0.05,
+      color: 0x343330, // Soft warm dark charcoal stone gray
+      roughness: 1.0,
+      metalness: 0.0,
       transparent: true,
       opacity: 0.0,
       side: THREE.BackSide
@@ -202,35 +202,35 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
 
-    // 6a. Lab Table Top (Local Y relative to floor)
+    // 6a. Lab Table Top (Local Y relative to floor) - Pushed outward to -0.35
     const tableTop = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.02, 0.22), furnitureMat);
-    tableTop.position.set(-0.25, 0.17, -0.1); // -0.48 absolute Y
+    tableTop.position.set(-0.35, 0.17, -0.05); // -0.48 absolute Y
     furnitureGroup.add(tableTop);
 
-    // Table Legs (Local Y)
+    // Table Legs (Local Y) - Pushed outward
     const legGeom = new THREE.CylinderGeometry(0.008, 0.008, 0.15, 8);
     const legL1 = new THREE.Mesh(legGeom, metallicMat);
-    legL1.position.set(-0.42, 0.09, -0.19); // -0.56 absolute Y
+    legL1.position.set(-0.52, 0.09, -0.14); // -0.56 absolute Y
     furnitureGroup.add(legL1);
     const legL2 = new THREE.Mesh(legGeom, metallicMat);
-    legL2.position.set(-0.42, 0.09, -0.01);
+    legL2.position.set(-0.52, 0.09, 0.04);
     furnitureGroup.add(legL2);
     const legR1 = new THREE.Mesh(legGeom, metallicMat);
-    legR1.position.set(-0.08, 0.09, -0.19);
+    legR1.position.set(-0.18, 0.09, -0.14);
     furnitureGroup.add(legR1);
     const legR2 = new THREE.Mesh(legGeom, metallicMat);
-    legR2.position.set(-0.08, 0.09, -0.01);
+    legR2.position.set(-0.18, 0.09, 0.04);
     furnitureGroup.add(legR2);
 
-    // 6b. Research Stool Chair (Local Y)
+    // 6b. Research Stool Chair (Local Y) - Pushed outward
     const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.012, 12), furnitureMat);
-    stoolSeat.position.set(-0.24, 0.11, 0.16); // -0.54 absolute Y
+    stoolSeat.position.set(-0.32, 0.11, 0.18); // -0.54 absolute Y
     furnitureGroup.add(stoolSeat);
     const stoolLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.1, 8), metallicMat);
-    stoolLeg.position.set(-0.24, 0.05, 0.16); // -0.60 absolute Y
+    stoolLeg.position.set(-0.32, 0.05, 0.18); // -0.60 absolute Y
     furnitureGroup.add(stoolLeg);
 
-    // 6c. Stacked Reports / Mini Books (Local Y)
+    // 6c. Stacked Reports / Mini Books (Local Y) - Keeps on the right edge
     const bookColors = [0x9ca3af, 0x3b82f6, 0x10b981];
     const bookGroup = new THREE.Group();
     bookColors.forEach((color, idx) => {
@@ -248,9 +248,9 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     });
     furnitureGroup.add(bookGroup);
 
-    // 6d. SF Energy Data Core Capsule (Local Y)
+    // 6d. SF Energy Data Core Capsule (Local Y) - Pushed leftward
     const energyCore = new THREE.Group();
-    energyCore.position.set(-0.32, 0.20, -0.12); // -0.45 absolute Y (Placed on desk top)
+    energyCore.position.set(-0.42, 0.20, -0.07); // -0.45 absolute Y (Placed on desk top)
     furnitureGroup.add(energyCore);
 
     const glassTubeMat = new THREE.MeshStandardMaterial({
@@ -284,9 +284,9 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     plasmaNode.position.y = 0.025;
     energyCore.add(plasmaNode);
 
-    // 6e. SF Cyber Console Input Panel (Local Y)
+    // 6e. SF Cyber Console Input Panel (Local Y) - Moved leftward
     const consolePanel = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.008, 0.06), furnitureMat);
-    consolePanel.position.set(-0.24, 0.185, -0.03); // -0.465 absolute Y
+    consolePanel.position.set(-0.34, 0.185, -0.01); // -0.465 absolute Y
     consolePanel.rotation.x = -Math.PI / 16;
     furnitureGroup.add(consolePanel);
 
@@ -303,9 +303,9 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       consolePanel.add(consoleLed);
     }
 
-    // 6f. Research Bookcase (Local Y)
+    // 6f. Research Bookcase (Local Y) - Pushed fully backward to -0.44
     const bookcaseGroup = new THREE.Group();
-    bookcaseGroup.position.set(0, 0.01, -0.28); // -0.64 absolute Y
+    bookcaseGroup.position.set(0, 0.01, -0.44); // -0.64 absolute Y
     furnitureGroup.add(bookcaseGroup);
 
     const frameMat = new THREE.MeshStandardMaterial({
@@ -404,14 +404,14 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       depthWrite: false
     });
     const hologramMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.35), hlMaterial);
-    hologramMesh.position.set(0.18, 0.43, -0.22); // -0.22 absolute Y
+    hologramMesh.position.set(0.35, 0.43, -0.26); // -0.22 absolute Y - Pushed outward
     hologramMesh.rotation.y = -0.15;
     hologramMesh.renderOrder = 1;
     hologramMesh.userData = { id: 'news' };
     furnitureGroup.add(hologramMesh);
     clickables.push(hologramMesh);
 
-    // Hologram Projector Base (Local Y)
+    // Hologram Projector Base (Local Y) - Pushed outward
     const projectorBaseMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       roughness: 0.35,
@@ -420,10 +420,10 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
     const projectorBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.015, 12), projectorBaseMat);
-    projectorBase.position.set(0.18, 0.01, -0.22); // -0.64 absolute Y
+    projectorBase.position.set(0.35, 0.01, -0.26); // -0.64 absolute Y
     furnitureGroup.add(projectorBase);
 
-    // Holographic Light Cone (Local Y)
+    // Holographic Light Cone (Local Y) - Pushed outward
     const beamMat = new THREE.MeshBasicMaterial({
       color: 0x00ffff,
       transparent: true,
@@ -432,10 +432,10 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       depthWrite: false
     });
     const beamCone = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.42, 16, 1, true), beamMat);
-    beamCone.position.set(0.18, 0.22, -0.22); // -0.43 absolute Y
+    beamCone.position.set(0.35, 0.22, -0.26); // -0.43 absolute Y
     furnitureGroup.add(beamCone);
 
-    // Cyber Server Rack on the floor (Local Y)
+    // Cyber Server Rack on the floor (Local Y) - Pushed outward
     const serverMat = new THREE.MeshStandardMaterial({
       color: 0xf1f5f9,
       roughness: 0.4,
@@ -444,10 +444,10 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
     const serverMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.28, 0.15), serverMat);
-    serverMesh.position.set(0.32, 0.14, -0.12); // -0.51 absolute Y
+    serverMesh.position.set(0.45, 0.14, -0.15); // -0.51 absolute Y
     furnitureGroup.add(serverMesh);
 
-    // Server LED indicator lights (Local Y)
+    // Server LED indicator lights (Local Y) - Offset aligned with serverMesh
     const serverLeds = [];
     const ledColors = [0x00ff66, 0xff3333, 0xffcc00];
     for (let l = 0; l < 4; l++) {
@@ -457,15 +457,15 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         opacity: 0.0
       });
       const led = new THREE.Mesh(new THREE.SphereGeometry(0.008, 8, 8), ledMat);
-      // Position calculated relative to serverMesh local coordinates
-      led.position.set(0.32 - 0.076, 0.23 - l * 0.045, -0.12 + (l % 2 === 0 ? 0.03 : -0.03));
+      // Position calculated relative to serverMesh local coordinates (X pushed to 0.45, Z pushed to -0.15)
+      led.position.set(0.45 - 0.076, 0.23 - l * 0.045, -0.15 + (l % 2 === 0 ? 0.03 : -0.03));
       furnitureGroup.add(led);
       serverLeds.push(led);
     }
 
-    // 7b. Interactive 3D Mini-Calculator (Local Y)
+    // 7b. Interactive 3D Mini-Calculator (Local Y) - Positioned on the shifted table top
     const calcGroup = new THREE.Group();
-    calcGroup.position.set(-0.16, 0.185, -0.05); // -0.465 absolute Y
+    calcGroup.position.set(-0.26, 0.185, -0.04); // -0.465 absolute Y
     calcGroup.rotation.y = 0.12;
     calcGroup.userData = { id: 'calculators' };
 
@@ -508,7 +508,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     furnitureGroup.add(calcGroup);
     clickables.push(calcGroup);
 
-    // 7c. Holographic Wireframe Globe (Local Y)
+    // 7c. Holographic Wireframe Globe (Local Y) - Positioned on the shifted table top
     const globeMat = new THREE.MeshStandardMaterial({
       color: 0x00ff88,
       emissive: 0x00ff88,
@@ -518,14 +518,14 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       wireframe: true
     });
     const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), globeMat);
-    globeMesh.position.set(-0.25, 0.33, -0.1); // -0.32 absolute Y
+    globeMesh.position.set(-0.35, 0.33, -0.08); // -0.32 absolute Y
     globeMesh.userData = { id: 'dashboard' };
     furnitureGroup.add(globeMesh);
     clickables.push(globeMesh);
 
-    // 7d. Interactive 3D Envelope (Local Y)
+    // 7d. Interactive 3D Envelope (Local Y) - Positioned on the shifted table top
     const letterGroup = new THREE.Group();
-    letterGroup.position.set(-0.15, 0.185, -0.16); // -0.465 absolute Y
+    letterGroup.position.set(-0.25, 0.185, -0.15); // -0.465 absolute Y
     letterGroup.rotation.y = -0.35;
     letterGroup.userData = { id: 'subscribe' };
 
@@ -797,7 +797,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0x4a5568, light: 0xe2e8f0, dark: 0x1e293b },
       { hasGlasses: true, glassesColor: 0x1e293b, coatColor: 0xffffff }
     );
-    npcNews.mesh.position.set(0.08, -0.64, -0.1); // Slightly repositioned inside for close-up camera
+    npcNews.mesh.position.set(0.15, -0.64, -0.05); // Repositioned outward corresponding to the hologram mesh
     npcNews.mesh.rotation.y = -Math.PI / 4; 
     npcNews.mesh.userData = { id: 'npc_news' };
     acornGroup.add(npcNews.mesh);
@@ -808,7 +808,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xfbd38d, light: 0xfffaf0, dark: 0x7b341e },
       { hasGlasses: true, glassesColor: 0xd69e2e, coatColor: 0xffffff }
     );
-    npcCalc.mesh.position.set(-0.12, -0.64, 0.05); // Repositioned
+    npcCalc.mesh.position.set(-0.16, -0.64, 0.1); // Repositioned outward corresponding to the stool/calculator
     npcCalc.mesh.rotation.y = Math.PI / 3; 
     npcCalc.mesh.userData = { id: 'npc_calc' };
     acornGroup.add(npcCalc.mesh);
@@ -819,7 +819,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xd69e2e, light: 0xfefcbf, dark: 0x4a3728 },
       { hasGlasses: false, coatColor: 0xffffff } 
     );
-    npcBenefit.mesh.position.set(-0.06, -0.64, -0.18); // Repositioned
+    npcBenefit.mesh.position.set(-0.08, -0.64, -0.24); // Repositioned outward corresponding to the envelope
     npcBenefit.mesh.rotation.y = Math.PI / 5;
     npcBenefit.mesh.userData = { id: 'npc_benefit' };
     acornGroup.add(npcBenefit.mesh);
@@ -830,7 +830,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xf6e05e, light: 0xfffaf0, dark: 0x744210 },
       { hasGlasses: true, glassesColor: 0xa0aec0, coatColor: 0xffffff } 
     );
-    npcDashboard.mesh.position.set(-0.21, -0.64, -0.05); // Repositioned
+    npcDashboard.mesh.position.set(-0.26, -0.64, 0.0); // Repositioned outward corresponding to the globe
     npcDashboard.mesh.rotation.y = Math.PI / 2.5;
     npcDashboard.mesh.userData = { id: 'npc_dashboard' };
     acornGroup.add(npcDashboard.mesh);
@@ -1032,16 +1032,16 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
 
       // 13. CLOSE-UP CAMERA EYE LEVEL: Close zoom-in tracking Rogi
       if (entered) {
-        const targetCamX = rogiX * 0.72; 
-        const targetCamY = -0.64 + 0.22; // Low camera height (close to ground)
-        const targetCamZ = rogiZ + 0.65; // Extremely close Z distance (0.65 instead of 1.62)
+        const targetCamX = rogiX; 
+        const targetCamY = -0.64 + 0.28; // Slightly higher camera so it is easier to see the character
+        const targetCamZ = rogiZ + 0.88; // Slightly further Z to ensure the player character doesn't get clipped and is visible in the lower center
 
         camera.position.x += (targetCamX - camera.position.x) * 0.07;
         camera.position.y += (targetCamY - camera.position.y) * 0.07;
         camera.position.z += (targetCamZ - camera.position.z) * 0.07;
 
-        // Look at Rogi's eye level (slightly above ground)
-        camera.lookAt(new THREE.Vector3(camera.position.x, -0.64 + 0.08, camera.position.z - 0.65));
+        // Directly look at Rogi's actual coordinates (slightly above his pivot ground level)
+        camera.lookAt(new THREE.Vector3(rogiX, -0.64 + 0.09, rogiZ));
       } else {
         camera.position.x += (0 - camera.position.x) * 0.08;
         camera.position.y += (0 - camera.position.y) * 0.08;
