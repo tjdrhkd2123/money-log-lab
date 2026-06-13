@@ -886,18 +886,19 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
       // 12. Dynamic Transition Interpolation (Opaque Acorn -> Transparent Lab Room)
       const entered = isEnteredRef.current;
 
-      // Camera Targets (Third-Person Follow Camera when inside, standard front view when outside)
+      // Camera Targets (Animal Crossing-style Panning Follow Camera when inside)
       if (entered) {
-        const targetCamX = rogiX;
-        const targetCamY = -0.64 + 0.45; // slightly above the floor looking down
-        const targetCamZ = rogiZ + 1.0;  // keep follow distance from behind
+        // Camera pans horizontally and vertically to track Rogi, keeping a cozy overhead perspective
+        const targetCamX = rogiX * 0.72; 
+        const targetCamY = 0.28;        
+        const targetCamZ = rogiZ + 1.62; 
 
-        camera.position.x += (targetCamX - camera.position.x) * 0.08;
-        camera.position.y += (targetCamY - camera.position.y) * 0.08;
-        camera.position.z += (targetCamZ - camera.position.z) * 0.08;
+        camera.position.x += (targetCamX - camera.position.x) * 0.07;
+        camera.position.y += (targetCamY - camera.position.y) * 0.07;
+        camera.position.z += (targetCamZ - camera.position.z) * 0.07;
 
-        // Aim the camera at Rogi's head height
-        camera.lookAt(new THREE.Vector3(rogiX, -0.64 + 0.22, rogiZ));
+        // Fixed yaw rotation: look straight ahead relative to camera position to avoid dizzying turns
+        camera.lookAt(new THREE.Vector3(camera.position.x, -0.64 + 0.14, camera.position.z - 1.62));
       } else {
         camera.position.x += (0 - camera.position.x) * 0.08;
         camera.position.y += (0 - camera.position.y) * 0.08;
