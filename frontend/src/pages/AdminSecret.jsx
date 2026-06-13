@@ -938,8 +938,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           
           {/* Post Tabs list (Left column) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: '8px' }}>
-              DAILY ACORNS POST LIST
+            <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: '8px' }}>
+              오늘의 로기 수집 포스팅 리스트
             </span>
             
             {dashboardData.dailyAcorns.generated.posts.map(post => (
@@ -996,8 +996,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     marginBottom: '24px'
                   }}>
                     <div>
-                      <span style={{ fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-accent-emerald)', textTransform: 'uppercase' }}>
-                        SEO OPTIMIZED POST DRAFT
+                      <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', textTransform: 'uppercase' }}>
+                        로기의 맞춤형 SEO 포스팅 초안
                       </span>
                       <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)', marginTop: '4px', fontFamily: 'var(--font-headers)' }}>
                         {activeTab === 'economic' ? 'MACRO' :
