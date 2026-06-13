@@ -369,8 +369,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
             />
           </div>
 
-          {/* Absolute Navigation Header overlayed on Home - Only show when entered */}
-          {isEntered && (
+          {/* Absolute Navigation Header overlayed on Home - Only show when NOT entered */}
+          {!isEntered && (
             <header className="app-header" style={{ 
               position: 'absolute', 
               top: 0, 
@@ -393,11 +393,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
               </div>
 
               <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <button onClick={() => setActiveOverlay('dashboard')} style={{ background: 'none', border: 'none', color: activeOverlay === 'dashboard' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'dashboard' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 대시보드</button>
-                <button onClick={() => setActiveOverlay('news')} style={{ background: 'none', border: 'none', color: activeOverlay === 'news' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'news' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
-                <button onClick={() => setActiveOverlay('calculators')} style={{ background: 'none', border: 'none', color: activeOverlay === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
-                <button onClick={() => setActiveOverlay('benefits')} style={{ background: 'none', border: 'none', color: activeOverlay === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
-                <button onClick={() => setActiveOverlay('subscribe')} style={{ background: 'none', border: 'none', color: activeOverlay === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('dashboard'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>금융 대시보드</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('news'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>실시간 뉴스 📰</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('calculators'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>금융 계산기 💱</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('benefits'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>파트너 혜택 🪙</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('subscribe'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>도토리 구독 🌰</button>
 
                 {isAdmin && (
                   <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>🔐 시크릿 룸</button>
@@ -419,31 +419,31 @@ export default function LandingPage({ onNavigateToAdmin }) {
           )}
 
           {/* Floating Title Overlay */}
-          <div style={{
-            position: 'absolute',
-            top: isEntered ? '8%' : '20%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            textAlign: 'center',
-            zIndex: 10,
-            pointerEvents: 'none',
-            width: '90%',
-            maxWidth: '600px',
-            transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}>
-            <h1 style={{
-              fontSize: isEntered ? 'clamp(24px, 3.5vw, 32px)' : 'clamp(44px, 7vw, 68px)',
-              fontWeight: '900',
-              fontFamily: 'var(--font-headers)',
-              letterSpacing: '-0.04em',
-              background: 'linear-gradient(to bottom, #ffffff 40%, var(--color-accent-blue) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '6px',
-              textShadow: '0 4px 24px rgba(0,0,0,0.85)',
-              transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}>로기 경제연구소</h1>
-          </div>
+          {!isEntered && (
+            <div style={{
+              position: 'absolute',
+              top: '20%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              textAlign: 'center',
+              zIndex: 10,
+              pointerEvents: 'none',
+              width: '90%',
+              maxWidth: '600px'
+            }}>
+              <h1 style={{
+                fontSize: 'clamp(44px, 7vw, 68px)',
+                fontWeight: '900',
+                fontFamily: 'var(--font-headers)',
+                letterSpacing: '-0.04em',
+                background: 'linear-gradient(to bottom, #ffffff 40%, var(--color-accent-blue) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                marginBottom: '6px',
+                textShadow: '0 4px 24px rgba(0,0,0,0.85)'
+              }}>로기 경제연구소</h1>
+            </div>
+          )}
 
           {/* Opaque Acorn state: "연구소 들어가기" Button */}
           {!isEntered ? (

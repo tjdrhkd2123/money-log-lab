@@ -783,6 +783,8 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         }
       }
 
+      sqGroup.scale.set(0.55, 0.55, 0.55); // 캐릭터 크기 45% 축소로 많이 작아지게 조정
+
       return {
         mesh: sqGroup,
         bodyGroup: sqBodyGroup,
@@ -846,20 +848,20 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     acornGroup.add(npcDashboard.mesh);
     clickables.push(npcDashboard.mesh);
 
-    // 8l. Dropshadow for Rogi
+    // 8l. Dropshadow for Rogi (Scale down)
     const shadowMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
       opacity: 0.0,
       depthWrite: false
     });
-    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.075, 16), shadowMat);
+    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
     shadowMesh.position.set(0, -0.648, 0.15); 
     shadowMesh.renderOrder = 1;
     acornGroup.add(shadowMesh);
 
-    // Dropshadows for NPCs
+    // Dropshadows for NPCs (Scale down)
     const createNPCShadow = (npcMesh) => {
       const npcShadowMat = new THREE.MeshBasicMaterial({
         color: 0x000000,
@@ -867,7 +869,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         opacity: 0.0,
         depthWrite: false
       });
-      const npcShadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.07, 16), npcShadowMat);
+      const npcShadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.042, 16), npcShadowMat);
       npcShadowMesh.rotation.x = -Math.PI / 2;
       npcShadowMesh.position.set(npcMesh.position.x, -0.648, npcMesh.position.z);
       npcShadowMesh.renderOrder = 1;
@@ -1001,7 +1003,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     let clock = new THREE.Clock();
     let rogiX = 0;
     let rogiZ = 0.15; 
-    const rogiSpeed = 0.0065; 
+    const rogiSpeed = 0.0042; 
 
     let currentNearNPCId = null;
 
@@ -1205,7 +1207,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         ];
 
         let closestNPC = null;
-        let minNPCListDist = 0.22; // Proximity threshold
+        let minNPCListDist = 0.14; // Proximity threshold
 
         npcs.forEach(npc => {
           const dx = rogiX - npc.x;
