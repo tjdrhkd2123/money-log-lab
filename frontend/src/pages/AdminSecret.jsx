@@ -938,8 +938,8 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
           
           {/* Post Tabs list (Left column) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: '8px' }}>
-              오늘의 로기 수집 포스팅 리스트
+            <span style={{ fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: '8px' }}>
+              DAILY ACORNS POST LIST
             </span>
             
             {dashboardData.dailyAcorns.generated.posts.map(post => (
@@ -947,7 +947,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                 key={post.category}
                 onClick={() => setActiveTab(post.category)}
                 style={{
-                  background: activeTab === post.category ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-secondary)',
+                  background: activeTab === post.category ? 'rgba(197, 168, 128, 0.08)' : 'var(--bg-secondary)',
                   border: '1px solid',
                   borderColor: activeTab === post.category ? 'var(--color-accent-blue)' : 'var(--color-card-border)',
                   borderRadius: 'var(--border-radius-md)',
@@ -964,12 +964,12 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                   <span style={{
                     fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)',
-                    textTransform: 'uppercase', color: 'var(--color-accent-blue)'
+                    textTransform: 'uppercase', color: 'var(--color-accent-blue)', letterSpacing: '0.05em'
                   }}>
-                    {post.category === 'economic' ? '📊 경제·글로벌' : 
-                     post.category === 'stock' ? '📈 국내 주식' :
-                     post.category === 'bitgetCoin' ? '🪙 Bitget 코인' :
-                     post.category === 'okxCoin' ? '🪙 OKX 코인' : '🏠 부동산 칼럼'}
+                    {post.category === 'economic' ? 'MACRO' : 
+                     post.category === 'stock' ? 'STOCKS' :
+                     post.category === 'bitgetCoin' ? 'CRYPTO (BITGET)' :
+                     post.category === 'okxCoin' ? 'CRYPTO (OKX)' : 'REAL ESTATE'}
                   </span>
                   <FileCheck size={14} style={{ color: 'var(--color-accent-emerald)' }} />
                 </div>
@@ -996,14 +996,14 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     marginBottom: '24px'
                   }}>
                     <div>
-                      <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', textTransform: 'uppercase' }}>
-                        로기의 맞춤형 SEO 포스팅 초안
+                      <span style={{ fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-accent-emerald)', textTransform: 'uppercase' }}>
+                        SEO OPTIMIZED POST DRAFT
                       </span>
-                      <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', marginTop: '4px' }}>
-                        {activeTab === 'economic' ? '📊 경제·글로벌 포스팅' :
-                         activeTab === 'stock' ? '📈 주식 분석 포스팅' :
-                         activeTab === 'bitgetCoin' ? '🪙 Bitget 코인 포스팅' :
-                         activeTab === 'okxCoin' ? '🪙 OKX 코인 포스팅' : '🏠 부동산 칼럼'}
+                      <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)', marginTop: '4px', fontFamily: 'var(--font-headers)' }}>
+                        {activeTab === 'economic' ? 'MACRO' :
+                         activeTab === 'stock' ? 'STOCKS' :
+                         activeTab === 'bitgetCoin' ? 'CRYPTO (BITGET)' :
+                         activeTab === 'okxCoin' ? 'CRYPTO (OKX)' : 'REAL ESTATE'}
                       </h2>
                     </div>
 
@@ -1034,9 +1034,9 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {activePost.titles.map((title, idx) => (
                         <div key={idx} style={{
-                          background: title.startsWith('✅') ? 'rgba(37, 99, 235, 0.04)' : 'var(--bg-tertiary)',
+                          background: title.startsWith('✅') ? 'rgba(197, 168, 128, 0.04)' : 'var(--bg-tertiary)',
                           border: '1px solid',
-                          borderColor: title.startsWith('✅') ? 'rgba(37, 99, 235, 0.15)' : 'var(--color-card-border)',
+                          borderColor: title.startsWith('✅') ? 'rgba(197, 168, 128, 0.15)' : 'var(--color-card-border)',
                           padding: '10px 16px', borderRadius: '8px', fontSize: '14px',
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           color: 'var(--color-text-primary)'
@@ -1052,7 +1052,7 @@ ${post.hashtags.map(tag => `#${tag}`).join(' ')}
 
                   {/* Upper Trailer box (스포일러 방지 오늘의 핵심 정리) */}
                   <div style={{
-                    background: 'rgba(37, 99, 235, 0.03)', border: '1px solid rgba(37, 99, 235, 0.15)',
+                    background: 'rgba(197, 168, 128, 0.03)', border: '1px solid rgba(197, 168, 128, 0.15)',
                     padding: '20px', borderRadius: 'var(--border-radius-md)', marginBottom: '24px'
                   }}>
                     <h4 style={{ fontSize: '14px', color: 'var(--color-accent-blue)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>

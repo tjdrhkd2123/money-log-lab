@@ -163,7 +163,7 @@ export default function CardNews() {
           alignItems: 'center',
           padding: '16px 24px',
           borderTop: '1px solid var(--color-card-border)',
-          background: 'rgba(241, 245, 249, 0.6)'
+          background: 'rgba(0, 0, 0, 0.2)'
         }}>
           {/* Prev Button */}
           <button 
