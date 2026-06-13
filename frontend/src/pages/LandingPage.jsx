@@ -283,9 +283,155 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const filteredNews = news.filter(item => item.category === newsTab);
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       
-      <header className="app-header" style={{ borderBottom: '1px solid var(--color-card-border)', paddingBottom: '20px', marginBottom: '40px' }}>
+      {/* 1. Immersive Splash Screen (100vh) */}
+      {activeView === 'home' && (
+        <section className="hero-splash-screen" style={{ 
+          position: 'relative',
+          width: '100%',
+          height: '100vh',
+          background: 'radial-gradient(circle at center, #241c15 0%, #0a0b0d 100%)',
+          overflow: 'hidden'
+        }}>
+          {/* Fullscreen 3D Canvas */}
+          <div style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100%', 
+            zIndex: 1 
+          }}>
+            <ThreeDHero onWhiteboardClick={handleWhiteboardClick} />
+          </div>
+
+          {/* Clean Floating Title Overlay */}
+          <div style={{
+            position: 'absolute',
+            top: '12%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            textAlign: 'center',
+            zIndex: 10,
+            pointerEvents: 'none',
+            width: '90%',
+            maxWidth: '600px'
+          }}>
+            <h1 style={{
+              fontSize: 'clamp(38px, 6vw, 62px)',
+              fontWeight: '900',
+              fontFamily: 'var(--font-headers)',
+              letterSpacing: '-0.04em',
+              background: 'linear-gradient(to bottom, #ffffff 40%, var(--color-accent-blue) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              marginBottom: '12px',
+              textShadow: '0 4px 24px rgba(0,0,0,0.85)'
+            }}>로기 경제연구소</h1>
+            <p style={{
+              fontSize: 'clamp(14px, 2vw, 18px)',
+              color: 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-headers)',
+              fontWeight: '600',
+              letterSpacing: '0.08em',
+              opacity: 0.9,
+              textShadow: '0 2px 8px rgba(0,0,0,0.5)'
+            }}>다람쥐 연구원 로기의 3D 금융 공간 🐿️</p>
+          </div>
+
+          {/* Dynamic Instructions Guide Overlay */}
+          <div 
+            className="tooltip-bounce"
+            style={{
+              position: 'absolute',
+              bottom: '120px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              background: 'linear-gradient(135deg, rgba(197, 168, 128, 0.9) 0%, rgba(10, 11, 13, 0.9) 100%)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#ffffff',
+              padding: '10px 20px',
+              borderRadius: '30px',
+              fontSize: '13px',
+              fontWeight: '800',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(197, 168, 128, 0.3)',
+              pointerEvents: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🎮 키보드 방향키(←, → 또는 A, D)로 로기를 조종해봐! 🐿️
+          </div>
+
+          {/* Interactive Guide Tooltip over Whiteboard */}
+          <div 
+            className="tooltip-bounce"
+            style={{
+              position: 'absolute',
+              top: '25%',
+              right: '8%',
+              zIndex: 10,
+              background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #a38d6b 100%)',
+              color: '#ffffff',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              boxShadow: '0 4px 15px rgba(197, 168, 128, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              pointerEvents: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            💡 화이트보드를 누르면 뉴스가 열려! 📰
+          </div>
+
+          {/* Scroll Down Indicator */}
+          <div style={{
+            position: 'absolute',
+            bottom: '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            textAlign: 'center',
+            color: 'var(--color-text-secondary)',
+            fontSize: '13px',
+            fontWeight: '700',
+            pointerEvents: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <div style={{ opacity: 0.8 }}>아래로 스크롤하여 대시보드 들어가기</div>
+            <div className="tooltip-bounce" style={{ fontSize: '20px', color: 'var(--color-accent-blue)' }}>↓</div>
+          </div>
+        </section>
+      )}
+
+      {/* 2. Main content wrapper (Centered and width limited) */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px 20px' }}>
+      
+      <header className="app-header" style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 100, 
+        background: 'rgba(10, 11, 13, 0.85)', 
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--color-card-border)', 
+        padding: '16px 0', 
+        marginBottom: '40px'
+      }}>
         <div className="app-header-logo" onClick={() => setActiveView('home')} style={{ cursor: 'pointer' }}>
           <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)' }}>🐿️</div>
           <div>
@@ -321,40 +467,32 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
       {activeView === 'home' && (
         <>
-          <section className="hero-section-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '40px', margin: '0 auto 60px auto', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 480px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(197, 168, 128, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(197, 168, 128, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
-              <h1 className="hero-title" style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가 쉽고 빠르게 정리해줄게!</h1>
-              <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '28px', fontWeight: '400' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
-              <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
+          <div id="dashboard-title-section" style={{ height: '1px', marginBottom: '20px' }} /> {/* target for scroll */}
+          
+          {/* Introduction & Subscription Banner */}
+          <section className="glass-card" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            gap: '45px', 
+            padding: '40px',
+            borderRadius: '24px',
+            marginBottom: '50px', 
+            flexWrap: 'wrap',
+            background: 'linear-gradient(135deg, rgba(20, 22, 26, 0.6) 0%, rgba(10, 11, 13, 0.8) 100%)'
+          }}>
+            <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+              <div style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(197, 168, 128, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(197, 168, 128, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가 쉽고 빠르게 정리해줄게!</h2>
+              <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '24px', fontWeight: '400' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
+              <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '12px 24px', fontSize: '14.5px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
             </div>
-            
-            <div style={{ flex: '1 1 320px', minWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-              {/* Floating Tooltip Guide */}
-              <div 
-                className="tooltip-bounce"
-                style={{
-                  position: 'absolute',
-                  top: '-15px',
-                  zIndex: 10,
-                  background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #a38d6b 100%)',
-                  color: '#ffffff',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '12.5px',
-                  fontWeight: '700',
-                  boxShadow: '0 4px 15px rgba(197, 168, 128, 0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  pointerEvents: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                💡 도토리 연구실 안의 화이트보드를 누르면 뉴스가 열려! 📰
+            <div style={{ flex: '1 1 250px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', background: 'rgba(197, 168, 128, 0.03)', borderRadius: '20px', border: '1px solid rgba(197, 168, 128, 0.08)' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🐿️📬</span>
+                <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>구독자 전용 혜택</h4>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: '1.5' }}>매일 아침 무료 레터 발송<br/>이슈 키워드 요약 노트 제공</p>
               </div>
-              <ThreeDHero onWhiteboardClick={handleWhiteboardClick} />
             </div>
           </section>
 
@@ -650,5 +788,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
         <p style={{ marginTop: '5px' }}>다람쥐 연구원 로기가 물어오는 똑똑한 금융 도토리 🐿️🌰</p>
       </footer>
     </div>
+  </div>
   );
 }

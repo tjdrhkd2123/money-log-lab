@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import rogiMascotUrl from '../assets/rogi_mascot.png';
 
 export default function ThreeDHero({ onWhiteboardClick }) {
   const containerRef = useRef(null);
@@ -187,40 +186,151 @@ export default function ThreeDHero({ onWhiteboardClick }) {
 
     const clickables = [wbMesh]; // Objects clickable by Raycaster
 
-    // 8. Build Inner Rogi Mascot (White Background Removed dynamically)
-    const rogiMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      side: THREE.DoubleSide
-    });
+    // 8. Build Inner 3D Rogi Mascot
+    const create3DRogi = () => {
+      const rogiGroup = new THREE.Group();
 
-    const img = new Image();
-    img.src = rogiMascotUrl;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+      // Materials
+      const brownMat = new THREE.MeshStandardMaterial({
+        color: 0xc07a43, // Squirrel chestnut brown
+        roughness: 0.8,
+        metalness: 0.1
+      });
+      const creamMat = new THREE.MeshStandardMaterial({
+        color: 0xf3e5ab, // Soft cream belly/cheeks
+        roughness: 0.8,
+        metalness: 0.1
+      });
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x222222, // Eyes/nose
+        roughness: 0.5,
+        metalness: 0.1
+      });
 
-      // Chroma keying: remove white background pixels
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
-          data[i+3] = 0; // Alpha transparent
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
+      // 1. Body
+      const bodyGeom = new THREE.SphereGeometry(0.22, 16, 16);
+      const bodyMesh = new THREE.Mesh(bodyGeom, brownMat);
+      bodyMesh.scale.set(1, 1.35, 0.95);
+      bodyMesh.position.y = 0.28;
+      rogiGroup.add(bodyMesh);
 
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.minFilter = THREE.LinearFilter;
-      rogiMaterial.map = texture;
-      rogiMaterial.needsUpdate = true;
+      // Belly patch (cream sphere squashed)
+      const bellyGeom = new THREE.SphereGeometry(0.15, 12, 12);
+      const bellyMesh = new THREE.Mesh(bellyGeom, creamMat);
+      bellyMesh.scale.set(0.9, 1.1, 0.5);
+      bellyMesh.position.set(0, 0.26, 0.14);
+      rogiGroup.add(bellyMesh);
+
+      // 2. Head
+      const headGeom = new THREE.SphereGeometry(0.18, 16, 16);
+      const headMesh = new THREE.Mesh(headGeom, brownMat);
+      headMesh.position.set(0, 0.55, 0.02);
+      rogiGroup.add(headMesh);
+
+      // Cheeks (cream spheres)
+      const cheekL = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), creamMat);
+      cheekL.position.set(-0.05, 0.51, 0.13);
+      rogiGroup.add(cheekL);
+      const cheekR = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), creamMat);
+      cheekR.position.set(0.05, 0.51, 0.13);
+      rogiGroup.add(cheekR);
+
+      // Snout/Nose
+      const nose = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), darkMat);
+      nose.position.set(0, 0.54, 0.18);
+      rogiGroup.add(nose);
+
+      // Eyes
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), darkMat);
+      eyeL.position.set(-0.08, 0.58, 0.12);
+      rogiGroup.add(eyeL);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), darkMat);
+      eyeR.position.set(0.08, 0.58, 0.12);
+      rogiGroup.add(eyeR);
+
+      // Ears (outer)
+      const earGeom = new THREE.ConeGeometry(0.045, 0.12, 4);
+      earGeom.translate(0, 0.06, 0);
+
+      const earL = new THREE.Mesh(earGeom, brownMat);
+      earL.position.set(-0.11, 0.68, 0.02);
+      earL.rotation.z = 0.22;
+      rogiGroup.add(earL);
+
+      const earR = new THREE.Mesh(earGeom, brownMat);
+      earR.position.set(0.11, 0.68, 0.02);
+      earR.rotation.z = -0.22;
+      rogiGroup.add(earR);
+
+      // 3. Bushy Tail (Curved chain of spheres)
+      const tailGroup = new THREE.Group();
+      tailGroup.position.set(0, 0.15, -0.15);
+      
+      const tailSpheres = [
+        { r: 0.08, pos: [0, 0.06, -0.05] },
+        { r: 0.12, pos: [0, 0.18, -0.12] },
+        { r: 0.15, pos: [0, 0.32, -0.16] },
+        { r: 0.13, pos: [0, 0.42, -0.12] },
+        { r: 0.09, pos: [0, 0.46, -0.02] }
+      ];
+
+      tailSpheres.forEach(spec => {
+        const sMesh = new THREE.Mesh(new THREE.SphereGeometry(spec.r, 12, 12), brownMat);
+        sMesh.position.set(...spec.pos);
+        tailGroup.add(sMesh);
+      });
+      rogiGroup.add(tailGroup);
+
+      // 4. Arms (holding an acorn!)
+      const armGeom = new THREE.CylinderGeometry(0.03, 0.02, 0.18, 8);
+      armGeom.translate(0, -0.09, 0);
+
+      const armL = new THREE.Mesh(armGeom, brownMat);
+      armL.position.set(-0.16, 0.38, 0.05);
+      armL.rotation.z = 0.45;
+      armL.rotation.x = 0.6;
+      rogiGroup.add(armL);
+
+      const armR = new THREE.Mesh(armGeom, brownMat);
+      armR.position.set(0.16, 0.38, 0.05);
+      armR.rotation.z = -0.45;
+      armR.rotation.x = 0.6;
+      rogiGroup.add(armR);
+
+      // Small 3D acorn held by Rogi!
+      const heldAcorn = new THREE.Group();
+      heldAcorn.position.set(0, 0.32, 0.18);
+      heldAcorn.scale.set(0.15, 0.15, 0.15);
+      
+      const haBody = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({ color: 0xb45309 }));
+      haBody.scale.set(1, 1.2, 1);
+      const haCap = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      haCap.position.y = 0.12;
+      heldAcorn.add(haBody);
+      heldAcorn.add(haCap);
+      rogiGroup.add(heldAcorn);
+
+      // 5. Legs
+      const legGeom = new THREE.CylinderGeometry(0.04, 0.03, 0.16, 8);
+      legGeom.translate(0, -0.08, 0);
+
+      const legL = new THREE.Mesh(legGeom, brownMat);
+      legL.position.set(-0.1, 0.12, 0.02);
+      rogiGroup.add(legL);
+
+      const legR = new THREE.Mesh(legGeom, brownMat);
+      legR.position.set(0.1, 0.12, 0.02);
+      rogiGroup.add(legR);
+
+      // Expose joints for animation in loop
+      rogiGroup.userData = { legL, legR, armL, armR, tailGroup };
+
+      return rogiGroup;
     };
 
-    const rogiGeom = new THREE.PlaneGeometry(1.2, 1.2);
-    const rogiMesh = new THREE.Mesh(rogiGeom, rogiMaterial);
-    rogiMesh.position.set(0, -0.32, 0.1); // Stand on the laboratory floor
+    const rogiMesh = create3DRogi();
+    rogiMesh.position.set(0, -0.61, 0.1); // Stand on the laboratory floor
+    rogiMesh.scale.set(1.15, 1.15, 1.15);
     rogiMesh.renderOrder = 1; // Render before glass
     acornGroup.add(rogiMesh);
 
@@ -235,6 +345,7 @@ export default function ThreeDHero({ onWhiteboardClick }) {
 
     const checkIntersection = (x, y) => {
       mouseVec.set(x, y);
+      acornGroup.updateMatrixWorld(true); // Ensure coordinates are completely fresh
       raycaster.setFromCamera(mouseVec, camera);
       // Raycast objects inside the group (need to check their world coordinates)
       const intersects = raycaster.intersectObjects(clickables);
@@ -276,12 +387,36 @@ export default function ThreeDHero({ onWhiteboardClick }) {
     window.addEventListener('mousemove', handleMouseMove);
     canvasRef.current.addEventListener('click', handleCanvasClick);
 
-    // 10. Animation Pacing variables
+    // 10. Keyboard controls tracker
+    const keysPressed = { Left: false, Right: false };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+        keysPressed.Left = true;
+      }
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+        keysPressed.Right = true;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+        keysPressed.Left = false;
+      }
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+        keysPressed.Right = false;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    // 11. Animation variables
     let animationFrameId;
     let clock = new THREE.Clock();
     let rogiX = 0;
     let rogiDirection = 1; // 1 = right, -1 = left
-    const rogiSpeed = 0.0055;
+    const rogiSpeed = 0.0075; // Slightly faster for interactive responsiveness
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -297,24 +432,54 @@ export default function ThreeDHero({ onWhiteboardClick }) {
       acornGroup.rotation.x = mouseY * 0.35;
       acornGroup.position.y = Math.sin(time * 0.8) * 0.05;
 
-      // Pacing walking logic inside the laboratory
-      rogiX += rogiSpeed * rogiDirection;
-      if (rogiX > 0.32) {
-        rogiX = 0.32;
+      // Keyboard-driven movement logic inside the laboratory
+      let isWalking = false;
+      if (keysPressed.Left && !keysPressed.Right) {
+        rogiX -= rogiSpeed;
         rogiDirection = -1;
-      } else if (rogiX < -0.32) {
-        rogiX = -0.32;
+        isWalking = true;
+      } else if (keysPressed.Right && !keysPressed.Left) {
+        rogiX += rogiSpeed;
         rogiDirection = 1;
+        isWalking = true;
       }
 
+      // Constrain within circular floor bounds
+      if (rogiX > 0.32) rogiX = 0.32;
+      if (rogiX < -0.32) rogiX = -0.32;
+
       rogiMesh.position.x = rogiX;
-      
-      // Flip scale dynamically depending on walking direction
       rogiMesh.scale.x = rogiDirection * 1.15;
-      
-      // Walking bobbing / wobble bounce
-      rogiMesh.position.y = -0.32 + Math.abs(Math.sin(time * 8.5)) * 0.05;
-      rogiMesh.rotation.z = Math.sin(time * 8.5) * 0.04;
+
+      // Animate joints based on movement state
+      if (isWalking) {
+        // Walking limb swing animation
+        const walkCycle = Math.sin(time * 14);
+        if (rogiMesh.userData.legL) rogiMesh.userData.legL.rotation.x = walkCycle * 0.55;
+        if (rogiMesh.userData.legR) rogiMesh.userData.legR.rotation.x = -walkCycle * 0.55;
+        if (rogiMesh.userData.armL) rogiMesh.userData.armL.rotation.x = 0.6 - walkCycle * 0.25;
+        if (rogiMesh.userData.armR) rogiMesh.userData.armR.rotation.x = 0.6 + walkCycle * 0.25;
+        
+        // Wobble & bobbing bounce
+        rogiMesh.position.y = -0.61 + Math.abs(Math.sin(time * 14)) * 0.04;
+        rogiMesh.rotation.z = Math.sin(time * 14) * 0.04;
+        if (rogiMesh.userData.tailGroup) {
+          rogiMesh.userData.tailGroup.rotation.z = Math.sin(time * 7) * 0.08;
+        }
+      } else {
+        // Idle smooth interpolation to stance
+        if (rogiMesh.userData.legL) rogiMesh.userData.legL.rotation.x += (0 - rogiMesh.userData.legL.rotation.x) * 0.15;
+        if (rogiMesh.userData.legR) rogiMesh.userData.legR.rotation.x += (0 - rogiMesh.userData.legR.rotation.x) * 0.15;
+        if (rogiMesh.userData.armL) rogiMesh.userData.armL.rotation.x += (0.6 - rogiMesh.userData.armL.rotation.x) * 0.15;
+        if (rogiMesh.userData.armR) rogiMesh.userData.armR.rotation.x += (0.6 - rogiMesh.userData.armR.rotation.x) * 0.15;
+        
+        // Breathing movement
+        rogiMesh.position.y = -0.61 + Math.sin(time * 1.8) * 0.012;
+        rogiMesh.rotation.z += (0 - rogiMesh.rotation.z) * 0.15;
+        if (rogiMesh.userData.tailGroup) {
+          rogiMesh.userData.tailGroup.rotation.z = Math.sin(time * 1.8) * 0.04;
+        }
+      }
 
       renderer.render(scene, camera);
     };
@@ -340,6 +505,8 @@ export default function ThreeDHero({ onWhiteboardClick }) {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
       if (canvasRef.current) {
         canvasRef.current.removeEventListener('click', handleCanvasClick);
       }
@@ -352,7 +519,7 @@ export default function ThreeDHero({ onWhiteboardClick }) {
       ref={containerRef} 
       style={{ 
         width: '100%', 
-        height: '420px', 
+        height: '100%', 
         position: 'relative', 
         display: 'flex', 
         alignItems: 'center', 
