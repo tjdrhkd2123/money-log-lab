@@ -16,6 +16,69 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [isEntered, setIsEntered] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState(null); // 'dashboard', 'news', 'calculators', 'subscribe', 'benefits'
 
+  // NPC Interaction state variables
+  const [nearNPC, setNearNPC] = useState(null);
+  const [activeNPC, setActiveNPC] = useState(null);
+  const [typedText, setTypedText] = useState('');
+
+  const getNPCDialogText = (id) => {
+    switch (id) {
+      case 'npc_news':
+        return '앗, 로기 소장님! 실시간 금융 뉴스를 요약해서 브리핑 파일로 만들고 있었어요. 📰 글로벌 경제 속보를 바로 확인하시겠어요?';
+      case 'npc_calc':
+        return '소장님 오셨네요! 알려주신 복리 도토리 적금 시뮬레이터와 실시간 원·달러 환율 계산기를 튜닝 중이었어요. 💱 수치를 계산해볼까요?';
+      case 'npc_benefit':
+        return '안녕! 매일 아침 도토리 소식지를 구독한 패밀리들에게 보낼 꿀맛 파트너 혜택 정보를 정리하고 있어. 🪙 실시간 혜택 채널로 안내해줄까?';
+      case 'npc_dashboard':
+        return '소장님, 여기 보세요! 실시간 KOSPI 지수와 글로벌 지표 데이터망에 이상 무! 아주 안정적으로 순환매가 돌고 있답니다. 📊 시황판을 열어볼까요?';
+      default:
+        return '안녕하세요, 로기 소장님! 머니로그 연구소에서 금융 경제 지표를 연구하는 중입니다. 🐿️';
+    }
+  };
+
+  // Typing effect for NPC speech
+  useEffect(() => {
+    if (!activeNPC) {
+      setTypedText('');
+      return;
+    }
+    const fullText = getNPCDialogText(activeNPC.id);
+    setTypedText('');
+    let idx = 0;
+    const interval = setInterval(() => {
+      if (idx < fullText.length) {
+        setTypedText(fullText.substring(0, idx + 1));
+        idx++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 25);
+    return () => clearInterval(interval);
+  }, [activeNPC]);
+
+  // Space key interaction for dialogue activation
+  useEffect(() => {
+    const handleDialogueKeyDown = (e) => {
+      if (isEntered && nearNPC && !activeNPC && e.key === ' ') {
+        e.preventDefault();
+        setActiveNPC(nearNPC);
+      }
+    };
+    window.addEventListener('keydown', handleDialogueKeyDown);
+    return () => window.removeEventListener('keydown', handleDialogueKeyDown);
+  }, [isEntered, nearNPC, activeNPC]);
+
+  const handleNPCChoice = (type) => {
+    if (!activeNPC) return;
+    if (type === 'action') {
+      if (activeNPC.id === 'npc_news') setActiveOverlay('news');
+      else if (activeNPC.id === 'npc_calc') setActiveOverlay('calculators');
+      else if (activeNPC.id === 'npc_benefit') setActiveOverlay('benefits');
+      else if (activeNPC.id === 'npc_dashboard') setActiveOverlay('dashboard');
+    }
+    setActiveNPC(null);
+  };
+
   const [news, setNews] = useState([]);
   const [newsTab, setNewsTab] = useState('economy');
   const [indices, setIndices] = useState(null);
@@ -299,7 +362,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
             height: '100%', 
             zIndex: 1 
           }}>
-            <ThreeDHero onItemClick={(id) => setActiveOverlay(id)} isEntered={isEntered} />
+            <ThreeDHero 
+              onItemClick={(id) => setActiveOverlay(id)} 
+              onNearNPCChange={(npc) => setNearNPC(npc)}
+              isEntered={isEntered} 
+            />
           </div>
 
           {/* Absolute Navigation Header overlayed on Home - Only show when entered */}
@@ -508,6 +575,138 @@ export default function LandingPage({ onNavigateToAdmin }) {
               >
                 🌐 홀로그램: 실시간 뉴스
               </div>
+
+              {/* NPC Proximity Tooltip */}
+              {nearNPC && !activeNPC && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '95px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 100,
+                  background: 'rgba(15, 23, 42, 0.88)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1.5px solid var(--color-accent-blue)',
+                  color: '#ffffff',
+                  padding: '8px 18px',
+                  borderRadius: '20px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.35)',
+                  animation: 'fadeIn 0.2s ease-out'
+                }}>
+                  <span>💬 <strong>{nearNPC.name}</strong> ({nearNPC.role})</span>
+                  <button 
+                    onClick={() => setActiveNPC(nearNPC)}
+                    style={{
+                      background: 'var(--color-accent-blue)',
+                      border: 'none',
+                      color: '#ffffff',
+                      padding: '3px 10px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      transition: 'all 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    대화하기 [Space]
+                  </button>
+                </div>
+              )}
+
+              {/* Animal Crossing Style Dialogue Box */}
+              {activeNPC && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '40px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '90%',
+                  maxWidth: '540px',
+                  height: '150px',
+                  zIndex: 500,
+                  background: 'rgba(255, 253, 240, 0.95)',
+                  border: '4px solid #8c6d53',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+                  borderRadius: '24px',
+                  padding: '16px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  color: '#4a2f13',
+                  animation: 'fadeIn 0.2s ease-out'
+                }}>
+                  {/* Name Plate */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-16px',
+                    left: '24px',
+                    background: '#e69855',
+                    border: '3px solid #8c6d53',
+                    borderRadius: '12px',
+                    padding: '2px 14px',
+                    fontWeight: '900',
+                    fontSize: '13px',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+                  }}>
+                    {activeNPC.name}
+                  </div>
+
+                  {/* Message Content */}
+                  <div style={{ fontSize: '15px', fontWeight: '700', lineHeight: '1.6', marginTop: '8px', textAlign: 'left' }}>
+                    {typedText}
+                  </div>
+
+                  {/* Interaction Buttons (Choices) */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                    <button 
+                      onClick={() => handleNPCChoice('action')}
+                      style={{
+                        background: '#8c6d53',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        fontSize: '12px',
+                        padding: '6px 14px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        transition: 'all 0.1s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      {activeNPC.id === 'npc_news' && '📰 뉴스 확인하기'}
+                      {activeNPC.id === 'npc_calc' && '💱 금융 계산기'}
+                      {activeNPC.id === 'npc_benefit' && '🪙 혜택 가이드'}
+                      {activeNPC.id === 'npc_dashboard' && '📊 대시보드 보기'}
+                    </button>
+                    <button 
+                      onClick={() => handleNPCChoice('close')}
+                      style={{
+                        background: 'rgba(0,0,0,0.06)',
+                        border: '1px solid rgba(0,0,0,0.12)',
+                        color: '#4a2f13',
+                        fontWeight: '800',
+                        fontSize: '12px',
+                        padding: '6px 14px',
+                        borderRadius: '12px',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
+                    >
+                      그냥 둘러보기 🐿️
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </section>
