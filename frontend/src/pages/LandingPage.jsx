@@ -104,6 +104,16 @@ export default function LandingPage({ onNavigateToAdmin }) {
     }
   }, [indices]);
 
+  const handleWhiteboardClick = () => {
+    setActiveView('news-clip');
+    setTimeout(() => {
+      const el = document.getElementById('news-section-title');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email) return;
@@ -319,8 +329,32 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
             </div>
             
-            <div style={{ flex: '1 1 320px', minWidth: '320px', display: 'flex', justifyContent: 'center' }}>
-              <ThreeDHero />
+            <div style={{ flex: '1 1 320px', minWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Floating Tooltip Guide */}
+              <div 
+                className="tooltip-bounce"
+                style={{
+                  position: 'absolute',
+                  top: '-15px',
+                  zIndex: 10,
+                  background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #a38d6b 100%)',
+                  color: '#ffffff',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '12.5px',
+                  fontWeight: '700',
+                  boxShadow: '0 4px 15px rgba(197, 168, 128, 0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  pointerEvents: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                💡 도토리 연구실 안의 화이트보드를 누르면 뉴스가 열려! 📰
+              </div>
+              <ThreeDHero onWhiteboardClick={handleWhiteboardClick} />
             </div>
           </section>
 
@@ -370,7 +404,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
       {activeView === 'news-clip' && (
         <section style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
           <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>📰 로기의 실시간 핫이슈 뉴스 클립</h2>
+            <h2 id="news-section-title" style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>📰 로기의 실시간 핫이슈 뉴스 클립</h2>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>구글 뉴스 RSS에서 24시간 이내의 실시간 뉴스 헤드라인을 분야별로 수집해왔어! 🐿️</p>
           </div>
           

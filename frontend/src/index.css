@@ -462,7 +462,15 @@ select:focus {
   align-items: center;
   gap: 6px;
 }
+@keyframes bounce-soft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
 
-
-
-
+.tooltip-bounce {
+  animation: bounce-soft 2.4s infinite ease-in-out;
+}

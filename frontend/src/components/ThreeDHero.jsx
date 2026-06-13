@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import rogiMascotUrl from '../assets/rogi_mascot.png';
 
-export default function ThreeDHero() {
+export default function ThreeDHero({ onWhiteboardClick }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [threeLoaded, setThreeLoaded] = useState(false);
@@ -42,21 +42,21 @@ export default function ThreeDHero() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
     // Key Light (Warm Champagne Gold)
-    const keyLight = new THREE.DirectionalLight(0xc5a880, 2.0);
+    const keyLight = new THREE.DirectionalLight(0xc5a880, 2.2);
     keyLight.position.set(5, 5, 4);
     scene.add(keyLight);
 
     // Fill Light (Soft White)
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
     fillLight.position.set(-5, 3, 2);
     scene.add(fillLight);
 
     // Top Rim Light
-    const topLight = new THREE.DirectionalLight(0xfff8ee, 1.2);
+    const topLight = new THREE.DirectionalLight(0xfff8ee, 1.5);
     topLight.position.set(0, 8, 0);
     scene.add(topLight);
 
@@ -135,32 +135,111 @@ export default function ThreeDHero() {
     acornGroup.scale.set(1.4, 1.4, 1.4);
     scene.add(acornGroup);
 
-    // 6. Build Inner Rogi Mascot
-    const textureLoader = new THREE.TextureLoader();
-    const rogiTexture = textureLoader.load(rogiMascotUrl);
-    
-    // Use high-fidelity texture filtering
-    rogiTexture.minFilter = THREE.LinearFilter;
-    rogiTexture.magFilter = THREE.LinearFilter;
+    // 6. Build Laboratory Floor (Circular Platform)
+    const floorGeom = new THREE.CircleGeometry(0.55, 32);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1f242d, // Deep warm charcoal laboratory floor
+      roughness: 0.85,
+      metalness: 0.1,
+      side: THREE.DoubleSide
+    });
+    const floorMesh = new THREE.Mesh(floorGeom, floorMaterial);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.y = -0.65;
+    acornGroup.add(floorMesh);
 
+    // 7. Build Interactive Whiteboard
+    const wbCanvas = document.createElement('canvas');
+    wbCanvas.width = 256;
+    wbCanvas.height = 128;
+    const wbCtx = wbCanvas.getContext('2d');
+    wbCtx.fillStyle = '#f8fafc'; // White board
+    wbCtx.fillRect(0, 0, 256, 128);
+
+    // Whiteboard border
+    wbCtx.strokeStyle = '#c5a880'; // Gold border
+    wbCtx.lineWidth = 14;
+    wbCtx.strokeRect(0, 0, 256, 128);
+
+    // Board text
+    wbCtx.fillStyle = '#0a0b0d';
+    wbCtx.font = 'bold 36px "Outfit", sans-serif';
+    wbCtx.textAlign = 'center';
+    wbCtx.textBaseline = 'middle';
+    wbCtx.fillText('NEWS 📰', 128, 64);
+
+    const wbTexture = new THREE.CanvasTexture(wbCanvas);
+    const wbMaterial = new THREE.MeshStandardMaterial({
+      map: wbTexture,
+      roughness: 0.3,
+      metalness: 0.1,
+      side: THREE.DoubleSide,
+      emissive: 0x000000,
+      emissiveIntensity: 0
+    });
+
+    const wbGeom = new THREE.PlaneGeometry(0.65, 0.325);
+    const wbMesh = new THREE.Mesh(wbGeom, wbMaterial);
+    wbMesh.position.set(0.12, -0.3, -0.25); // Position inside the room
+    wbMesh.rotation.y = -0.12; // Rotate slightly
+    wbMesh.renderOrder = 1;
+    acornGroup.add(wbMesh);
+
+    const clickables = [wbMesh]; // Objects clickable by Raycaster
+
+    // 8. Build Inner Rogi Mascot (White Background Removed dynamically)
     const rogiMaterial = new THREE.MeshBasicMaterial({
-      map: rogiTexture,
       transparent: true,
       side: THREE.DoubleSide
     });
 
-    // Make Rogi fit inside the transparent acorn body
-    const rogiGeom = new THREE.PlaneGeometry(1.3, 1.3);
-    const rogiMesh = new THREE.Mesh(rogiGeom, rogiMaterial);
-    rogiMesh.position.set(0, -0.15, 0);
-    rogiMesh.renderOrder = 1; // Render before glass
-    scene.add(rogiMesh);
+    const img = new Image();
+    img.src = rogiMascotUrl;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
 
-    // 7. Mouse Tracker variables
+      // Chroma keying: remove white background pixels
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
+          data[i+3] = 0; // Alpha transparent
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      rogiMaterial.map = texture;
+      rogiMaterial.needsUpdate = true;
+    };
+
+    const rogiGeom = new THREE.PlaneGeometry(1.2, 1.2);
+    const rogiMesh = new THREE.Mesh(rogiGeom, rogiMaterial);
+    rogiMesh.position.set(0, -0.32, 0.1); // Stand on the laboratory floor
+    rogiMesh.renderOrder = 1; // Render before glass
+    acornGroup.add(rogiMesh);
+
+    // 9. Mouse Tracker & Raycaster variables
     let mouseX = 0;
     let mouseY = 0;
     let targetMouseX = 0;
     let targetMouseY = 0;
+
+    const raycaster = new THREE.Raycaster();
+    const mouseVec = new THREE.Vector2();
+
+    const checkIntersection = (x, y) => {
+      mouseVec.set(x, y);
+      raycaster.setFromCamera(mouseVec, camera);
+      // Raycast objects inside the group (need to check their world coordinates)
+      const intersects = raycaster.intersectObjects(clickables);
+      return intersects.length > 0 ? intersects[0] : null;
+    };
 
     const handleMouseMove = (event) => {
       if (!canvasRef.current) return;
@@ -170,13 +249,39 @@ export default function ThreeDHero() {
 
       targetMouseX = (x / rect.width) * 2 - 1;
       targetMouseY = -(y / rect.height) * 2 + 1;
+
+      // Check hover for cursor & whiteboard glow feedback
+      const hit = checkIntersection(targetMouseX, targetMouseY);
+      if (hit) {
+        canvasRef.current.style.cursor = 'pointer';
+        wbMesh.material.emissive.setHex(0xc5a880); // Gold glow
+        wbMesh.material.emissiveIntensity = 0.45;
+      } else {
+        canvasRef.current.style.cursor = 'grab';
+        wbMesh.material.emissive.setHex(0x000000);
+        wbMesh.material.emissiveIntensity = 0;
+      }
+    };
+
+    const handleCanvasClick = () => {
+      const hit = checkIntersection(targetMouseX, targetMouseY);
+      if (hit) {
+        // Trigger news view redirection callback
+        if (onWhiteboardClick) {
+          onWhiteboardClick();
+        }
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
+    canvasRef.current.addEventListener('click', handleCanvasClick);
 
-    // 8. Animation loop
+    // 10. Animation Pacing variables
     let animationFrameId;
     let clock = new THREE.Clock();
+    let rogiX = 0;
+    let rogiDirection = 1; // 1 = right, -1 = left
+    const rogiSpeed = 0.0055;
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -188,26 +293,35 @@ export default function ThreeDHero() {
       mouseY += (targetMouseY - mouseY) * 0.07;
 
       // Rotate outer 3D acorn container (tilt towards mouse + auto spin)
-      acornGroup.rotation.y = time * 0.25 + mouseX * 0.7;
-      acornGroup.rotation.x = mouseY * 0.4;
-      acornGroup.position.y = Math.sin(time * 0.9) * 0.06;
+      acornGroup.rotation.y = time * 0.18 + mouseX * 0.6;
+      acornGroup.rotation.x = mouseY * 0.35;
+      acornGroup.position.y = Math.sin(time * 0.8) * 0.05;
 
-      // Animate inner Rogi mascot (floating parallax effect)
-      rogiMesh.position.y = -0.15 + Math.sin(time * 1.4) * 0.12;
-      rogiMesh.position.x = mouseX * 0.28; // slide offset in opposition/sync
+      // Pacing walking logic inside the laboratory
+      rogiX += rogiSpeed * rogiDirection;
+      if (rogiX > 0.32) {
+        rogiX = 0.32;
+        rogiDirection = -1;
+      } else if (rogiX < -0.32) {
+        rogiX = -0.32;
+        rogiDirection = 1;
+      }
+
+      rogiMesh.position.x = rogiX;
       
-      // Make Rogi always face the screen camera (Billboard effect)
-      rogiMesh.quaternion.copy(camera.quaternion);
+      // Flip scale dynamically depending on walking direction
+      rogiMesh.scale.x = rogiDirection * 1.15;
       
-      // Playful roll animation
-      rogiMesh.rotateZ(Math.cos(time * 0.8) * 0.06 - mouseX * 0.15);
+      // Walking bobbing / wobble bounce
+      rogiMesh.position.y = -0.32 + Math.abs(Math.sin(time * 8.5)) * 0.05;
+      rogiMesh.rotation.z = Math.sin(time * 8.5) * 0.04;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 9. Resize handler
+    // 11. Resize handler
     const handleResize = () => {
       if (!containerRef.current) return;
       width = containerRef.current.clientWidth;
@@ -226,6 +340,9 @@ export default function ThreeDHero() {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('click', handleCanvasClick);
+      }
       if (renderer) renderer.dispose();
     };
   }, [threeLoaded]);
@@ -239,8 +356,7 @@ export default function ThreeDHero() {
         position: 'relative', 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'center',
-        cursor: 'grab'
+        justifyContent: 'center'
       }}
     >
       {!threeLoaded && (
