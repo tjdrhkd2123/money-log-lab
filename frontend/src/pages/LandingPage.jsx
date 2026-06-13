@@ -10,7 +10,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [backendWaking, setBackendWaking] = useState(true);
-  const [activeView, setActiveView] = useState('home'); // 'home', 'subscribe', 'login', 'register'
+  const [activeView, setActiveView] = useState('home'); // 'home', 'login', 'register'
+  
+  // Game state variables
+  const [isEntered, setIsEntered] = useState(false);
+  const [activeOverlay, setActiveOverlay] = useState(null); // 'dashboard', 'news', 'calculators', 'subscribe', 'benefits'
 
   const [news, setNews] = useState([]);
   const [newsTab, setNewsTab] = useState('economy');
@@ -58,7 +62,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
   }, []);
 
   const getActiveRate = () => {
-    return indices?.usdKrw?.price ? parseFloat(indices.usdKrw.price.replace(/,/g, '')) : 1520;
+    return indices?.usdKrw?.price ? parseFloat(indices.usdKrw.price.replace(/,/g, '')) : 1370;
   };
 
   const handleKrwChange = (val) => {
@@ -103,16 +107,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
       }
     }
   }, [indices]);
-
-  const handleWhiteboardClick = () => {
-    setActiveView('news-clip');
-    setTimeout(() => {
-      const el = document.getElementById('news-section-title');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  };
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -244,6 +238,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
     setCurrentUser(null);
     setIsAdmin(false);
     setActiveView('home');
+    setIsEntered(false);
+    setActiveOverlay(null);
   };
 
   const getSavingsResult = () => {
@@ -283,15 +279,15 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const filteredNews = news.filter(item => item.category === newsTab);
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-primary)', overflowX: 'hidden' }}>
       
-      {/* 1. Immersive Splash Screen (100vh) */}
+      {/* 1. Immersive 3D Space (100vh) */}
       {activeView === 'home' && (
         <section className="hero-splash-screen" style={{ 
           position: 'relative',
           width: '100%',
           height: '100vh',
-          background: 'radial-gradient(circle at center, #241c15 0%, #0a0b0d 100%)',
+          background: 'radial-gradient(circle at center, #1e1711 0%, #08090b 100%)',
           overflow: 'hidden'
         }}>
           {/* Fullscreen 3D Canvas */}
@@ -303,491 +299,569 @@ export default function LandingPage({ onNavigateToAdmin }) {
             height: '100%', 
             zIndex: 1 
           }}>
-            <ThreeDHero onWhiteboardClick={handleWhiteboardClick} />
+            <ThreeDHero onItemClick={(id) => setActiveOverlay(id)} isEntered={isEntered} />
           </div>
 
-          {/* Clean Floating Title Overlay */}
+          {/* Absolute Navigation Header overlayed on Home */}
+          <header className="app-header" style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0,
+            width: '100%',
+            zIndex: 100, 
+            background: 'linear-gradient(to bottom, rgba(10, 11, 13, 0.72) 0%, transparent 100%)',
+            padding: '20px 40px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: 'none'
+          }}>
+            <div className="app-header-logo" onClick={() => { setIsEntered(false); setActiveOverlay(null); }} style={{ cursor: 'pointer' }}>
+              <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)' }}>🐿️</div>
+              <div>
+                <h1 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
+                <p style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em' }}>ROGI'S FINANCIAL ACORNS</p>
+              </div>
+            </div>
+
+            <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              {isEntered && (
+                <>
+                  <button onClick={() => setActiveOverlay('dashboard')} style={{ background: 'none', border: 'none', color: activeOverlay === 'dashboard' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'dashboard' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 대시보드</button>
+                  <button onClick={() => setActiveOverlay('news')} style={{ background: 'none', border: 'none', color: activeOverlay === 'news' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'news' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
+                  <button onClick={() => setActiveOverlay('calculators')} style={{ background: 'none', border: 'none', color: activeOverlay === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
+                  <button onClick={() => setActiveOverlay('benefits')} style={{ background: 'none', border: 'none', color: activeOverlay === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
+                  <button onClick={() => setActiveOverlay('subscribe')} style={{ background: 'none', border: 'none', color: activeOverlay === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
+                </>
+              )}
+
+              {isAdmin && (
+                <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>🔐 시크릿 룸</button>
+              )}
+
+              {currentUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-primary)' }}>{currentUser}님 🐿️</span>
+                  <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogOut size={13} /> 로그아웃</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+                  <button onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogIn size={13} /> 로그인</button>
+                  <button onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><UserPlus size={13} /> 회원가입</button>
+                </div>
+              )}
+            </nav>
+          </header>
+
+          {/* Floating Title Overlay */}
           <div style={{
             position: 'absolute',
-            top: '12%',
+            top: isEntered ? '8%' : '14%',
             left: '50%',
             transform: 'translateX(-50%)',
             textAlign: 'center',
             zIndex: 10,
             pointerEvents: 'none',
             width: '90%',
-            maxWidth: '600px'
+            maxWidth: '600px',
+            transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             <h1 style={{
-              fontSize: 'clamp(38px, 6vw, 62px)',
+              fontSize: isEntered ? 'clamp(24px, 3.5vw, 32px)' : 'clamp(38px, 6vw, 62px)',
               fontWeight: '900',
               fontFamily: 'var(--font-headers)',
               letterSpacing: '-0.04em',
               background: 'linear-gradient(to bottom, #ffffff 40%, var(--color-accent-blue) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              marginBottom: '12px',
-              textShadow: '0 4px 24px rgba(0,0,0,0.85)'
+              marginBottom: '6px',
+              textShadow: '0 4px 24px rgba(0,0,0,0.85)',
+              transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>로기 경제연구소</h1>
-            <p style={{
-              fontSize: 'clamp(14px, 2vw, 18px)',
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-headers)',
-              fontWeight: '600',
-              letterSpacing: '0.08em',
-              opacity: 0.9,
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)'
-            }}>다람쥐 연구원 로기의 3D 금융 공간 🐿️</p>
+            {!isEntered && (
+              <p style={{
+                fontSize: 'clamp(14px, 2vw, 17px)',
+                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-headers)',
+                fontWeight: '600',
+                letterSpacing: '0.08em',
+                opacity: 0.9,
+                textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                animation: 'fadeIn 0.5s ease-out'
+              }}>다람쥐 연구원 로기의 3D 금융 공간 🐿️</p>
+            )}
           </div>
 
-          {/* Dynamic Instructions Guide Overlay */}
-          <div 
-            className="tooltip-bounce"
-            style={{
+          {/* Opaque Acorn state: "연구소 들어가기" Button */}
+          {!isEntered ? (
+            <div style={{
               position: 'absolute',
-              bottom: '120px',
+              bottom: '18%',
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 10,
-              background: 'linear-gradient(135deg, rgba(197, 168, 128, 0.9) 0%, rgba(10, 11, 13, 0.9) 100%)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              color: '#ffffff',
-              padding: '10px 20px',
-              borderRadius: '30px',
-              fontSize: '13px',
-              fontWeight: '800',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-              border: '1px solid rgba(197, 168, 128, 0.3)',
-              pointerEvents: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            🎮 키보드 방향키(←, → 또는 A, D)로 로기를 조종해봐! 🐿️
-          </div>
-
-          {/* Interactive Guide Tooltip over Whiteboard */}
-          <div 
-            className="tooltip-bounce"
-            style={{
-              position: 'absolute',
-              top: '25%',
-              right: '8%',
-              zIndex: 10,
-              background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #a38d6b 100%)',
-              color: '#ffffff',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '12.5px',
-              fontWeight: '700',
-              boxShadow: '0 4px 15px rgba(197, 168, 128, 0.4)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              pointerEvents: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            💡 화이트보드를 누르면 뉴스가 열려! 📰
-          </div>
-
-          {/* Scroll Down Indicator */}
-          <div style={{
-            position: 'absolute',
-            bottom: '30px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            textAlign: 'center',
-            color: 'var(--color-text-secondary)',
-            fontSize: '13px',
-            fontWeight: '700',
-            pointerEvents: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <div style={{ opacity: 0.8 }}>아래로 스크롤하여 대시보드 들어가기</div>
-            <div className="tooltip-bounce" style={{ fontSize: '20px', color: 'var(--color-accent-blue)' }}>↓</div>
-          </div>
-        </section>
-      )}
-
-      {/* 2. Main content wrapper (Centered and width limited) */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px 20px' }}>
-      
-      <header className="app-header" style={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 100, 
-        background: 'rgba(10, 11, 13, 0.85)', 
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--color-card-border)', 
-        padding: '16px 0', 
-        marginBottom: '40px'
-      }}>
-        <div className="app-header-logo" onClick={() => setActiveView('home')} style={{ cursor: 'pointer' }}>
-          <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)' }}>🐿️</div>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
-            <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em' }}>ROGI'S FINANCIAL ACORNS</p>
-          </div>
-        </div>
-
-        <nav style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={() => setActiveView('home')} style={{ background: 'none', border: 'none', color: activeView === 'home' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'home' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>금융 대시보드</button>
-          <button onClick={() => setActiveView('news-clip')} style={{ background: 'none', border: 'none', color: activeView === 'news-clip' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'news-clip' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
-          <button onClick={() => setActiveView('calculators')} style={{ background: 'none', border: 'none', color: activeView === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
-          <button onClick={() => setActiveView('benefits')} style={{ background: 'none', border: 'none', color: activeView === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
-          <button onClick={() => setActiveView('subscribe')} style={{ background: 'none', border: 'none', color: activeView === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeView === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '4px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
-
-          {isAdmin && (
-            <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14.5px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '4px', borderBottom: '2px solid transparent' }}>🔐 시크릿 룸</button>
-          )}
-
-          {currentUser ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid var(--color-card-border)', paddingLeft: '20px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-primary)' }}>{currentUser}님 🐿️</span>
-              <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogOut size={13} /> 로그아웃</button>
+              textAlign: 'center',
+              animation: 'fadeIn 0.8s ease-out'
+            }}>
+              <button 
+                onClick={() => setIsEntered(true)}
+                className="btn-primary tooltip-bounce"
+                style={{
+                  padding: '16px 44px',
+                  fontSize: '18px',
+                  fontWeight: '800',
+                  boxShadow: '0 10px 30px rgba(197, 168, 128, 0.35)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #a38d6b 100%)',
+                  borderRadius: '30px'
+                }}
+              >
+                연구소 들어가기 🐿️🚪
+              </button>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '16px', fontWeight: '500', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                단단한 도토리 문을 열고 로기의 미래 연구실로 입장해보세요!
+              </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginLeft: '12px', borderLeft: '1px solid var(--color-card-border)', paddingLeft: '20px' }}>
-              <button onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '14px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogIn size={14} /> 로그인</button>
-              <button onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '14px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><UserPlus size={14} /> 회원가입</button>
-            </div>
-          )}
-        </nav>
-      </header>
+            <>
+              {/* Entered state: Controls guide and exit button */}
+              <button 
+                onClick={() => { setIsEntered(false); setActiveOverlay(null); }}
+                style={{
+                  position: 'absolute',
+                  top: '25px',
+                  right: '25px',
+                  zIndex: 20,
+                  background: 'rgba(10, 11, 13, 0.7)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(10px)',
+                  color: 'var(--color-text-primary)',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(10, 11, 13, 0.7)'}
+              >
+                도토리 밖으로 나가기 🚪
+              </button>
 
-      {activeView === 'home' && (
-        <>
-          <div id="dashboard-title-section" style={{ height: '1px', marginBottom: '20px' }} /> {/* target for scroll */}
-          
-          {/* Introduction & Subscription Banner */}
-          <section className="glass-card" style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            gap: '45px', 
-            padding: '40px',
-            borderRadius: '24px',
-            marginBottom: '50px', 
-            flexWrap: 'wrap',
-            background: 'linear-gradient(135deg, rgba(20, 22, 26, 0.6) 0%, rgba(10, 11, 13, 0.8) 100%)'
+              {/* Joystick Keyboard Guide */}
+              <div 
+                className="tooltip-bounce"
+                style={{
+                  position: 'absolute',
+                  bottom: '40px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 10,
+                  background: 'linear-gradient(135deg, rgba(197, 168, 128, 0.9) 0%, rgba(10, 11, 13, 0.9) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  color: '#ffffff',
+                  padding: '10px 20px',
+                  borderRadius: '30px',
+                  fontSize: '12.5px',
+                  fontWeight: '800',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                  border: '1px solid rgba(197, 168, 128, 0.3)',
+                  pointerEvents: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                🎮 방향키(←, → 또는 A, D)로 로기를 조종해봐! 🐿️
+              </div>
+
+              {/* Game Item Labels */}
+              <div 
+                className="tooltip-bounce"
+                style={{
+                  position: 'absolute',
+                  top: '32%',
+                  left: '12%',
+                  zIndex: 10,
+                  background: 'rgba(0, 255, 136, 0.12)',
+                  color: '#00ff88',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  boxShadow: '0 4px 15px rgba(0, 255, 136, 0.1)',
+                  border: '1px solid rgba(0, 255, 136, 0.3)',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                🟢 지구본: 금융 대시보드
+              </div>
+
+              <div 
+                className="tooltip-bounce"
+                style={{
+                  position: 'absolute',
+                  top: '28%',
+                  right: '15%',
+                  zIndex: 10,
+                  background: 'rgba(0, 255, 255, 0.12)',
+                  color: '#00ffff',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  boxShadow: '0 4px 15px rgba(0, 255, 255, 0.1)',
+                  border: '1px solid rgba(0, 255, 255, 0.3)',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                🌐 홀로그램: 실시간 뉴스
+              </div>
+            </>
+          )}
+        </section>
+      )}
+
+      {/* 2. Standard Views (Login / Register Page) */}
+      {activeView !== 'home' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px 20px' }}>
+          {/* Main Navigation Header for Sub-pages */}
+          <header className="app-header" style={{ 
+            position: 'sticky', 
+            top: 0, 
+            zIndex: 100, 
+            background: 'rgba(10, 11, 13, 0.85)', 
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid var(--color-card-border)', 
+            padding: '16px 0', 
+            marginBottom: '40px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <div style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(197, 168, 128, 0.08)', padding: '6px 14px', borderRadius: '30px', border: '1px solid rgba(197, 168, 128, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}><Award size={13} />매일 아침 07:00 AM 신선한 경제 도토리 무료 배달</div>
-              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', lineHeight: '1.35', background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px', fontWeight: '800' }}>경제 뉴스가 어렵니?<br/>다람쥐 연구원 로기가 쉽고 빠르게 정리해줄게!</h2>
-              <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '24px', fontWeight: '400' }}>어려운 금융 용어와 복잡한 지표들을 중학생도 바로 이해할 수 있게 요약해 줄게. 매일 3분만 가볍게 읽어봐! 🐿️🌰</p>
-              <button onClick={() => setActiveView('subscribe')} className="btn-primary" style={{ padding: '12px 24px', fontSize: '14.5px' }}>매일 아침 메일로 도토리 받기 <ArrowRight size={16} /></button>
-            </div>
-            <div style={{ flex: '1 1 250px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', background: 'rgba(197, 168, 128, 0.03)', borderRadius: '20px', border: '1px solid rgba(197, 168, 128, 0.08)' }}>
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>🐿️📬</span>
-                <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>구독자 전용 혜택</h4>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: '1.5' }}>매일 아침 무료 레터 발송<br/>이슈 키워드 요약 노트 제공</p>
+            <div className="app-header-logo" onClick={() => { setActiveView('home'); setIsEntered(false); }} style={{ cursor: 'pointer' }}>
+              <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>🐿️</div>
+              <div>
+                <h1 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
+                <p style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>ROGI'S FINANCIAL ACORNS</p>
               </div>
             </div>
-          </section>
 
-          <div className="glass-card" style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', padding: '24px 30px', borderRadius: '24px', borderLeft: '4px solid var(--color-accent-blue)', textAlign: 'center', boxShadow: 'var(--shadow-card)', maxWidth: '800px', margin: '0 auto 60px auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '32px' }}>🐿️📈</span>
-              <div style={{ textAlign: 'left' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '4px' }}>로기 금융 연구소 가동 중!</h3>
-                <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: '1.5' }}>로기 비서가 국내 실시간 코스피 마켓과 글로벌 거시 경제 흐름을 쉼 없이 모니터링하고 분석하고 있어.</p>
-              </div>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-accent-emerald)', background: 'rgba(118, 165, 131, 0.08)', padding: '6px 12px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent-emerald)' }} />실시간 인덱스 피드 가동 중</span>
-            </div>
-          </div>
+            <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('dashboard'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>금융 대시보드</button>
+              <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('news'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>실시간 뉴스 📰</button>
+              <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('calculators'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>금융 계산기 💱</button>
 
-          {/* 📅 로기의 실시간 금융 브리핑 */}
-          {indices && (
-            <div className="glass-card" style={{ background: 'rgba(197, 168, 128, 0.03)', borderColor: 'rgba(197, 168, 128, 0.12)', padding: '16px 20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '800px', margin: '-40px auto 60px auto', animation: 'fadeIn 0.3s ease-in-out' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'var(--font-headers)', fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Calendar size={14} /> 로기의 실시간 금융 브리핑
-                </span>
-                <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>수집 기준 시각: {indices.timestamp}</span>
-              </div>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', fontWeight: '500', margin: 0, textAlign: 'left' }}>{getRogiCommentary()}</p>
-            </div>
-          )}
+              {currentUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid var(--color-card-border)', paddingLeft: '16px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700' }}>{currentUser}님 🐿️</span>
+                  <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', cursor: 'pointer' }}>로그아웃</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginLeft: '12px', borderLeft: '1px solid var(--color-card-border)', paddingLeft: '16px' }}>
+                  <button onClick={() => setActiveView('login')} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer' }}>로그인</button>
+                  <button onClick={() => setActiveView('register')} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer' }}>회원가입</button>
+                </div>
+              )}
+            </nav>
+          </header>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginTop: '20px' }}>
-            <section style={{ width: '100%' }}>
-              <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>📊 실시간 금융 대시보드</h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>수집된 원화 대비 가치 및 주요 코스피 지수를 한눈에 파악해봐!</p>
-              </div>
-              <DashboardHome onNewsLoaded={setNews} onIndicesLoaded={setIndices} />
-            </section>
-            <section style={{ width: '100%' }}>
-              <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '20px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>📰 로기의 오늘의 경제 도토리</h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>좌우로 가볍게 넘겨보며 오늘의 경제 핵심 꿀팁을 스캔해봐!</p>
-              </div>
-              <CardNews />
-            </section>
-          </div>
-        </>
+          <main>
+            {activeView === 'login' && (
+              <section style={{ maxWidth: '400px', margin: '60px auto', padding: '0 20px' }}>
+                <div className="glass-card" style={{ textAlign: 'center', padding: '36px' }}>
+                  <div style={{ background: 'rgba(45, 130, 255, 0.08)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'var(--color-accent-blue)' }}><Lock size={28} /></div>
+                  <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>로그인</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 금융 멤버십에 입장해줘!</p>
+                  <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><Mail size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="text" placeholder="이메일 주소 입력" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="password" placeholder="비밀번호 입력" required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
+                    <button type="submit" disabled={loading} className="btn-primary" style={{ justifyContent: 'center', marginTop: '10px' }}>{loading ? '로그인 중...' : '시작하기 🐿️'}</button>
+                  </form>
+                  {authError && <div style={{ marginTop: '16px', color: 'var(--color-accent-orange)', fontSize: '13px' }}>⚠️ {authError}</div>}
+                  {authSuccess && <div style={{ marginTop: '16px', color: 'var(--color-accent-blue)', fontSize: '13px', fontWeight: '700' }}>{authSuccess}</div>}
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '24px' }}>계정이 없으신가요? <span onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ color: 'var(--color-accent-blue)', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>회원가입 하기</span></p>
+                </div>
+              </section>
+            )}
+
+            {activeView === 'register' && (
+              <section style={{ maxWidth: '400px', margin: '60px auto', padding: '0 20px' }}>
+                <div className="glass-card" style={{ textAlign: 'center', padding: '36px' }}>
+                  <div style={{ background: 'rgba(118, 165, 131, 0.08)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'var(--color-accent-emerald)' }}><UserPlus size={28} /></div>
+                  <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>회원가입</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 패밀리 멤버가 되어 도토리를 키워보세요!</p>
+                  <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><Mail size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="email" placeholder="이메일 주소 입력" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="password" placeholder="비밀번호 입력 (6자리 이상)" required minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="text" placeholder="닉네임/이름 입력" required value={authName} onChange={(e) => setAuthName(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
+                    <button type="submit" className="btn-primary" style={{ justifyContent: 'center', marginTop: '10px', background: 'linear-gradient(135deg, var(--color-accent-emerald) 0%, #5d8f6b 100%)', boxShadow: '0 4px 14px rgba(118, 165, 131, 0.15)' }}>패밀리 등록하기 🌰</button>
+                  </form>
+                  {authError && <div style={{ marginTop: '16px', color: 'var(--color-accent-orange)', fontSize: '13px' }}>⚠️ {authError}</div>}
+                  {authSuccess && <div style={{ marginTop: '16px', color: 'var(--color-accent-emerald)', fontSize: '13px', fontWeight: '700' }}>{authSuccess}</div>}
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '24px' }}>이미 계정이 있으신가요? <span onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ color: 'var(--color-accent-blue)', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>로그인 하기</span></p>
+                </div>
+              </section>
+            )}
+          </main>
+
+          <footer style={{ textAlign: 'center', marginTop: '80px', padding: '30px 0', borderTop: '1px solid rgba(255, 255, 255, 0.05)', color: 'var(--color-text-muted)', fontSize: '13px' }}>
+            <p>© 2026 머니로그랩 (Money Log Lab). All Rights Reserved.</p>
+            <p style={{ marginTop: '5px' }}>다람쥐 연구원 로기가 물어오는 똑똑한 금융 도토리 🐿️🌰</p>
+          </footer>
+        </div>
       )}
 
-      {activeView === 'news-clip' && (
-        <section style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h2 id="news-section-title" style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>📰 로기의 실시간 핫이슈 뉴스 클립</h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>구글 뉴스 RSS에서 24시간 이내의 실시간 뉴스 헤드라인을 분야별로 수집해왔어! 🐿️</p>
-          </div>
-          
-          <div className="glass-card" style={{ padding: '30px', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', boxShadow: 'var(--shadow-card)', borderRadius: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> EDITORIAL CATEGORIES</span>
-              <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '10px' }}>
-                {['economy', 'realestate', 'coin'].map(tab => (
-                  <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', padding: '8px 16px', borderRadius: '8px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', transition: 'all 0.2s' }}>{tab === 'economy' ? 'MACRO' : tab === 'realestate' ? 'REAL ESTATE' : 'CRYPTO'}</button>
-                ))}
-              </div>
-            </div>
+      {/* 3. In-Viewport Interactive Overlays (Floating panels centered over Three.js scene) */}
+      {activeOverlay && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 1000,
+          background: 'rgba(10, 11, 13, 0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div className="glass-card" style={{
+            width: '100%',
+            maxWidth: '1000px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            position: 'relative',
+            padding: '40px 30px',
+            background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)',
+            border: '1px solid var(--color-card-border-glow)',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+            borderRadius: '28px',
+            animation: 'fadeIn 0.25s ease-out'
+          }}>
+            {/* Close/Return Button */}
+            <button 
+              onClick={() => setActiveOverlay(null)} 
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'var(--color-text-primary)',
+                fontSize: '13px',
+                fontWeight: '800',
+                padding: '8px 18px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                zIndex: 10,
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+            >
+              돌아가기 🚪
+            </button>
 
-            {news.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {filteredNews.map((item, idx) => (
-                  <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderRadius: '12px', border: '1px solid var(--color-card-border)', background: 'var(--bg-secondary)', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent-blue)'} onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-card-border)'}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', paddingRight: '16px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', lineHeight: '1.4' }}>{item.title}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>{item.source} • {new Date(item.pubDate).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+            {activeOverlay === 'dashboard' && (
+              <section style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>📊 실시간 금융 대시보드</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>코스피 지수와 글로벌 환율 지표 현황판이야! 🐿️</p>
+                </div>
+                
+                {indices && (
+                  <div className="glass-card" style={{ background: 'rgba(197, 168, 128, 0.03)', borderColor: 'rgba(197, 168, 128, 0.12)', padding: '16px 20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '6px', margin: '0 auto 24px auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'var(--font-headers)', fontSize: '13px', fontWeight: '700', color: 'var(--color-accent-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Calendar size={14} /> 로기의 실시간 금융 브리핑
+                      </span>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>수집 기준 시각: {indices.timestamp}</span>
                     </div>
-                    <ChevronRight size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+                    <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', lineHeight: '1.6', fontWeight: '500', margin: 0, textAlign: 'left' }}>{getRogiCommentary()}</p>
+                  </div>
+                )}
+                
+                <DashboardHome onNewsLoaded={setNews} onIndicesLoaded={setIndices} />
+              </section>
+            )}
+
+            {activeOverlay === 'news' && (
+              <section style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>📰 로기의 실시간 핫이슈 뉴스 클립</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>분야별 구글 뉴스 RSS 실시간 요약 헤드라인! 🐿️</p>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> EDITORIAL CATEGORIES</span>
+                  <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '10px' }}>
+                    {['economy', 'realestate', 'coin'].map(tab => (
+                      <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', padding: '8px 16px', borderRadius: '8px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', transition: 'all 0.2s' }}>{tab === 'economy' ? 'MACRO' : tab === 'realestate' ? 'REAL ESTATE' : 'CRYPTO'}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {news.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {filteredNews.map((item, idx) => (
+                      <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderRadius: '12px', border: '1px solid var(--color-card-border)', background: 'var(--bg-secondary)', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent-blue)'} onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-card-border)'}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', paddingRight: '16px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', lineHeight: '1.4' }}>{item.title}</span>
+                          <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>{item.source} • {new Date(item.pubDate).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <ChevronRight size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
+                    <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px auto', color: 'var(--color-accent-blue)' }} />
+                    <p style={{ fontSize: '14px' }}>금융 데이터를 로딩하고 있습니다 🐿️</p>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeOverlay === 'calculators' && (
+              <section style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>💱 로기의 스마트 금융 계산기</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>실시간 환율 변환과 미래 도토리 적금 시뮬레이션! 🐿️</p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '14px', marginBottom: '24px' }}>
+                  <button onClick={() => setCalcTab('exchange')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'exchange' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'exchange' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>💱 실시간 환율 계산기</button>
+                  <button onClick={() => setCalcTab('savings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'savings' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'savings' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>🌰 복리 도토리 저금통</button>
+                </div>
+
+                {calcTab === 'exchange' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: '240px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>원화 입력 (KRW)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
+                          <input type="number" value={krwInput} onChange={(e) => handleKrwChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '24px', color: 'var(--color-text-muted)', paddingTop: '22px' }}>⇄</div>
+                      <div style={{ flex: 1, minWidth: '240px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>달러 변환 (USD)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
+                          <input type="number" value={usdInput} onChange={(e) => handleUsdChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>달러</span>
+                        </div>
+                      </div>
+                    </div>
+                    {indices?.usdKrw?.price && (
+                      <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>
+                        현재 수집 환율 지표: 1 USD = **{indices.usdKrw.price} KRW** 🐿️
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>월 저축액 (KRW)</label>
+                        <input type="number" value={monthlySavings} onChange={(e) => setMonthlySavings(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700', outline: 'none' }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>연 이자율 (%)</label>
+                        <input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700', outline: 'none' }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>적립 기간 (년)</label>
+                        <input type="number" value={savingsPeriod} onChange={(e) => setSavingsPeriod(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700', outline: 'none' }} />
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--color-card-border)', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>총 납입 원금:</span>
+                        <span style={{ fontWeight: '700' }}>{(Number(monthlySavings) * Number(savingsPeriod) * 12).toLocaleString()} 원</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>예상 세후 복리 이자:</span>
+                        <span style={{ fontWeight: '700', color: 'var(--color-accent-emerald)' }}>+ {savingsRes.interest.toLocaleString()} 원</span>
+                      </div>
+                      <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>최종 수령액 (월복리):</span>
+                        <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--color-accent-blue)' }}>{savingsRes.total.toLocaleString()} 원</span>
+                      </div>
+                      <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-text-muted)', textAlign: 'right' }}>
+                        🐿️ 저금통 도토리 환산: **{savingsRes.acorns.toLocaleString()}개 🌰**
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeOverlay === 'subscribe' && (
+              <section style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-in-out' }}>
+                <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', background: 'rgba(197, 168, 128, 0.08)', padding: '6px 16px', borderRadius: '30px', border: '1px solid rgba(197, 168, 128, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '24px' }}><Mail size={14} />로기의 스마트 이메일 뉴스레터</div>
+                <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', marginBottom: '14px' }}>매일 아침 7시, 금융 도토리를 메일함에 쏙! 🐿️📬</h2>
+                <p style={{ fontSize: '14.5px', color: 'var(--color-text-secondary)', marginBottom: '28px', lineHeight: '1.6' }}>어려운 경제 뉴스 읽기 끝! 구독 버튼 하나로<br/>세상 편한 이메일 요약본을 매일 공짜로 챙겨줄게!</p>
+                <form onSubmit={handleSubscribe} className="newsletter-form" style={{ boxShadow: 'var(--shadow-card)', background: 'var(--color-card-bg)', border: '1px solid var(--color-card-border)', borderRadius: '40px', padding: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ paddingLeft: '16px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center' }}><Mail size={18} /></div>
+                  <input type="email" placeholder="이메일 주소를 입력해줘!" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '15px', flex: '1', height: '40px', fontFamily: 'var(--font-body)' }} />
+                  <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '0 24px', height: '42px', borderRadius: '21px', fontSize: '13.5px' }}>경제 도토리 구독하기 🐿️</button>
+                </form>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '16px' }}><ShieldCheck size={12} style={{ color: 'var(--color-accent-blue)' }} />철벽 보안 데이터 보호 적용 및 실시간 암호화 적용</div>
+                
+                {status.message && (<div className="glass-card" style={{ marginTop: '20px', padding: '12px 18px', borderRadius: '12px', borderLeft: status.type === 'success' ? '4px solid var(--color-accent-blue)' : '4px solid var(--color-accent-orange)', background: 'var(--bg-secondary)', fontSize: '14px', fontWeight: '600', color: status.type === 'success' ? 'var(--color-accent-blue)' : 'var(--color-accent-orange)' }}>{status.message}</div>)}
+              </section>
+            )}
+
+            {activeOverlay === 'benefits' && (
+              <section style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                  <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>🪙 머니로그랩 파트너 혜택</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>로기가 제공하는 특별 혜택 리워드와 깊이 있는 분석 컬럼 모음! 🐿️</p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <a href="https://litt.ly/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-orange)', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                    <div>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-orange)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>🔥 EXCLUSIVE BENEFIT</span>
+                      <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>🪙 거래소 꿀혜택 바로가기</h4>
+                      <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>수수료 평생 할인 & 파트너 가입 특별 리워드 증정!</p>
+                    </div>
+                    <div style={{ background: 'rgba(217, 119, 6, 0.08)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-orange)' }}><ArrowRight size={16} /></div>
                   </a>
-                ))}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
-                <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px auto', color: 'var(--color-accent-blue)' }} />
-                <p style={{ fontSize: '14px' }}>금융 대시보드 지표 갱신을 통해 뉴스를 실시간 로딩하고 있습니다 🐿️</p>
-              </div>
+
+                  <a href="https://blog.naver.com/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-emerald)', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                    <div>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-emerald)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}> Green NAVER BLOG</span>
+                      <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>💚 네이버 공식 블로그 시황 글 읽기</h4>
+                      <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>로기가 작성해 둔 핵심 거시 분석 및 시황 칼럼 모음!</p>
+                    </div>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.08)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-emerald)' }}><ArrowRight size={16} /></div>
+                  </a>
+                </div>
+              </section>
             )}
           </div>
-        </section>
-      )}
-
-      {activeView === 'calculators' && (
-        <section style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>💱 로기의 스마트 금융 계산기</h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>실시간 환율 계산과 미래 도토리 자산을 불려보는 복리 적금 시뮬레이터야! 🐿️</p>
-          </div>
-
-          <div className="glass-card" style={{ padding: '30px', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)', boxShadow: 'var(--shadow-card)', borderRadius: '24px' }}>
-            <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '14px', marginBottom: '24px' }}>
-              <button onClick={() => setCalcTab('exchange')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'exchange' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'exchange' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>💱 간편 실시간 환율 계산기</button>
-              <button onClick={() => setCalcTab('savings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: calcTab === 'savings' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', borderBottom: calcTab === 'savings' ? '3px solid var(--color-accent-blue)' : '3px solid transparent', paddingBottom: '8px', transition: 'all 0.2s' }}>🌰 복리 도토리 저금통 (적금 계산기)</button>
-            </div>
-
-            {calcTab === 'exchange' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: '240px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>원화 입력 (KRW)</label>
-                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
-                      <input type="number" value={krwInput} onChange={(e) => handleKrwChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: '24px', color: 'var(--color-text-muted)', paddingTop: '22px' }}>⇄</div>
-                  <div style={{ flex: 1, minWidth: '240px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>달러 변환 (USD)</label>
-                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
-                      <input type="number" value={usdInput} onChange={(e) => handleUsdChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>달러</span>
-                    </div>
-                  </div>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'left' }}>
-                  {indices?.usdKrw?.price ? (
-                    `* 현재 1달러 기준 실시간 환율은 ${indices.usdKrw.price}원입니다. (실시간 정보 반영 🐿️)`
-                  ) : (
-                    `* 1달러 기준 환율 1,520원으로 실시간 단순 계산식 기준이 적용되었습니다. 실제 환율과 미세한 오차가 있을 수 있습니다.`
-                  )}
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: '160px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>월 납입액 (원)</label>
-                    <input type="number" value={monthlySavings} onChange={(e) => setMonthlySavings(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: '160px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>연 이자율 (%)</label>
-                    <input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: '120px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>적립 기간</label>
-                    <select value={savingsPeriod} onChange={(e) => setSavingsPeriod(e.target.value)} style={{ width: '100%', border: '1px solid var(--color-card-border)', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', background: 'var(--bg-tertiary)', color: 'var(--color-text-primary)', fontWeight: '700' }}>
-                      <option value="1">1년 (12개월)</option>
-                      <option value="2">2년 (24개월)</option>
-                      <option value="3">3년 (36개월)</option>
-                      <option value="5">5년 (60개월)</option>
-                      <option value="10">10년 (120개월)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '16px', border: '1px solid var(--color-card-border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>총 납입 원금:</span>
-                    <span style={{ fontWeight: '700', color: 'var(--color-text-primary)' }}>{savingsRes.principal.toLocaleString()} 원</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>예상 세후 복리 이자:</span>
-                    <span style={{ fontWeight: '700', color: 'var(--color-accent-emerald)' }}>+ {savingsRes.interest.toLocaleString()} 원</span>
-                  </div>
-                  <div style={{ borderTop: '1px dashed var(--color-card-border)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>최종 수령액 (월복리):</span>
-                    <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--color-accent-blue)' }}>{savingsRes.total.toLocaleString()} 원</span>
-                  </div>
-                  <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-text-muted)', textAlign: 'right' }}>
-                    🐿️ 저금통 도토리 환산: **{savingsRes.acorns.toLocaleString()}개 🌰**
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {activeView === 'benefits' && (
-        <section style={{ maxWidth: '1000px', margin: '0 auto', animation: 'fadeIn 0.3s ease-in-out' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '26px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>🪙 머니로그랩 파트너 혜택 & 분석</h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>로기가 제공하는 특별 혜택 리워드와 깊이 있는 분석 컬럼을 모아봤어! 🐿️</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px', marginBottom: '50px' }}>
-            <a href="https://litt.ly/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-orange)', transition: 'all 0.3s ease', boxShadow: 'var(--shadow-card)' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-orange)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>🔥 EXCLUSIVE BENEFIT</span>
-                <h4 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)' }}>🪙 거래소 혜택 바로가기</h4>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '6px', lineHeight: '1.4' }}>로기가 챙겨주는 글로벌 선물 거래 수수료 평생 할인 & 리워드 단독 꿀혜택!</p>
-              </div>
-              <div style={{ background: 'rgba(217, 119, 6, 0.08)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-orange)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={18} /></div>
-            </a>
-            <a href="https://blog.naver.com/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-emerald)', transition: 'all 0.3s ease', boxShadow: 'var(--shadow-card)' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-accent-emerald)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}> Green NAVER BLOG</span>
-                <h4 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)' }}>💚 네이버 블로그로 뉴스 자세히 보기</h4>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '6px', lineHeight: '1.4' }}>5대 분야 AI 매칭 포스팅 원고와 깊이 있는 시황 상세 분석글을 읽어봐!</p>
-              </div>
-              <div style={{ background: 'rgba(16, 185, 129, 0.08)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-emerald)', flexShrink: 0, marginLeft: '16px' }}><ArrowRight size={18} /></div>
-            </a>
-          </div>
-
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
-            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
-              <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Coins size={28} /></div>
-              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>글로벌 포트폴리오 다각화</h3>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>원화 자산의 감쇠 위기 속에서, 해외 선물 마켓 및 알트코인 지표를 적절히 병행하여 헷지 수단을 설계할 수 있도록 명료하게 분석합니다.</p>
-            </div>
-            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
-              <div style={{ color: 'var(--color-accent-orange)', marginBottom: '12px' }}><Bell size={28} /></div>
-              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>매일 아침 7시 이메일 발송</h3>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>바쁜 출근길이나 등교시간에도 3분 내에 글로벌 경제 흐름을 간편하게 스캔하고 시작할 수 있도록 요약된 이메일 뉴스레터를 배달해 드립니다.</p>
-            </div>
-            <div className="glass-card" style={{ background: 'var(--bg-secondary)', padding: '24px' }}>
-              <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Shield size={28} /></div>
-              <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>위협 공격 차단 보안</h3>
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>최신 API Rate-Limiter 미들웨어와 철저한 이스케이프 보안 메커니즘을 가동하여 해커의 악의적 위협(XSS/SQL 인젝션)으로부터 구독자 개인정보를 철통 수호합니다.</p>
-            </div>
-          </section>
-        </section>
-      )}
-
-      {activeView === 'login' && (
-        <section style={{ maxWidth: '400px', margin: '60px auto', padding: '0 20px' }}>
-          <div className="glass-card" style={{ textAlign: 'center', padding: '36px' }}>
-            <div style={{ background: 'rgba(197, 168, 128, 0.08)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'var(--color-accent-blue)' }}><Lock size={28} /></div>
-            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>로그인</h2>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 금융 멤버십에 입장해줘!</p>
-            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><Mail size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="text" placeholder="이메일 주소 입력" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="password" placeholder="비밀번호 입력" required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
-              <button type="submit" disabled={loading} className="btn-primary" style={{ justifyContent: 'center', marginTop: '10px' }}>{loading ? '로그인 중...' : '시작하기 🐿️'}</button>
-            </form>
-            {authError && <div style={{ marginTop: '16px', color: 'var(--color-accent-orange)', fontSize: '13px' }}>⚠️ {authError}</div>}
-            {authSuccess && <div style={{ marginTop: '16px', color: 'var(--color-accent-blue)', fontSize: '13px', fontWeight: '700' }}>{authSuccess}</div>}
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '24px' }}>계정이 없으신가요? <span onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ color: 'var(--color-accent-blue)', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>회원가입 하기</span></p>
-          </div>
-        </section>
-      )}
-
-      {activeView === 'register' && (
-        <section style={{ maxWidth: '400px', margin: '60px auto', padding: '0 20px' }}>
-          <div className="glass-card" style={{ textAlign: 'center', padding: '36px' }}>
-            <div style={{ background: 'rgba(118, 165, 131, 0.08)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: 'var(--color-accent-emerald)' }}><UserPlus size={28} /></div>
-            <h2 style={{ fontSize: '22px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', marginBottom: '8px' }}>회원가입</h2>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>머니로그랩 패밀리 멤버가 되어 도토리를 키워보세요!</p>
-            <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><Mail size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="email" placeholder="이메일 주소 입력" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="password" placeholder="비밀번호 입력 (6자리 이상)" required minLength={6} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '30px', padding: '10px 16px' }}><KeyRound size={16} style={{ color: 'var(--color-text-muted)' }} /><input type="text" placeholder="닉네임/이름 입력" required value={authName} onChange={(e) => setAuthName(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '14px', flex: '1', fontFamily: 'var(--font-body)' }} /></div>
-              <button type="submit" className="btn-primary" style={{ justifyContent: 'center', marginTop: '10px', background: 'linear-gradient(135deg, var(--color-accent-emerald) 0%, #5d8f6b 100%)', boxShadow: '0 4px 14px rgba(118, 165, 131, 0.15)' }}>패밀리 등록하기 🌰</button>
-            </form>
-            {authError && <div style={{ marginTop: '16px', color: 'var(--color-accent-orange)', fontSize: '13px' }}>⚠️ {authError}</div>}
-            {authSuccess && <div style={{ marginTop: '16px', color: 'var(--color-accent-emerald)', fontSize: '13px', fontWeight: '700' }}>{authSuccess}</div>}
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '24px' }}>이미 계정이 있으신가요? <span onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ color: 'var(--color-accent-blue)', cursor: 'pointer', fontWeight: '700', textDecoration: 'underline' }}>로그인 하기</span></p>
-          </div>
-        </section>
-      )}
-
-      {activeView === 'subscribe' && (
-        <section style={{ textAlign: 'center', maxWidth: '600px', margin: '40px auto 60px auto', position: 'relative' }}>
-          <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', background: 'rgba(197, 168, 128, 0.08)', padding: '6px 16px', borderRadius: '30px', border: '1px solid rgba(197, 168, 128, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '24px' }}><Mail size={14} />로기의 스마트 이메일 뉴스레터</div>
-          <h1 className="hero-title" style={{ background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px' }}>매일 아침 7시,<br/>금융 도토리를 메일함에 쏙! 🐿️📬</h1>
-          <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '36px', lineHeight: '1.6' }}>귀찮고 어려운 경제 뉴스 읽기 끝! 구독 버튼 하나로<br/>세상 편한 이메일 요약본을 매일 공짜로 챙겨줄게!</p>
-          <form onSubmit={handleSubscribe} className="glass-card newsletter-form" style={{ boxShadow: 'var(--shadow-card)', background: 'var(--color-card-bg)', border: '1px solid var(--color-card-border)' }}>
-            <div style={{ paddingLeft: '16px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center' }}><Mail size={18} /></div>
-            <input type="email" placeholder="뉴스레터를 받아볼 이메일 주소를 적어줘!" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '15px', flex: '1', height: '40px', fontFamily: 'var(--font-body)' }} />
-            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '0 24px', height: '46px', borderRadius: '23px', fontSize: '14px' }}>경제 도토리 구독하기 🐿️</button>
-          </form>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '12px' }}><ShieldCheck size={12} style={{ color: 'var(--color-accent-blue)' }} />철벽 보안 데이터 보호 적용 및 스팸 방지 실시간 검증 완료</div>
-          <div className="glass-card no-mobile-padding" style={{ marginTop: '24px', padding: '12px 16px', borderRadius: '20px', background: 'var(--bg-secondary)', border: '1px solid', borderColor: backendWaking ? 'rgba(200, 122, 122, 0.25)' : 'rgba(197, 168, 128, 0.25)', fontSize: '12px', fontWeight: '600', textAlign: 'center', color: backendWaking ? 'var(--color-accent-orange)' : 'var(--color-accent-blue)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', boxShadow: backendWaking ? '0 4px 10px rgba(200, 122, 122, 0.05)' : '0 4px 10px rgba(197, 168, 128, 0.05)' }}>
-            {backendWaking ? (<><RefreshCw size={12} className="animate-spin" /><span>🐿️ 로기가 잠든 배포 서버를 힘껏 깨우고 있어요! (약 15초 소요)</span></>) : (<span>🟢 로기 연구소 서버 활성화 완료! 실시간 데이터 동기화 레이어 작동 중</span>)}
-          </div>
-          {status.message && (<div className="glass-card" style={{ marginTop: '20px', padding: '12px 18px', borderRadius: 'var(--border-radius-md)', borderLeft: status.type === 'success' ? '4px solid var(--color-accent-blue)' : '4px solid var(--color-accent-orange)', background: 'var(--bg-secondary)', fontSize: '14px', fontWeight: '600', textAlign: 'center', color: status.type === 'success' ? 'var(--color-accent-blue)' : 'var(--color-accent-orange)' }}>{status.message}</div>)}
-        </section>
-      )}
-
-      <section style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '60px' }}>
-        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
-          <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Coins size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>글로벌 포트폴리오 다각화</h3>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>원화 자산의 감쇠 위기 속에서, 해외 선물 마켓 및 알트코인 지표를 적절히 병행하여 헷지 수단을 설계할 수 있도록 명료하게 분석합니다.</p>
         </div>
-        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
-          <div style={{ color: 'var(--color-accent-orange)', marginBottom: '12px' }}><Bell size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>매일 아침 7시 이메일 발송</h3>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>바쁜 출근길이나 등교시간에도 3분 내에 글로벌 경제 흐름을 간편하게 스캔하고 시작할 수 있도록 요약된 이메일 뉴스레터를 배달해 드립니다.</p>
-        </div>
-        <div className="glass-card" style={{ background: 'var(--bg-secondary)' }}>
-          <div style={{ color: 'var(--color-accent-blue)', marginBottom: '12px' }}><Shield size={28} /></div>
-          <h3 style={{ fontSize: '18px', color: 'var(--color-text-primary)', marginBottom: '8px', fontFamily: 'var(--font-headers)' }}>위협 공격 차단 보안</h3>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>최신 API Rate-Limiter 미들웨어와 철저한 이스케이프 보안 메커니즘을 가동하여 해커의 악의적 위협(XSS/SQL 인젝션)으로부터 구독자 개인정보를 철통 수호합니다.</p>
-        </div>
-      </section>
+      )}
 
-      <footer style={{ textAlign: 'center', marginTop: '80px', padding: '30px 0', borderTop: '1px solid rgba(255, 255, 255, 0.05)', color: 'var(--color-text-muted)', fontSize: '13px' }}>
-        <p>© 2026 머니로그랩 (Money Log Lab). All Rights Reserved.</p>
-        <p style={{ marginTop: '5px' }}>다람쥐 연구원 로기가 물어오는 똑똑한 금융 도토리 🐿️🌰</p>
-      </footer>
     </div>
-  </div>
   );
 }
