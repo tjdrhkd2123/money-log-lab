@@ -97,7 +97,8 @@ export default function ThreeDHero() {
       opacity: 0.26,
       side: THREE.DoubleSide,
       emissive: 0xc5a880,
-      emissiveIntensity: 0.15
+      emissiveIntensity: 0.15,
+      depthWrite: false // Fix transparency sorting
     });
 
     const capMaterial = new THREE.MeshStandardMaterial({
@@ -108,7 +109,8 @@ export default function ThreeDHero() {
       opacity: 0.38,
       side: THREE.DoubleSide,
       emissive: 0x9b7e56,
-      emissiveIntensity: 0.08
+      emissiveIntensity: 0.08,
+      depthWrite: false // Fix transparency sorting
     });
 
     const stemMaterial = new THREE.MeshStandardMaterial({
@@ -118,7 +120,11 @@ export default function ThreeDHero() {
     });
 
     const bodyMesh = new THREE.Mesh(bodyGeom, glassMaterial);
+    bodyMesh.renderOrder = 2; // Render after Rogi
+
     const capMesh = new THREE.Mesh(capGeom, capMaterial);
+    capMesh.renderOrder = 2; // Render after Rogi
+
     const stemMesh = new THREE.Mesh(stemGeom, stemMaterial);
 
     acornGroup.add(bodyMesh);
@@ -147,6 +153,7 @@ export default function ThreeDHero() {
     const rogiGeom = new THREE.PlaneGeometry(1.3, 1.3);
     const rogiMesh = new THREE.Mesh(rogiGeom, rogiMaterial);
     rogiMesh.position.set(0, -0.15, 0);
+    rogiMesh.renderOrder = 1; // Render before glass
     scene.add(rogiMesh);
 
     // 7. Mouse Tracker variables
