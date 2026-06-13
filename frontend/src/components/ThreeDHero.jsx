@@ -886,11 +886,24 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
       // 12. Dynamic Transition Interpolation (Opaque Acorn -> Transparent Lab Room)
       const entered = isEnteredRef.current;
 
-      // Camera Targets
-      const targetCamZ = entered ? 3.6 : 5.2;
-      const targetCamY = entered ? -0.05 : 0;
-      camera.position.z += (targetCamZ - camera.position.z) * 0.08;
-      camera.position.y += (targetCamY - camera.position.y) * 0.08;
+      // Camera Targets (Third-Person Follow Camera when inside, standard front view when outside)
+      if (entered) {
+        const targetCamX = rogiX;
+        const targetCamY = -0.64 + 0.45; // slightly above the floor looking down
+        const targetCamZ = rogiZ + 1.0;  // keep follow distance from behind
+
+        camera.position.x += (targetCamX - camera.position.x) * 0.08;
+        camera.position.y += (targetCamY - camera.position.y) * 0.08;
+        camera.position.z += (targetCamZ - camera.position.z) * 0.08;
+
+        // Aim the camera at Rogi's head height
+        camera.lookAt(new THREE.Vector3(rogiX, -0.64 + 0.22, rogiZ));
+      } else {
+        camera.position.x += (0 - camera.position.x) * 0.08;
+        camera.position.y += (0 - camera.position.y) * 0.08;
+        camera.position.z += (5.2 - camera.position.z) * 0.08;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+      }
 
       // Acorn Shell Targets (Solid -> Completely hidden inside room)
       const targetShellOpacity = entered ? 0.0 : 1.0;
