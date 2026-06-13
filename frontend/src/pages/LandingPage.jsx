@@ -302,61 +302,59 @@ export default function LandingPage({ onNavigateToAdmin }) {
             <ThreeDHero onItemClick={(id) => setActiveOverlay(id)} isEntered={isEntered} />
           </div>
 
-          {/* Absolute Navigation Header overlayed on Home */}
-          <header className="app-header" style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0,
-            width: '100%',
-            zIndex: 100, 
-            background: 'linear-gradient(to bottom, rgba(10, 11, 13, 0.72) 0%, transparent 100%)',
-            padding: '20px 40px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: 'none'
-          }}>
-            <div className="app-header-logo" onClick={() => { setIsEntered(false); setActiveOverlay(null); }} style={{ cursor: 'pointer' }}>
-              <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)' }}>🐿️</div>
-              <div>
-                <h1 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
-                <p style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em' }}>ROGI'S FINANCIAL ACORNS</p>
+          {/* Absolute Navigation Header overlayed on Home - Only show when entered */}
+          {isEntered && (
+            <header className="app-header" style={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0,
+              width: '100%',
+              zIndex: 100, 
+              background: 'linear-gradient(to bottom, rgba(10, 11, 13, 0.72) 0%, transparent 100%)',
+              padding: '20px 40px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: 'none'
+            }}>
+              <div className="app-header-logo" onClick={() => { setIsEntered(false); setActiveOverlay(null); }} style={{ cursor: 'pointer' }}>
+                <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.15)' }}>🐿️</div>
+                <div>
+                  <h1 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
+                  <p style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em' }}>로기의 금융 도토리</p>
+                </div>
               </div>
-            </div>
 
-            <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              {isEntered && (
-                <>
-                  <button onClick={() => setActiveOverlay('dashboard')} style={{ background: 'none', border: 'none', color: activeOverlay === 'dashboard' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'dashboard' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 대시보드</button>
-                  <button onClick={() => setActiveOverlay('news')} style={{ background: 'none', border: 'none', color: activeOverlay === 'news' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'news' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
-                  <button onClick={() => setActiveOverlay('calculators')} style={{ background: 'none', border: 'none', color: activeOverlay === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
-                  <button onClick={() => setActiveOverlay('benefits')} style={{ background: 'none', border: 'none', color: activeOverlay === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
-                  <button onClick={() => setActiveOverlay('subscribe')} style={{ background: 'none', border: 'none', color: activeOverlay === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
-                </>
-              )}
+              <nav style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <button onClick={() => setActiveOverlay('dashboard')} style={{ background: 'none', border: 'none', color: activeOverlay === 'dashboard' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'dashboard' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 대시보드</button>
+                <button onClick={() => setActiveOverlay('news')} style={{ background: 'none', border: 'none', color: activeOverlay === 'news' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'news' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>실시간 뉴스 📰</button>
+                <button onClick={() => setActiveOverlay('calculators')} style={{ background: 'none', border: 'none', color: activeOverlay === 'calculators' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'calculators' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>금융 계산기 💱</button>
+                <button onClick={() => setActiveOverlay('benefits')} style={{ background: 'none', border: 'none', color: activeOverlay === 'benefits' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'benefits' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>파트너 혜택 🪙</button>
+                <button onClick={() => setActiveOverlay('subscribe')} style={{ background: 'none', border: 'none', color: activeOverlay === 'subscribe' ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', borderBottom: activeOverlay === 'subscribe' ? '2px solid var(--color-accent-blue)' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s' }}>도토리 구독 🌰</button>
 
-              {isAdmin && (
-                <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>🔐 시크릿 룸</button>
-              )}
+                {isAdmin && (
+                  <button onClick={onNavigateToAdmin} style={{ background: 'none', border: 'none', color: 'var(--color-accent-orange)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>🔐 시크릿 룸</button>
+                )}
 
-              {currentUser ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-primary)' }}>{currentUser}님 🐿️</span>
-                  <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogOut size={13} /> 로그아웃</button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
-                  <button onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogIn size={13} /> 로그인</button>
-                  <button onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><UserPlus size={13} /> 회원가입</button>
-                </div>
-              )}
-            </nav>
-          </header>
+                {currentUser ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-primary)' }}>{currentUser}님 🐿️</span>
+                    <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogOut size={13} /> 로그아웃</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+                    <button onClick={() => { setActiveView('login'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LogIn size={13} /> 로그인</button>
+                    <button onClick={() => { setActiveView('register'); setAuthError(''); setAuthSuccess(''); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '600', fontSize: '13.5px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><UserPlus size={13} /> 회원가입</button>
+                  </div>
+                )}
+              </nav>
+            </header>
+          )}
 
           {/* Floating Title Overlay */}
           <div style={{
             position: 'absolute',
-            top: isEntered ? '8%' : '14%',
+            top: isEntered ? '8%' : '20%',
             left: '50%',
             transform: 'translateX(-50%)',
             textAlign: 'center',
@@ -367,7 +365,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
             transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             <h1 style={{
-              fontSize: isEntered ? 'clamp(24px, 3.5vw, 32px)' : 'clamp(38px, 6vw, 62px)',
+              fontSize: isEntered ? 'clamp(24px, 3.5vw, 32px)' : 'clamp(44px, 7vw, 68px)',
               fontWeight: '900',
               fontFamily: 'var(--font-headers)',
               letterSpacing: '-0.04em',
@@ -378,18 +376,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
               textShadow: '0 4px 24px rgba(0,0,0,0.85)',
               transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
             }}>로기 경제연구소</h1>
-            {!isEntered && (
-              <p style={{
-                fontSize: 'clamp(14px, 2vw, 17px)',
-                color: 'var(--color-text-secondary)',
-                fontFamily: 'var(--font-headers)',
-                fontWeight: '600',
-                letterSpacing: '0.08em',
-                opacity: 0.9,
-                textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                animation: 'fadeIn 0.5s ease-out'
-              }}>다람쥐 연구원 로기의 3D 금융 공간 🐿️</p>
-            )}
           </div>
 
           {/* Opaque Acorn state: "연구소 들어가기" Button */}
@@ -418,9 +404,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
               >
                 연구소 들어가기 🐿️🚪
               </button>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '16px', fontWeight: '500', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                단단한 도토리 문을 열고 로기의 미래 연구실로 입장해보세요!
-              </p>
             </div>
           ) : (
             <>
@@ -478,7 +461,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                   whiteSpace: 'nowrap'
                 }}
               >
-                🎮 방향키(←, → 또는 A, D)로 로기를 조종해봐! 🐿️
+                🎮 방향키(↑,↓,←,→ 또는 W,A,S,D)로 로기를 3D 맵 안에서 자유롭게 조종해봐! 🐿️
               </div>
 
               {/* Game Item Labels */}
@@ -552,7 +535,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <div style={{ background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, var(--bg-tertiary) 100%)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>🐿️</div>
               <div>
                 <h1 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '-0.03em' }}>머니로그랩 <span style={{ color: 'var(--color-accent-blue)', fontWeight: '400' }}>Lab</span></h1>
-                <p style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>ROGI'S FINANCIAL ACORNS</p>
+                <p style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>로기의 금융 도토리</p>
               </div>
             </div>
 
@@ -709,10 +692,10 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> EDITORIAL CATEGORIES</span>
+                  <span style={{ fontSize: '13px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><FileText size={16} style={{ color: 'var(--color-accent-blue)' }} /> 뉴스 카테고리 분류</span>
                   <div style={{ display: 'flex', gap: '6px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '10px' }}>
                     {['economy', 'realestate', 'coin'].map(tab => (
-                      <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', padding: '8px 16px', borderRadius: '8px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', transition: 'all 0.2s' }}>{tab === 'economy' ? 'MACRO' : tab === 'realestate' ? 'REAL ESTATE' : 'CRYPTO'}</button>
+                      <button key={tab} onClick={() => setNewsTab(tab)} style={{ background: newsTab === tab ? 'var(--color-card-bg)' : 'none', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: '800', fontFamily: 'var(--font-headers)', letterSpacing: '0.05em', padding: '8px 16px', borderRadius: '8px', color: newsTab === tab ? 'var(--color-accent-blue)' : 'var(--color-text-secondary)', transition: 'all 0.2s' }}>{tab === 'economy' ? '거시 경제' : tab === 'realestate' ? '부동산' : '가상 자산'}</button>
                     ))}
                   </div>
                 </div>
@@ -840,7 +823,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <a href="https://litt.ly/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-orange)', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                     <div>
-                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-orange)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>🔥 EXCLUSIVE BENEFIT</span>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-orange)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>🔥 단독 특별 혜택</span>
                       <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>🪙 거래소 꿀혜택 바로가기</h4>
                       <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>수수료 평생 할인 & 파트너 가입 특별 리워드 증정!</p>
                     </div>
@@ -849,7 +832,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
                   <a href="https://blog.naver.com/moneyloglab123" target="_blank" rel="noopener noreferrer" className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', textDecoration: 'none', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16, 185, 129, 0.05) 100%)', borderLeft: '5px solid var(--color-accent-emerald)', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
                     <div>
-                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-emerald)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}> Green NAVER BLOG</span>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-accent-emerald)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>💚 네이버 공식 블로그</span>
                       <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--color-text-primary)' }}>💚 네이버 공식 블로그 시황 글 읽기</h4>
                       <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>로기가 작성해 둔 핵심 거시 분석 및 시황 칼럼 모음!</p>
                     </div>

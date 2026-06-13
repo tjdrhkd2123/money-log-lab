@@ -67,7 +67,7 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     acornGroup.scale.set(1.4, 1.4, 1.4);
     scene.add(acornGroup);
 
-    // Outer shell body geometry
+    // Outer shell body geometry (Full 360 deg sweep)
     const bodyPoints = [];
     bodyPoints.push(new THREE.Vector2(0, -1.1));
     bodyPoints.push(new THREE.Vector2(0.35, -1.0));
@@ -92,7 +92,7 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     const stemGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.35, 12);
     stemGeom.translate(0, 1.15, 0);
 
-    // Materials - initialized as transparent to support fading
+    // Materials - initialized as transparent to support fading to outline dome
     const glassMaterial = new THREE.MeshStandardMaterial({
       color: 0xc5a880, // Rich warm metallic gold/amber
       roughness: 0.15,
@@ -106,7 +106,7 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     });
 
     const capMaterial = new THREE.MeshStandardMaterial({
-      color: 0x5b3f29, // Deep dark oak/chocolate cap
+      color: 0x5b3f29, // Deep dark oak cap
       roughness: 0.45,
       metalness: 0.65,
       transparent: true,
@@ -120,7 +120,9 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     const stemMaterial = new THREE.MeshStandardMaterial({
       color: 0x3d271a,
       roughness: 0.8,
-      metalness: 0.1
+      metalness: 0.1,
+      transparent: true,
+      opacity: 1.0
     });
 
     const bodyMesh = new THREE.Mesh(bodyGeom, glassMaterial);
@@ -148,6 +150,24 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.position.y = -0.65;
     acornGroup.add(floorMesh);
+
+    // Neon grid rings on the floor
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x00ffcc,
+      transparent: true,
+      opacity: 0.0,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const ringMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.52, 0.54, 32), ringMat);
+    ringMesh1.rotation.x = -Math.PI / 2;
+    ringMesh1.position.y = -0.648;
+    acornGroup.add(ringMesh1);
+
+    const ringMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.38, 0.39, 32), ringMat);
+    ringMesh2.rotation.x = -Math.PI / 2;
+    ringMesh2.position.y = -0.648;
+    acornGroup.add(ringMesh2);
 
     // Setup group for lab furniture to sync opacities together
     const furnitureGroup = new THREE.Group();
@@ -259,6 +279,65 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     beaker.add(bkLiquid);
     furnitureGroup.add(beaker);
 
+    // 6e. Research Bookcase (sitting at the back)
+    const bookcaseGroup = new THREE.Group();
+    bookcaseGroup.position.set(0, -0.64, -0.28); // Sits on floor y = -0.65
+    furnitureGroup.add(bookcaseGroup);
+
+    // Bookcase Frame Material
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x3d2a1d, // Mahogany wood
+      roughness: 0.7,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.0
+    });
+    
+    const backPanel = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.38, 0.015), frameMat);
+    backPanel.position.set(0, 0.19, 0);
+    bookcaseGroup.add(backPanel);
+
+    const sideL = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.38, 0.07), frameMat);
+    sideL.position.set(-0.14, 0.19, 0.025);
+    bookcaseGroup.add(sideL);
+
+    const sideR = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.38, 0.07), frameMat);
+    sideR.position.set(0.14, 0.19, 0.025);
+    bookcaseGroup.add(sideR);
+
+    const shelf1 = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.012, 0.06), frameMat);
+    shelf1.position.set(0, 0.12, 0.025);
+    bookcaseGroup.add(shelf1);
+
+    const shelf2 = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.012, 0.06), frameMat);
+    shelf2.position.set(0, 0.24, 0.025);
+    bookcaseGroup.add(shelf2);
+
+    const topPanel = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.015, 0.07), frameMat);
+    topPanel.position.set(0, 0.38, 0.025);
+    bookcaseGroup.add(topPanel);
+
+    // Mini books to fill bookcase shelves
+    const miniBookColors = [0x9b2c2c, 0x2b6cb0, 0x2f855a, 0xd69e2e, 0x4e382b];
+    for (let s = 0; s < 3; s++) { // 3 shelf rows (including bottom floor shelf)
+      const shelfY = s === 0 ? 0.01 : s === 1 ? 0.13 : 0.25;
+      for (let b = 0; b < 6; b++) {
+        const bookMat = new THREE.MeshStandardMaterial({
+          color: miniBookColors[(s * 3 + b) % miniBookColors.length],
+          roughness: 0.8,
+          transparent: true,
+          opacity: 0.0
+        });
+        const bookHeight = 0.05 + Math.random() * 0.015;
+        const bookMesh = new THREE.Mesh(new THREE.BoxGeometry(0.012, bookHeight, 0.045), bookMat);
+        bookMesh.position.set(-0.1 + b * 0.038, shelfY + bookHeight / 2, 0.025);
+        if (Math.random() > 0.65) {
+          bookMesh.rotation.z = (Math.random() - 0.5) * 0.18;
+        }
+        bookcaseGroup.add(bookMesh);
+      }
+    }
+
     // 7. Build Interactive Holographic & Hardware Devices
     const clickables = [];
 
@@ -286,12 +365,12 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     hlCtx.fillStyle = '#00ffff';
     hlCtx.shadowColor = '#00ffff';
     hlCtx.shadowBlur = 10;
-    hlCtx.font = 'bold 30px "Outfit", sans-serif';
+    hlCtx.font = 'bold 32px "Outfit", sans-serif'; // Adjusted size slightly for Korean fonts
     hlCtx.textAlign = 'center';
     hlCtx.textBaseline = 'middle';
-    hlCtx.fillText('NEWS CLIPS', 128, 65);
-    hlCtx.font = 'bold 16px "Outfit", sans-serif';
-    hlCtx.fillText('[CLICK TO ENTER]', 128, 115);
+    hlCtx.fillText('실시간 뉴스', 128, 65);
+    hlCtx.font = 'bold 18px "Outfit", sans-serif';
+    hlCtx.fillText('[클릭하여 열기]', 128, 115);
 
     const hlTexture = new THREE.CanvasTexture(hlCanvas);
     const hlMaterial = new THREE.MeshStandardMaterial({
@@ -312,6 +391,57 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     hologramMesh.userData = { id: 'news' };
     acornGroup.add(hologramMesh);
     clickables.push(hologramMesh);
+
+    // Hologram Projector Base (metal disk on the floor)
+    const projectorBaseMat = new THREE.MeshStandardMaterial({
+      color: 0x4a5568,
+      roughness: 0.5,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.0
+    });
+    const projectorBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.015, 12), projectorBaseMat);
+    projectorBase.position.set(0.18, -0.64, -0.22);
+    acornGroup.add(projectorBase);
+
+    // Holographic Light Cone (beam from floor to screen)
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0x00ffff,
+      transparent: true,
+      opacity: 0.0,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const beamCone = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.42, 16, 1, true), beamMat);
+    beamCone.position.set(0.18, -0.43, -0.22);
+    acornGroup.add(beamCone);
+
+    // Cyber Server Rack on the floor
+    const serverMat = new THREE.MeshStandardMaterial({
+      color: 0x242831,
+      roughness: 0.5,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0.0
+    });
+    const serverMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.28, 0.15), serverMat);
+    serverMesh.position.set(0.32, -0.51, -0.12);
+    acornGroup.add(serverMesh);
+
+    // Server LED indicator lights
+    const serverLeds = [];
+    const ledColors = [0x00ff66, 0xff3333, 0xffcc00];
+    for (let l = 0; l < 4; l++) {
+      const ledMat = new THREE.MeshBasicMaterial({
+        color: ledColors[l % ledColors.length],
+        transparent: true,
+        opacity: 0.0
+      });
+      const led = new THREE.Mesh(new THREE.SphereGeometry(0.008, 8, 8), ledMat);
+      led.position.set(0.32 - 0.076, -0.42 - l * 0.045, -0.12 + (l % 2 === 0 ? 0.03 : -0.03));
+      acornGroup.add(led);
+      serverLeds.push(led);
+    }
 
     // 7b. Interactive 3D Mini-Calculator (sitting on desk)
     const calcGroup = new THREE.Group();
@@ -405,56 +535,211 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     acornGroup.add(letterGroup);
     clickables.push(letterGroup);
 
-    // 8. Build 2.5D Paper Cutout Mascot (Rogi)
-    const rogiMaterial = new THREE.MeshStandardMaterial({
-      transparent: true,
-      side: THREE.DoubleSide,
-      roughness: 0.95,
-      metalness: 0.05,
-      opacity: 0.0 // Starts invisible
-    });
+    // 8. Build 3D Mascot (Rogi)
+    const rogiGroup = new THREE.Group();
+    rogiGroup.position.set(0, -0.64, 0.1); // Floor y is -0.65, so foot starts around here
+    acornGroup.add(rogiGroup);
 
-    const img = new Image();
-    img.src = rogiMascotUrl;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-
-      // Chroma keying: remove white background pixels
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
-          data[i+3] = 0; // Set Alpha to 0
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.minFilter = THREE.LinearFilter;
-      rogiMaterial.map = texture;
-      rogiMaterial.needsUpdate = true;
+    const rogiMaterials = [];
+    const createRogiMaterial = (color, roughness = 0.5, metalness = 0.1) => {
+      const mat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: roughness,
+        metalness: metalness,
+        transparent: true,
+        opacity: 0.0
+      });
+      rogiMaterials.push(mat);
+      return mat;
     };
 
-    const rogiGeom = new THREE.PlaneGeometry(0.7, 0.7); // Smaller, cute scale inside room
-    const rogiMesh = new THREE.Mesh(rogiGeom, rogiMaterial);
-    rogiMesh.position.set(0, -0.32, 0.1); // Standing on floor
-    rogiMesh.renderOrder = 2; // Render before glass
-    acornGroup.add(rogiMesh);
+    // Warm friendly squirrel tones matching rogi_mascot artwork
+    const sqBrown = createRogiMaterial(0xbb6c3a, 0.7, 0.02); // Rich warm squirrel orange-brown
+    const sqLight = createRogiMaterial(0xfff5e6, 0.6, 0.02); // Creamy warm white/wheat for tummy & cheeks
+    const sqPink = createRogiMaterial(0xffc0cb, 0.6, 0.02);  // Cozy pink for inner ears
+    const sqDark = createRogiMaterial(0x422216, 0.85, 0.02); // Dark chocolate stripes
+    const sqBlack = createRogiMaterial(0x0e0e0e, 0.15, 0.85); // Glossy cartoon eyes/nose
+    const sqWhite = createRogiMaterial(0xffffff, 0.05, 0.95); // Shiny glare reflections
 
-    // 2.5D Dropshadow beneath Rogi's feet
+    // Subgroup to animate walking bobbing
+    const rogiBodyGroup = new THREE.Group();
+    rogiGroup.add(rogiBodyGroup);
+
+    // 8a. Tummy / Lower Body (Sphere)
+    const bodyGeom = new THREE.SphereGeometry(0.09, 18, 18);
+    bodyGeom.scale(1.0, 1.25, 0.95);
+    const bodyMesh = new THREE.Mesh(bodyGeom, sqBrown);
+    bodyMesh.position.y = 0.11;
+    rogiBodyGroup.add(bodyMesh);
+
+    // Light belly patch (Sphere, slightly forward)
+    const bellyGeom = new THREE.SphereGeometry(0.075, 18, 18);
+    bellyGeom.scale(0.82, 1.02, 0.45);
+    const bellyMesh = new THREE.Mesh(bellyGeom, sqLight);
+    bellyMesh.position.set(0, 0.095, 0.055);
+    rogiBodyGroup.add(bellyMesh);
+
+    // Dark back stripes (3 lines of stripes on the back of body)
+    const stripeL = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), sqDark);
+    stripeL.position.set(-0.03, 0.11, -0.078);
+    rogiBodyGroup.add(stripeL);
+    
+    const stripeC = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), sqLight); // middle light accent stripe
+    stripeC.position.set(0, 0.11, -0.082);
+    rogiBodyGroup.add(stripeC);
+
+    const stripeR = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), sqDark);
+    stripeR.position.set(0.03, 0.11, -0.078);
+    rogiBodyGroup.add(stripeR);
+
+    // 8b. Head (Sphere)
+    const headGeom = new THREE.SphereGeometry(0.085, 18, 18);
+    const headMesh = new THREE.Mesh(headGeom, sqBrown);
+    headMesh.position.set(0, 0.22, 0);
+    rogiBodyGroup.add(headMesh);
+
+    // Dark forehead stripes (signature stripe down the middle of head)
+    const foreheadStripe = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.055, 0.008), sqDark);
+    foreheadStripe.position.set(0, 0.26, 0.075);
+    foreheadStripe.rotation.x = -Math.PI / 12;
+    rogiBodyGroup.add(foreheadStripe);
+
+    // Muzzle / Cheeks (Cream colored chubby cheeks left/right)
+    const cheekL = new THREE.Mesh(new THREE.SphereGeometry(0.036, 14, 14), sqLight);
+    cheekL.position.set(-0.024, 0.195, 0.055);
+    rogiBodyGroup.add(cheekL);
+    const cheekR = new THREE.Mesh(new THREE.SphereGeometry(0.036, 14, 14), sqLight);
+    cheekR.position.set(0.024, 0.195, 0.055);
+    rogiBodyGroup.add(cheekR);
+
+    // Nose (Tiny black sphere)
+    const noseMesh = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), sqBlack);
+    noseMesh.position.set(0, 0.208, 0.086);
+    rogiBodyGroup.add(noseMesh);
+
+    // Eyes (Big cute cartoon eyes)
+    const eyeGeom = new THREE.SphereGeometry(0.018, 14, 14);
+    const eyeL = new THREE.Mesh(eyeGeom, sqBlack);
+    eyeL.position.set(-0.035, 0.23, 0.062);
+    rogiBodyGroup.add(eyeL);
+    const eyeR = new THREE.Mesh(eyeGeom, sqBlack);
+    eyeR.position.set(0.035, 0.23, 0.062);
+    rogiBodyGroup.add(eyeR);
+
+    // Eye Highlights (Shiny glare)
+    const glareGeom = new THREE.SphereGeometry(0.006, 8, 8);
+    const glareL = new THREE.Mesh(glareGeom, sqWhite);
+    glareL.position.set(-0.03, 0.238, 0.074);
+    rogiBodyGroup.add(glareL);
+    const glareR = new THREE.Mesh(glareGeom, sqWhite);
+    glareR.position.set(0.04, 0.238, 0.074);
+    rogiBodyGroup.add(glareR);
+
+    // 8c. Ears (Slightly larger, cute angled ears)
+    const earGeom = new THREE.ConeGeometry(0.03, 0.075, 4);
+    earGeom.rotateX(Math.PI / 8);
+
+    const earL = new THREE.Mesh(earGeom, sqBrown);
+    earL.position.set(-0.058, 0.292, 0.005);
+    earL.rotation.z = 0.24;
+    rogiBodyGroup.add(earL);
+
+    const innerEarL = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.055, 4), sqPink);
+    innerEarL.position.set(-0.052, 0.284, 0.014);
+    innerEarL.rotation.z = 0.24;
+    rogiBodyGroup.add(innerEarL);
+
+    const earR = new THREE.Mesh(earGeom, sqBrown);
+    earR.position.set(0.058, 0.292, 0.005);
+    earR.rotation.z = -0.24;
+    rogiBodyGroup.add(earR);
+
+    const innerEarR = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.055, 4), sqPink);
+    innerEarR.position.set(0.052, 0.284, 0.014);
+    innerEarR.rotation.z = -0.24;
+    rogiBodyGroup.add(innerEarR);
+
+    // 8d. Arms (Cylinders - Initialized in a cute hand-resting pose over tummy)
+    const armGeom = new THREE.CylinderGeometry(0.015, 0.011, 0.065, 8);
+    armGeom.translate(0, -0.03, 0);
+
+    const armL = new THREE.Mesh(armGeom, sqBrown);
+    armL.position.set(-0.085, 0.14, 0.025);
+    armL.rotation.z = 1.1; // Rest over tummy
+    armL.rotation.y = 0.5;
+    armL.rotation.x = 0.4;
+    rogiBodyGroup.add(armL);
+
+    const armR = new THREE.Mesh(armGeom, sqBrown);
+    armR.position.set(0.085, 0.14, 0.025);
+    armR.rotation.z = -1.1; // Rest over tummy
+    armR.rotation.y = -0.5;
+    armR.rotation.x = 0.4;
+    rogiBodyGroup.add(armR);
+
+    // 8e. Legs and feet (Mini cylinders)
+    const legGeom = new THREE.CylinderGeometry(0.022, 0.02, 0.04, 8);
+    
+    const legL = new THREE.Mesh(legGeom, sqBrown);
+    legL.position.set(-0.045, 0.02, 0.002);
+    rogiBodyGroup.add(legL);
+
+    const legR = new THREE.Mesh(legGeom, sqBrown);
+    legR.position.set(0.045, 0.02, 0.002);
+    rogiBodyGroup.add(legR);
+
+    const footGeom = new THREE.BoxGeometry(0.03, 0.015, 0.055);
+    
+    const footL = new THREE.Mesh(footGeom, sqLight);
+    footL.position.set(-0.045, 0.0075, 0.012);
+    rogiBodyGroup.add(footL);
+
+    const footR = new THREE.Mesh(footGeom, sqLight);
+    footR.position.set(0.045, 0.0075, 0.012);
+    rogiBodyGroup.add(footR);
+
+    // 8f. Large Fluffy Squirrel Tail (Bigger, sweeping segmented design)
+    const tailGroup = new THREE.Group();
+    tailGroup.position.set(0, 0.07, -0.07);
+    rogiBodyGroup.add(tailGroup);
+
+    const numTailSegs = 6;
+    const tailSegRefs = [];
+    for (let i = 0; i < numTailSegs; i++) {
+      const tRatio = i / (numTailSegs - 1);
+      const segSize = 0.042 + Math.sin(tRatio * Math.PI) * 0.065; // Much bulkier tail
+      const segGeom = new THREE.SphereGeometry(segSize, 10, 10);
+      const segMesh = new THREE.Mesh(segGeom, sqBrown);
+      
+      const arcAngle = tRatio * Math.PI * 0.88;
+      const radius = 0.14; // sweeping curve radius
+      segMesh.position.z = -Math.sin(arcAngle) * radius;
+      segMesh.position.y = Math.cos(arcAngle) * radius + 0.07;
+      
+      tailGroup.add(segMesh);
+      tailSegRefs.push(segMesh);
+
+      // Deep dark brown tail stripes
+      if (i % 2 === 1) {
+        const stripeGeom = new THREE.SphereGeometry(segSize + 0.002, 10, 10);
+        stripeGeom.scale(1.04, 1.0, 0.38);
+        const stripeMesh = new THREE.Mesh(stripeGeom, sqDark);
+        stripeMesh.position.copy(segMesh.position);
+        stripeMesh.rotation.x = arcAngle;
+        tailGroup.add(stripeMesh);
+      }
+    }
+
+    // 8g. Dropshadow (Dynamic Ground Circle)
     const shadowMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
       opacity: 0.0,
       depthWrite: false
     });
-    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.09, 16), shadowMat);
+    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.075, 16), shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
-    shadowMesh.position.set(0, -0.64, 0.1); // Slightly above floor to prevent z-fighting
+    shadowMesh.position.set(0, -0.648, 0.1); // slightly above floor
     shadowMesh.renderOrder = 1;
     acornGroup.add(shadowMesh);
 
@@ -550,26 +835,24 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     canvasRef.current.addEventListener('click', handleCanvasClick);
 
     // 10. Keyboard Controls Tracker (Only active when entered)
-    const keysPressed = { Left: false, Right: false };
+    const keysPressed = { Left: false, Right: false, Forward: false, Backward: false };
 
     const handleKeyDown = (e) => {
       if (!isEnteredRef.current) return;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'w') {
-        keysPressed.Left = true;
-      }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 's') {
-        keysPressed.Right = true;
-      }
+      const key = e.key.toLowerCase();
+      if (e.key === 'ArrowLeft' || key === 'a') keysPressed.Left = true;
+      if (e.key === 'ArrowRight' || key === 'd') keysPressed.Right = true;
+      if (e.key === 'ArrowUp' || key === 'w') keysPressed.Forward = true;
+      if (e.key === 'ArrowDown' || key === 's') keysPressed.Backward = true;
     };
 
     const handleKeyUp = (e) => {
       if (!isEnteredRef.current) return;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'w') {
-        keysPressed.Left = false;
-      }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 's') {
-        keysPressed.Right = false;
-      }
+      const key = e.key.toLowerCase();
+      if (e.key === 'ArrowLeft' || key === 'a') keysPressed.Left = false;
+      if (e.key === 'ArrowRight' || key === 'd') keysPressed.Right = false;
+      if (e.key === 'ArrowUp' || key === 'w') keysPressed.Forward = false;
+      if (e.key === 'ArrowDown' || key === 's') keysPressed.Backward = false;
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -579,8 +862,8 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
     let animationFrameId;
     let clock = new THREE.Clock();
     let rogiX = 0;
-    let rogiDirection = 1; // 1 = right, -1 = left
-    const rogiSpeed = 0.0075;
+    let rogiZ = 0.1; // Starting depth coordinate inside the room
+    const rogiSpeed = 0.0065; // Fine-tuned speed for multi-directional navigation
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -609,11 +892,11 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
       camera.position.z += (targetCamZ - camera.position.z) * 0.08;
       camera.position.y += (targetCamY - camera.position.y) * 0.08;
 
-      // Acorn Shell Targets (Solid -> Outline)
-      const targetShellOpacity = entered ? 0.06 : 1.0;
-      const targetCapOpacity = entered ? 0.12 : 1.0;
+      // Acorn Shell Targets (Solid -> Completely hidden inside room)
+      const targetShellOpacity = entered ? 0.0 : 1.0;
       glassMaterial.opacity += (targetShellOpacity - glassMaterial.opacity) * 0.08;
-      capMaterial.opacity += (targetCapOpacity - capMaterial.opacity) * 0.08;
+      capMaterial.opacity += (targetShellOpacity - capMaterial.opacity) * 0.08;
+      stemMaterial.opacity += (targetShellOpacity - stemMaterial.opacity) * 0.08;
 
       // Interior Props Targets (Invisible -> Fully Lit)
       const targetInteriorOpacity = entered ? 1.0 : 0.0;
@@ -624,6 +907,14 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
       flLiquidMat.opacity += (targetInteriorOpacity - flLiquidMat.opacity) * 0.08;
       bkLiquidMat.opacity += (targetInteriorOpacity - bkLiquidMat.opacity) * 0.08;
       
+      // Bookcase fading
+      frameMat.opacity += (targetInteriorOpacity - frameMat.opacity) * 0.08;
+      bookcaseGroup.children.forEach(child => {
+        if (child.material && child.material !== frameMat) {
+          child.material.opacity += (targetInteriorOpacity - child.material.opacity) * 0.08;
+        }
+      });
+      
       // Interactive Devices opacity
       hlMaterial.opacity += (targetInteriorOpacity - hlMaterial.opacity) * 0.08;
       calcBodyMat.opacity += (targetInteriorOpacity - calcBodyMat.opacity) * 0.08;
@@ -633,54 +924,127 @@ export default function ThreeDHero({ onItemClick, isEntered }) {
       envPaperMat.opacity += (targetInteriorOpacity - envPaperMat.opacity) * 0.08;
       sealMat.opacity += (targetInteriorOpacity - sealMat.opacity) * 0.08;
 
+      // SF Props opacity
+      projectorBaseMat.opacity += (targetInteriorOpacity - projectorBaseMat.opacity) * 0.08;
+      beamMat.opacity += ((entered ? 0.24 + Math.sin(time * 6) * 0.05 : 0) - beamMat.opacity) * 0.08;
+      ringMat.opacity += ((entered ? 0.45 : 0) - ringMat.opacity) * 0.08;
+      serverMat.opacity += (targetInteriorOpacity - serverMat.opacity) * 0.08;
+      serverLeds.forEach((led, idx) => {
+        // Blink LEDs in loop using sine wave with phase offset
+        const blinkVal = entered ? (Math.sin(time * 9 + idx * 1.5) > 0.1 ? 0.85 : 0.15) : 0;
+        led.material.opacity += (blinkVal - led.material.opacity) * 0.15;
+      });
+
       // Mascot & dropshadow opacity
-      rogiMaterial.opacity += (targetInteriorOpacity - rogiMaterial.opacity) * 0.08;
-      shadowMat.opacity += (entered ? 0.45 : 0.0 - shadowMat.opacity) * 0.08;
+      rogiMaterials.forEach(m => {
+        m.opacity += (targetInteriorOpacity - m.opacity) * 0.08;
+      });
+      shadowMat.opacity += ((entered ? 0.42 : 0.0) - shadowMat.opacity) * 0.08;
 
       // Render book pile opacities
       bookGroup.children.forEach(b => {
         b.material.opacity += (targetInteriorOpacity - b.material.opacity) * 0.08;
       });
 
-      // 13. Keyboard walking and 2.5D Animation logic
+      // 13. Keyboard walking and 3D 8-Directional Animation logic
       let isWalking = false;
+      let moveX = 0;
+      let moveZ = 0;
+
       if (entered) {
-        if (keysPressed.Left && !keysPressed.Right) {
-          rogiX -= rogiSpeed;
-          rogiDirection = -1;
-          isWalking = true;
-        } else if (keysPressed.Right && !keysPressed.Left) {
-          rogiX += rogiSpeed;
-          rogiDirection = 1;
-          isWalking = true;
-        }
+        if (keysPressed.Left) moveX -= 1;
+        if (keysPressed.Right) moveX += 1;
+        if (keysPressed.Forward) moveZ -= 1;  // Forward is -z (deeper)
+        if (keysPressed.Backward) moveZ += 1; // Backward is +z (closer)
       }
 
-      // Constrain position to circle floor
-      if (rogiX > 0.32) rogiX = 0.32;
-      if (rogiX < -0.32) rogiX = -0.32;
+      let targetRogiRotY = 0;
 
-      rogiMesh.position.x = rogiX;
+      if (moveX !== 0 || moveZ !== 0) {
+        isWalking = true;
+        // Normalize movement vector so diagonal move isn't faster
+        const length = Math.sqrt(moveX * moveX + moveZ * moveZ);
+        rogiX += (moveX / length) * rogiSpeed;
+        rogiZ += (moveZ / length) * rogiSpeed;
+
+        // Angle character towards movement direction (atan2(x, z))
+        targetRogiRotY = Math.atan2(moveX, moveZ);
+      }
+
+      // Constrain position to circle floor boundary (dome radius is ~0.45)
+      const dist = Math.sqrt(rogiX * rogiX + rogiZ * rogiZ);
+      const maxRadius = 0.42;
+      if (dist > maxRadius) {
+        const angle = Math.atan2(rogiZ, rogiX);
+        rogiX = Math.cos(angle) * maxRadius;
+        rogiZ = Math.sin(angle) * maxRadius;
+      }
+
+      rogiGroup.position.x = rogiX;
+      rogiGroup.position.z = rogiZ;
       shadowMesh.position.x = rogiX;
+      shadowMesh.position.z = rogiZ;
 
-      // Face walking direction
-      rogiMesh.scale.x = rogiDirection;
+      // Smooth rotate towards target direction (lerp to 0 if stopped)
+      if (isWalking) {
+        rogiGroup.rotation.y += (targetRogiRotY - rogiGroup.rotation.y) * 0.16;
+      } else {
+        rogiGroup.rotation.y += (0 - rogiGroup.rotation.y) * 0.12;
+      }
 
       if (isWalking) {
-        // Wobbling and paper-bobbing walks
-        rogiMesh.position.y = -0.34 + Math.abs(Math.sin(time * 14)) * 0.035;
-        rogiMesh.rotation.z = Math.sin(time * 14) * 0.06;
+        // Hopping bobbing motion when walking
+        rogiBodyGroup.position.y = Math.abs(Math.sin(time * 13)) * 0.022;
+        rogiBodyGroup.rotation.z = Math.sin(time * 13) * 0.045;
+        rogiBodyGroup.rotation.x = 0.04;
+
+        // Swing arms forward-backward naturally (reset Y & Z to normal swinging angles)
+        armL.rotation.x = 0.25 + Math.sin(time * 13) * 0.5;
+        armL.rotation.z += (0.25 - armL.rotation.z) * 0.12;
+        armL.rotation.y += (0.1 - armL.rotation.y) * 0.12;
+
+        armR.rotation.x = 0.25 - Math.sin(time * 13) * 0.5;
+        armR.rotation.z += (-0.25 - armR.rotation.z) * 0.12;
+        armR.rotation.y += (-0.1 - armR.rotation.y) * 0.12;
+
+        // Move legs
+        legL.rotation.x = Math.sin(time * 13) * 0.4;
+        legR.rotation.x = -Math.sin(time * 13) * 0.4;
+        footL.rotation.x = Math.sin(time * 13) * 0.4;
+        footR.rotation.x = -Math.sin(time * 13) * 0.4;
+
+        // Tail wagging
+        tailGroup.rotation.z = Math.sin(time * 13) * 0.12;
       } else {
-        // Standing breathing idle
-        rogiMesh.position.y = -0.34 + Math.sin(time * 1.8) * 0.008;
-        rogiMesh.rotation.z += (0 - rogiMesh.rotation.z) * 0.15;
+        // Idle breathing
+        rogiBodyGroup.position.y = Math.sin(time * 1.6) * 0.005;
+        rogiBodyGroup.rotation.z += (0 - rogiBodyGroup.rotation.z) * 0.12;
+        rogiBodyGroup.rotation.x += (0 - rogiBodyGroup.rotation.x) * 0.12;
+
+        // Reset arms back to resting tummy pose
+        armL.rotation.x += (0.4 - armL.rotation.x) * 0.12;
+        armL.rotation.z += (1.1 - armL.rotation.z) * 0.12;
+        armL.rotation.y += (0.5 - armL.rotation.y) * 0.12;
+
+        armR.rotation.x += (0.4 - armR.rotation.x) * 0.12;
+        armR.rotation.z += (-1.1 - armR.rotation.z) * 0.12;
+        armR.rotation.y += (-0.5 - armR.rotation.y) * 0.12;
+
+        // Reset legs / feet
+        legL.rotation.x += (0 - legL.rotation.x) * 0.12;
+        legR.rotation.x += (0 - legR.rotation.x) * 0.12;
+        footL.rotation.x += (0 - footL.rotation.x) * 0.12;
+        footR.rotation.x += (0 - footR.rotation.x) * 0.12;
+
+        // Tail breathing wiggle
+        tailGroup.rotation.z = Math.sin(time * 1.6) * 0.04;
       }
 
       // Adjust dropshadow scale depending on Rogi's height from floor
-      const heightOffset = rogiMesh.position.y - (-0.34);
-      const shadowScale = Math.max(0.4, 1.0 - heightOffset * 3.5);
+      const shadowHeightOffset = rogiBodyGroup.position.y;
+      const shadowScale = Math.max(0.4, 1.0 - shadowHeightOffset * 2.8);
       shadowMesh.scale.set(shadowScale, shadowScale, 1.0);
-      shadowMat.opacity = Math.max(0.15, 0.45 - heightOffset * 1.5) * targetInteriorOpacity;
+      shadowMat.opacity = Math.max(0.12, 0.42 - shadowHeightOffset * 1.2) * (entered ? 1.0 : 0.0);
 
       renderer.render(scene, camera);
     };
