@@ -20,6 +20,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [nearNPC, setNearNPC] = useState(null);
   const [activeNPC, setActiveNPC] = useState(null);
   const [typedText, setTypedText] = useState('');
+  const [npcPositions, setNpcPositions] = useState({});
 
   const getNPCDialogText = (id) => {
     switch (id) {
@@ -365,9 +366,74 @@ export default function LandingPage({ onNavigateToAdmin }) {
             <ThreeDHero 
               onItemClick={(id) => setActiveOverlay(id)} 
               onNearNPCChange={(npc) => setNearNPC(npc)}
+              onNPCPositionsUpdate={setNpcPositions}
               isEntered={isEntered} 
             />
           </div>
+
+          {/* Real-time 2.5D Name Tags Overlay */}
+          {isEntered && !activeOverlay && npcPositions && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}>
+              {Object.entries(npcPositions).map(([key, pos]) => {
+                const nameTags = {
+                  rogi: { name: '로기 소장 🐿️', color: '#bb6c3a' },
+                  npc_news: { name: '차돌 뉴스 연구원 📰', color: '#4a5568' },
+                  npc_calc: { name: '뽀짝 환율 연구원 💱', color: '#d69e2e' },
+                  npc_benefit: { name: '베이지 혜택 연구원 🪙', color: '#a38d6b' },
+                  npc_dashboard: { name: '노랑 지표 연구원 📊', color: '#744210' }
+                };
+                const info = nameTags[key];
+                if (!info || !pos) return null;
+                if (pos.x < 0 || pos.x > 100 || pos.y < 0 || pos.y > 100) return null;
+                
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      position: 'absolute',
+                      left: `${pos.x}%`,
+                      top: `${pos.y}%`,
+                      transform: 'translate(-50%, -100%)',
+                      marginTop: '-10px',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(4px)',
+                      WebkitBackdropFilter: 'blur(4px)',
+                      border: `1.5px solid ${info.color}`,
+                      borderRadius: '10px',
+                      padding: '3px 8px',
+                      fontSize: '11px',
+                      fontWeight: '800',
+                      color: '#2d1a0c',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      animation: 'fadeIn 0.2s ease-out'
+                    }}
+                  >
+                    <span style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: info.color
+                    }} />
+                    {info.name}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Absolute Navigation Header overlayed on Home - Only show when NOT entered */}
           {!isEntered && (
