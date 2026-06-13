@@ -7,7 +7,7 @@ import {
 
 export default function AdminSecret({ onNavigateHome }) {
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState(localStorage.getItem('admin_token') || '');
+  const [token, setToken] = useState(sessionStorage.getItem('admin_token') || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -60,7 +60,7 @@ export default function AdminSecret({ onNavigateHome }) {
       const data = await response.json();
       
       if (response.ok && data.success) {
-        localStorage.setItem('admin_token', data.token);
+        sessionStorage.setItem('admin_token', data.token);
         setToken(data.token);
       } else {
         setError(data.message || '패스워드가 올바르지 않아!');
@@ -73,7 +73,7 @@ export default function AdminSecret({ onNavigateHome }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
+    sessionStorage.removeItem('admin_token');
     setToken('');
     setDashboardData(null);
   };

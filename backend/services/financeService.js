@@ -105,7 +105,7 @@ export const financeService = {
     }
 
     if (!usdKrw) {
-      usdKrw = { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' };
+      usdKrw = { price: '1,520.00', change: '+4.50', changePercent: '0.30', status: 'UP' };
     } else {
       usdKrw.price = Number(usdKrw.price).toLocaleString('ko-KR', { minimumFractionDigits: 2 });
       usdKrw.change = (Number(usdKrw.change) >= 0 ? '+' : '') + Number(usdKrw.change).toFixed(2);

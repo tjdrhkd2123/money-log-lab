@@ -15,8 +15,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [newsTab, setNewsTab] = useState('economy');
   const [indices, setIndices] = useState(null);
 
-  const [currentUser, setCurrentUser] = useState(localStorage.getItem('current_user') || null);
-  const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem('admin_token'));
+  const [currentUser, setCurrentUser] = useState(sessionStorage.getItem('current_user') || null);
+  const [isAdmin, setIsAdmin] = useState(!!sessionStorage.getItem('admin_token'));
   
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
@@ -26,7 +26,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
   const [calcTab, setCalcTab] = useState('exchange');
   const [krwInput, setKrwInput] = useState('1000000');
-  const [usdInput, setUsdInput] = useState('');
+  const [usdInput, setUsdInput] = useState('657.89');
   const [monthlySavings, setMonthlySavings] = useState('300000');
   const [interestRate, setInterestRate] = useState('4.5');
   const [savingsPeriod, setSavingsPeriod] = useState('3');
@@ -37,6 +37,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
       try {
         const res = await fetch(`${API_BASE_URL}/api/public/indices`);
         if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setIndices(data.indices);
+            if (data.news) setNews(data.news);
+          }
           setBackendWaking(false);
           clearInterval(intervalId);
         }
@@ -51,24 +56,52 @@ export default function LandingPage({ onNavigateToAdmin }) {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    const rate = 1370; 
-    if (krwInput) {
-      setUsdInput((parseFloat(krwInput) / rate).toFixed(2));
+  const getActiveRate = () => {
+    return indices?.usdKrw?.price ? parseFloat(indices.usdKrw.price.replace(/,/g, '')) : 1520;
+  };
+
+  const handleKrwChange = (val) => {
+    setKrwInput(val);
+    const rate = getActiveRate();
+    if (val) {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) {
+        setUsdInput((parsed / rate).toFixed(2));
+      } else {
+        setUsdInput('');
+      }
     } else {
       setUsdInput('');
     }
-  }, [krwInput]);
+  };
 
   const handleUsdChange = (val) => {
     setUsdInput(val);
-    const rate = 1370;
+    const rate = getActiveRate();
     if (val) {
-      setKrwInput(Math.round(parseFloat(val) * rate).toString());
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) {
+        setKrwInput(Math.round(parsed * rate).toString());
+      } else {
+        setKrwInput('');
+      }
     } else {
       setKrwInput('');
     }
   };
+
+  // Dynamically update USD conversion value once when live exchange rate indices are fetched/updated
+  useEffect(() => {
+    if (indices) {
+      const rate = getActiveRate();
+      if (krwInput) {
+        const parsed = parseFloat(krwInput);
+        if (!isNaN(parsed)) {
+          setUsdInput((parsed / rate).toFixed(2));
+        }
+      }
+    }
+  }, [indices]);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -160,8 +193,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
         const data = await response.json();
         
         if (response.ok && data.success) {
-          localStorage.setItem('admin_token', data.token);
-          localStorage.setItem('current_user', '로기 연구소장 (Admin)');
+          sessionStorage.setItem('admin_token', data.token);
+          sessionStorage.setItem('current_user', '로기 연구소장 (Admin)');
           setCurrentUser('로기 연구소장 (Admin)');
           setIsAdmin(true);
           setAuthSuccess('어드민 계정 로그인 성공! 🔐');
@@ -182,7 +215,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
     const matchedUser = users.find(u => u.email === authEmail && u.password === authPassword);
 
     if (matchedUser) {
-      localStorage.setItem('current_user', matchedUser.name);
+      sessionStorage.setItem('current_user', matchedUser.name);
       setCurrentUser(matchedUser.name);
       setAuthSuccess(`${matchedUser.name}님, 머니로그랩에 오신 걸 환영해! 🐿️`);
       setTimeout(() => {
@@ -195,8 +228,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('admin_token');
+    sessionStorage.removeItem('current_user');
+    sessionStorage.removeItem('admin_token');
     setCurrentUser(null);
     setIsAdmin(false);
     setActiveView('home');
@@ -385,7 +418,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                   <div style={{ flex: 1, minWidth: '240px' }}>
                     <label style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>원화 입력 (KRW)</label>
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 16px', background: 'var(--bg-tertiary)' }}>
-                      <input type="number" value={krwInput} onChange={(e) => setKrwInput(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
+                      <input type="number" value={krwInput} onChange={(e) => handleKrwChange(e.target.value)} style={{ background: 'none', border: 'none', outline: 'none', flex: 1, fontSize: '16px', color: 'var(--color-text-primary)', fontWeight: '700' }} />
                       <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>원</span>
                     </div>
                   </div>
@@ -398,7 +431,13 @@ export default function LandingPage({ onNavigateToAdmin }) {
                     </div>
                   </div>
                 </div>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'left' }}>* 1달러 기준 환율 1,370원으로 실시간 단순 계산식 기준이 적용되었습니다. 실제 환율과 미세한 오차가 있을 수 있습니다.</p>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0, textAlign: 'left' }}>
+                  {indices?.usdKrw?.price ? (
+                    `* 현재 1달러 기준 실시간 환율은 ${indices.usdKrw.price}원입니다. (실시간 정보 반영 🐿️)`
+                  ) : (
+                    `* 1달러 기준 환율 1,520원으로 실시간 단순 계산식 기준이 적용되었습니다. 실제 환율과 미세한 오차가 있을 수 있습니다.`
+                  )}
+                </p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -534,7 +573,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-accent-blue)', fontFamily: 'var(--font-headers)', background: 'rgba(59, 130, 246, 0.08)', padding: '6px 16px', borderRadius: '30px', border: '1px solid rgba(59, 130, 246, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '24px' }}><Mail size={14} />로기의 스마트 이메일 뉴스레터</div>
           <h1 className="hero-title" style={{ background: 'linear-gradient(to right, var(--color-text-primary) 60%, var(--color-accent-blue) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '20px' }}>매일 아침 7시,<br/>금융 도토리를 메일함에 쏙! 🐿️📬</h1>
           <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', marginBottom: '36px', lineHeight: '1.6' }}>귀찮고 어려운 경제 뉴스 읽기 끝! 구독 버튼 하나로<br/>세상 편한 이메일 요약본을 매일 공짜로 챙겨줄게!</p>
-          <form onSubmit={handleSubscribe} className="glass-card newsletter-form" style={{ boxShadow: 'var(--shadow-card)', background: '#ffffff' }}>
+          <form onSubmit={handleSubscribe} className="glass-card newsletter-form" style={{ boxShadow: 'var(--shadow-card)', background: 'var(--color-card-bg)' }}>
             <div style={{ paddingLeft: '16px', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center' }}><Mail size={18} /></div>
             <input type="email" placeholder="뉴스레터를 받아볼 이메일 주소를 적어줘!" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color-text-primary)', fontSize: '15px', flex: '1', height: '40px', fontFamily: 'var(--font-body)' }} />
             <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '0 24px', height: '46px', borderRadius: '23px', fontSize: '14px' }}>{loading ? '구독 신청 중...' : '경제 도토리 구독하기 🐿️'}</button>

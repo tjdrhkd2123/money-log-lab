@@ -43,7 +43,7 @@ export async function triggerDailyHarvest() {
       indices: {
         kospi: { price: '2,680.50', change: '+24.15', changePercent: '0.91', status: 'UP' },
         kosdaq: { price: '845.20', change: '-3.10', changePercent: '-0.36', status: 'DOWN' },
-        usdKrw: { price: '1,507.00', change: '+4.50', changePercent: '0.33', status: 'UP' },
+        usdKrw: { price: '1,520.00', change: '+4.50', changePercent: '0.30', status: 'UP' },
         timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
       },
       news: []
@@ -72,7 +72,15 @@ export async function triggerDailyHarvest() {
       cardNews: [
         { slideNumber: 1, title: "🐿️ 로기 도토리 임시 가동", description: "오늘 아침 경제 지표 요약 소식입니다. 글로벌 정세 변동에 유의하세요!", keyword: "긴급 브리핑" }
       ],
-      newsletter: "오늘 아침도 로기와 함께 경제 지표를 확인해 보세요! 대시보드에서 실시간 정보를 볼 수 있습니다. 🐿️"
+      newsletter: {
+        subject: "[머니로그랩] 🐿️ 오늘 아침 로기의 경제 도토리 소식!",
+        htmlBody: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e8ed; border-radius: 12px;">
+            <h2>🐿️ 오늘 아침도 로기와 함께 경제 지표를 확인해 보세요!</h2>
+            <p>실시간 분석 서비스가 일시적으로 점검 중입니다. 머니로그랩 대시보드에서 실시간 뉴스와 지표를 직접 보실 수 있습니다!</p>
+          </div>
+        `
+      }
     };
   }
 
