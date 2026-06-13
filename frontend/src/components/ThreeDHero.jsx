@@ -45,19 +45,19 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    // 4. Lights (Toned Down for eye protection)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
     keyLight.position.set(5, 8, 4);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xe2e8f0, 0.9);
+    const fillLight = new THREE.DirectionalLight(0xe2e8f0, 0.45);
     fillLight.position.set(-5, 4, 2);
     scene.add(fillLight);
 
-    const pointLight = new THREE.PointLight(0x00ffff, 1.2, 5); // Hologram cyan light source
+    const pointLight = new THREE.PointLight(0x00ffff, 1.0, 4); // Hologram cyan light source
     pointLight.position.set(0.25, 0, -0.1);
     scene.add(pointLight);
 
@@ -66,7 +66,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     acornGroup.scale.set(1.4, 1.4, 1.4);
     scene.add(acornGroup);
 
-    // Outer shell body geometry (Full 360 deg sweep)
+    // Outer shell body geometry
     const bodyPoints = [];
     bodyPoints.push(new THREE.Vector2(0, -1.1));
     bodyPoints.push(new THREE.Vector2(0.35, -1.0));
@@ -91,13 +91,12 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     const stemGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.35, 12);
     stemGeom.translate(0, 1.15, 0);
 
-    // Materials - initialized as transparent to support fading to outline dome
     const glassMaterial = new THREE.MeshStandardMaterial({
-      color: 0xc5a880, // Rich warm metallic gold/amber
+      color: 0xc5a880,
       roughness: 0.15,
       metalness: 0.9,
       transparent: true,
-      opacity: 1.0, // Start fully solid
+      opacity: 1.0,
       side: THREE.DoubleSide,
       emissive: 0xc5a880,
       emissiveIntensity: 0.1,
@@ -105,11 +104,11 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     });
 
     const capMaterial = new THREE.MeshStandardMaterial({
-      color: 0x5b3f29, // Deep dark oak cap
+      color: 0x5b3f29,
       roughness: 0.45,
       metalness: 0.65,
       transparent: true,
-      opacity: 1.0, // Start fully solid
+      opacity: 1.0,
       side: THREE.DoubleSide,
       emissive: 0x5b3f29,
       emissiveIntensity: 0.05,
@@ -136,11 +135,11 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     acornGroup.add(capMesh);
     acornGroup.add(stemMesh);
 
-    // 6. Build Laboratory Interior Environment (White / Chrome SF Theme)
+    // 6. Build Laboratory Interior Environment (Toned-down Stone Gray/Warm Gray Theme)
     const floorMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf3f4f6, // Bright white-gray epoxy floor
-      roughness: 0.18,
-      metalness: 0.4,
+      color: 0xe5e7eb, // Soft warm gray floor (matte, non-glaring)
+      roughness: 0.85,
+      metalness: 0.1,
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide
@@ -150,34 +149,57 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     floorMesh.position.y = -0.65;
     acornGroup.add(floorMesh);
 
-    // White curved walls enclosing the room
+    // Wall panels (Stone gray, non-reflective)
     const wallMaterial = new THREE.MeshStandardMaterial({
-      color: 0xfafafa, // Clean white laboratory panels
-      roughness: 0.35,
-      metalness: 0.15,
+      color: 0xd1d5db, // Soft stone gray panels
+      roughness: 0.95, // High roughness to avoid specular glare
+      metalness: 0.05,
       transparent: true,
       opacity: 0.0,
-      side: THREE.BackSide // Render interior face only
+      side: THREE.BackSide
     });
     const wallMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.15, 32, 1, true), wallMaterial);
     wallMesh.position.y = -0.65 + 0.575;
     acornGroup.add(wallMesh);
 
+    // Wall partition ribs to give a true capsule/laboratory enclosure feel
+    const ribsGroup = new THREE.Group();
+    acornGroup.add(ribsGroup);
+
+    const ribMat = new THREE.MeshStandardMaterial({
+      color: 0x9ca3af, // Darker gray frame ribs
+      roughness: 0.6,
+      metalness: 0.6,
+      transparent: true,
+      opacity: 0.0
+    });
+
+    // Spawn 8 partition columns around the perimeter
+    const numRibs = 8;
+    const ribRad = 0.548;
+    for (let r = 0; r < numRibs; r++) {
+      const angle = (r / numRibs) * Math.PI * 2;
+      const ribColumn = new THREE.Mesh(new THREE.BoxGeometry(0.012, 1.15, 0.012), ribMat);
+      ribColumn.position.set(Math.cos(angle) * ribRad, -0.65 + 0.575, Math.sin(angle) * ribRad);
+      ribColumn.rotation.y = -angle;
+      ribsGroup.add(ribColumn);
+    }
+
     // Elegant silver horizontal wall trim
     const wallTrimMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0, // Chrome steel trim
-      roughness: 0.15,
-      metalness: 0.9,
+      color: 0x9ca3af,
+      roughness: 0.4,
+      metalness: 0.7,
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide
     });
-    const wallTrimMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.548, 0.55, 32), wallTrimMat);
+    const wallTrimMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.546, 0.55, 32), wallTrimMat);
     wallTrimMesh1.rotation.x = -Math.PI / 2;
     wallTrimMesh1.position.y = -0.15;
     acornGroup.add(wallTrimMesh1);
 
-    const wallTrimMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.548, 0.55, 32), wallTrimMat);
+    const wallTrimMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.546, 0.55, 32), wallTrimMat);
     wallTrimMesh2.rotation.x = -Math.PI / 2;
     wallTrimMesh2.position.y = 0.25;
     acornGroup.add(wallTrimMesh2);
@@ -205,17 +227,17 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     acornGroup.add(furnitureGroup);
 
     const furnitureMat = new THREE.MeshStandardMaterial({
-      color: 0xf8fafc, // High-gloss white furniture
-      roughness: 0.25,
-      metalness: 0.1,
+      color: 0xf3f4f6, // Matte soft gray-white furniture
+      roughness: 0.75,
+      metalness: 0.15,
       transparent: true,
       opacity: 0.0
     });
 
     const metallicMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0, // Chrome steel metal trim
-      roughness: 0.12,
-      metalness: 0.95,
+      color: 0x9ca3af, // Matte metal trim
+      roughness: 0.5,
+      metalness: 0.8,
       transparent: true,
       opacity: 0.0
     });
@@ -225,7 +247,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     tableTop.position.set(-0.25, -0.48, -0.1);
     furnitureGroup.add(tableTop);
 
-    // Table Legs (Chrome)
+    // Table Legs (Matte Metal)
     const legGeom = new THREE.CylinderGeometry(0.008, 0.008, 0.15, 8);
     const legL1 = new THREE.Mesh(legGeom, metallicMat);
     legL1.position.set(-0.42, -0.56, -0.19);
@@ -240,7 +262,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     legR2.position.set(-0.08, -0.56, -0.01);
     furnitureGroup.add(legR2);
 
-    // 6b. Research Stool Chair (White + Chrome)
+    // 6b. Research Stool Chair (White + Matte Metal)
     const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.012, 12), furnitureMat);
     stoolSeat.position.set(-0.24, -0.54, 0.16);
     furnitureGroup.add(stoolSeat);
@@ -249,7 +271,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     furnitureGroup.add(stoolLeg);
 
     // 6c. Stacked Reports / Mini Books (on the floor)
-    const bookColors = [0xcbd5e1, 0x3b82f6, 0x10b981]; // White-Gray, Blue, Green binders
+    const bookColors = [0x9ca3af, 0x3b82f6, 0x10b981];
     const bookGroup = new THREE.Group();
     bookColors.forEach((color, idx) => {
       const bookMat = new THREE.MeshStandardMaterial({
@@ -266,8 +288,12 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     });
     furnitureGroup.add(bookGroup);
 
-    // 6d. Chemical Flask & Beaker on Table (Transparent glass + Glowing liquid)
-    const glassBodyMat = new THREE.MeshStandardMaterial({
+    // 6d. SF Energy Data Core Capsule (Replaces chemical test-tubes / beaker)
+    const energyCore = new THREE.Group();
+    energyCore.position.set(-0.32, -0.45, -0.12);
+    furnitureGroup.add(energyCore);
+
+    const glassTubeMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.1,
       metalness: 0.9,
@@ -276,50 +302,60 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       side: THREE.DoubleSide
     });
     
-    // Flask (Glass Body + Green Liquid)
-    const flask = new THREE.Group();
-    flask.position.set(-0.35, -0.45, -0.14);
-    const flBody = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.045, 8), glassBodyMat);
-    const flLiquidMat = new THREE.MeshStandardMaterial({
-      color: 0x00ff66,
-      emissive: 0x00ff66,
-      emissiveIntensity: 0.7,
+    // Core Capsule Glass Chamber
+    const coreChamber = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.05, 12, 1, true), glassTubeMat);
+    coreChamber.position.y = 0.025;
+    energyCore.add(coreChamber);
+
+    // Metal Base for core
+    const coreBase = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.008, 12), metallicMat);
+    coreBase.position.y = 0.004;
+    energyCore.add(coreBase);
+    const coreCap = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.006, 12), metallicMat);
+    coreCap.position.y = 0.05;
+    energyCore.add(coreCap);
+
+    // Glowing Plasma energy element
+    const plasmaMat = new THREE.MeshStandardMaterial({
+      color: 0x00ffcc,
+      emissive: 0x00ffcc,
+      emissiveIntensity: 1.0,
       transparent: true,
       opacity: 0.0
     });
-    const flLiquid = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.03, 8), flLiquidMat);
-    flLiquid.position.y = -0.005;
-    flask.add(flBody);
-    flask.add(flLiquid);
-    furnitureGroup.add(flask);
+    const plasmaNode = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.038, 8), plasmaMat);
+    plasmaNode.position.y = 0.025;
+    energyCore.add(plasmaNode);
 
-    // Beaker (Glass Body + Blue Liquid)
-    const beaker = new THREE.Group();
-    beaker.position.set(-0.3, -0.45, -0.06);
-    const bkBody = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.04, 8), glassBodyMat);
-    const bkLiquidMat = new THREE.MeshStandardMaterial({
-      color: 0x0099ff,
-      emissive: 0x0099ff,
-      emissiveIntensity: 0.7,
+    // 6e. SF Cyber Console Input Panel (sitting on table desk)
+    const consolePanel = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.008, 0.06), furnitureMat);
+    consolePanel.position.set(-0.24, -0.465, -0.03);
+    consolePanel.rotation.x = -Math.PI / 16; // Slight tilt towards the front
+    furnitureGroup.add(consolePanel);
+
+    // Tiny glowing indicators on console
+    const consoleLedMat = new THREE.MeshStandardMaterial({
+      color: 0x00ffcc,
+      emissive: 0x00ffcc,
+      emissiveIntensity: 0.8,
       transparent: true,
       opacity: 0.0
     });
-    const bkLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.024, 8), bkLiquidMat);
-    bkLiquid.position.y = -0.006;
-    beaker.add(bkBody);
-    beaker.add(bkLiquid);
-    furnitureGroup.add(beaker);
+    for (let c = 0; c < 3; c++) {
+      const consoleLed = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.004, 0.008), consoleLedMat);
+      consoleLed.position.set(-0.035 + c * 0.035, 0.005, 0.012);
+      consolePanel.add(consoleLed);
+    }
 
-    // 6e. Research Bookcase (White Cabinet at the back)
+    // 6f. Research Bookcase (White Cabinet at the back)
     const bookcaseGroup = new THREE.Group();
-    bookcaseGroup.position.set(0, -0.64, -0.28); // Sits on floor y = -0.65
+    bookcaseGroup.position.set(0, -0.64, -0.28);
     furnitureGroup.add(bookcaseGroup);
 
-    // Bookcase Frame Material
     const frameMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9, // Glossy white/light gray
-      roughness: 0.3,
-      metalness: 0.2,
+      color: 0xe5e7eb, // Light gray cabinet body
+      roughness: 0.65,
+      metalness: 0.1,
       transparent: true,
       opacity: 0.0
     });
@@ -350,7 +386,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
 
     // Lab binder folders to fill shelves (Cool tone layout: Blue, White, Gray)
     const miniBookColors = [0x3b82f6, 0x64748b, 0x10b981, 0x94a3b8, 0x0284c7];
-    for (let s = 0; s < 3; s++) { // 3 shelf rows
+    for (let s = 0; s < 3; s++) {
       const shelfY = s === 0 ? 0.01 : s === 1 ? 0.13 : 0.25;
       for (let b = 0; b < 6; b++) {
         const bookMat = new THREE.MeshStandardMaterial({
@@ -416,7 +452,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       depthWrite: false
     });
     const hologramMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.35), hlMaterial);
-    hologramMesh.position.set(0.18, -0.22, -0.22); // Hovering in the back right
+    hologramMesh.position.set(0.18, -0.22, -0.22);
     hologramMesh.rotation.y = -0.15;
     hologramMesh.renderOrder = 1;
     hologramMesh.userData = { id: 'news' };
@@ -481,7 +517,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     calcGroup.userData = { id: 'calculators' };
 
     const calcBodyMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9, // Matte white casing
+      color: 0xf1f5f9,
       roughness: 0.5,
       metalness: 0.2,
       transparent: true,
@@ -491,7 +527,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     calcGroup.add(calcBody);
 
     const calcScreenMat = new THREE.MeshStandardMaterial({
-      color: 0xffaa00, // Golden glowing calculator panel
+      color: 0xffaa00,
       emissive: 0xffaa00,
       emissiveIntensity: 0.35,
       transparent: true,
@@ -522,7 +558,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
 
     // 7c. Holographic Wireframe Globe (for Financial Dashboard)
     const globeMat = new THREE.MeshStandardMaterial({
-      color: 0x00ff88, // Emerald green wireframe
+      color: 0x00ff88,
       emissive: 0x00ff88,
       emissiveIntensity: 0.5,
       transparent: true,
@@ -530,7 +566,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       wireframe: true
     });
     const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), globeMat);
-    globeMesh.position.set(-0.25, -0.32, -0.1); // Float above the desk center
+    globeMesh.position.set(-0.25, -0.32, -0.1);
     globeMesh.userData = { id: 'dashboard' };
     acornGroup.add(globeMesh);
     clickables.push(globeMesh);
@@ -542,7 +578,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     letterGroup.userData = { id: 'subscribe' };
 
     const envPaperMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff, // Crisp clean white paper
+      color: 0xffffff,
       roughness: 0.9,
       metalness: 0.05,
       transparent: true,
@@ -783,7 +819,8 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         }
       }
 
-      sqGroup.scale.set(0.55, 0.55, 0.55); // 캐릭터 크기 45% 축소로 많이 작아지게 조정
+      // SCALE REDUCTION: Scale the entire character down to 0.22 (60% smaller than previous 0.55)
+      sqGroup.scale.set(0.22, 0.22, 0.22);
 
       return {
         mesh: sqGroup,
@@ -796,10 +833,10 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       };
     };
 
-    // 8g. Create Rogi (Player Squirrel)
+    // 8g. Create Rogi (Player Squirrel) - Now wearing White Lab Coat!
     const rogiObj = createSquirrel(
-      { main: 0xbb6c3a, light: 0xfff5e6, dark: 0x422216 }, // Rogi's original warm palette
-      { hasGlasses: false }
+      { main: 0xbb6c3a, light: 0xfff5e6, dark: 0x422216 },
+      { hasGlasses: false, coatColor: 0xffffff }
     );
     rogiObj.mesh.position.set(0, -0.64, 0.15);
     acornGroup.add(rogiObj.mesh);
@@ -829,7 +866,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     // 8j. Create NPC 3: 혜택 안내 연구원 (Mailbox/Envelope 앞)
     const npcBenefit = createSquirrel(
       { main: 0xd69e2e, light: 0xfefcbf, dark: 0x4a3728 },
-      { hasGlasses: false, coatColor: 0xe53e3e } 
+      { hasGlasses: false, coatColor: 0xffffff } // Wears white coat as well
     );
     npcBenefit.mesh.position.set(-0.15, -0.64, -0.21); 
     npcBenefit.mesh.rotation.y = Math.PI / 5;
@@ -840,7 +877,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     // 8k. Create NPC 4: 금융 대시보드 연구원 (Holographic Globe 앞)
     const npcDashboard = createSquirrel(
       { main: 0xf6e05e, light: 0xfffaf0, dark: 0x744210 },
-      { hasGlasses: true, glassesColor: 0xa0aec0, coatColor: 0x3182ce } 
+      { hasGlasses: true, glassesColor: 0xa0aec0, coatColor: 0xffffff } // Wears white coat as well
     );
     npcDashboard.mesh.position.set(-0.35, -0.64, -0.08); 
     npcDashboard.mesh.rotation.y = Math.PI / 2.5;
@@ -848,20 +885,20 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     acornGroup.add(npcDashboard.mesh);
     clickables.push(npcDashboard.mesh);
 
-    // 8l. Dropshadow for Rogi (Scale down)
+    // 8l. Dropshadow for Rogi (Ultra Scale down)
     const shadowMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
       opacity: 0.0,
       depthWrite: false
     });
-    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.045, 16), shadowMat);
+    const shadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.018, 16), shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
     shadowMesh.position.set(0, -0.648, 0.15); 
     shadowMesh.renderOrder = 1;
     acornGroup.add(shadowMesh);
 
-    // Dropshadows for NPCs (Scale down)
+    // Dropshadows for NPCs (Ultra Scale down)
     const createNPCShadow = (npcMesh) => {
       const npcShadowMat = new THREE.MeshBasicMaterial({
         color: 0x000000,
@@ -869,7 +906,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         opacity: 0.0,
         depthWrite: false
       });
-      const npcShadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.042, 16), npcShadowMat);
+      const npcShadowMesh = new THREE.Mesh(new THREE.CircleGeometry(0.017, 16), npcShadowMat);
       npcShadowMesh.rotation.x = -Math.PI / 2;
       npcShadowMesh.position.set(npcMesh.position.x, -0.648, npcMesh.position.z);
       npcShadowMesh.renderOrder = 1;
@@ -1003,7 +1040,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
     let clock = new THREE.Clock();
     let rogiX = 0;
     let rogiZ = 0.15; 
-    const rogiSpeed = 0.0042; 
+    const rogiSpeed = 0.0022; // Scaled down in proportion to player size
 
     let currentNearNPCId = null;
 
@@ -1015,14 +1052,24 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       mouseX += (targetMouseX - mouseX) * 0.07;
       mouseY += (targetMouseY - mouseY) * 0.07;
 
-      acornGroup.rotation.y = time * 0.18 + mouseX * 0.6;
-      acornGroup.rotation.x = mouseY * 0.35;
-      acornGroup.position.y = Math.sin(time * 0.8) * 0.05;
+      const entered = isEnteredRef.current;
+
+      // 12. ROTATION LOCK logic: When entered inside, lock acorn container rotation entirely!
+      if (entered) {
+        acornGroup.rotation.y = 0;
+        acornGroup.rotation.x = 0;
+        acornGroup.position.y = 0;
+      } else {
+        acornGroup.rotation.y = time * 0.18 + mouseX * 0.6;
+        acornGroup.rotation.x = mouseY * 0.35;
+        acornGroup.position.y = Math.sin(time * 0.8) * 0.05;
+      }
 
       globeMesh.rotation.y = time * 0.4;
       globeMesh.rotation.x = time * 0.1;
 
-      const entered = isEnteredRef.current;
+      // Pulse electromagnetic data core light capsule
+      plasmaMat.emissiveIntensity = 0.65 + Math.sin(time * 8) * 0.35;
 
       if (entered) {
         const targetCamX = rogiX * 0.72; 
@@ -1049,12 +1096,14 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
       const targetInteriorOpacity = entered ? 1.0 : 0.0;
       floorMaterial.opacity += (targetInteriorOpacity - floorMaterial.opacity) * 0.08;
       wallMaterial.opacity += (targetInteriorOpacity * 0.95 - wallMaterial.opacity) * 0.08;
+      ribMat.opacity += (targetInteriorOpacity - ribMat.opacity) * 0.08;
       wallTrimMat.opacity += (targetInteriorOpacity - wallTrimMat.opacity) * 0.08;
       furnitureMat.opacity += (targetInteriorOpacity - furnitureMat.opacity) * 0.08;
       metallicMat.opacity += (targetInteriorOpacity - metallicMat.opacity) * 0.08;
-      glassBodyMat.opacity += (targetInteriorOpacity - glassBodyMat.opacity) * 0.08;
-      flLiquidMat.opacity += (targetInteriorOpacity - flLiquidMat.opacity) * 0.08;
-      bkLiquidMat.opacity += (targetInteriorOpacity - bkLiquidMat.opacity) * 0.08;
+      
+      glassTubeMat.opacity += (targetInteriorOpacity - glassTubeMat.opacity) * 0.08;
+      plasmaMat.opacity += (targetInteriorOpacity - plasmaMat.opacity) * 0.08;
+      consoleLedMat.opacity += (targetInteriorOpacity - consoleLedMat.opacity) * 0.08;
       
       frameMat.opacity += (targetInteriorOpacity - frameMat.opacity) * 0.08;
       bookcaseGroup.children.forEach(child => {
@@ -1179,7 +1228,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         const dx = rogiX - npc.mesh.position.x;
         const dz = rogiZ - npc.mesh.position.z;
         const nDist = Math.sqrt(dx*dx + dz*dz);
-        if (nDist < 0.28) {
+        if (nDist < 0.2) { // Adjusted proximity threshold for NPC heads to follow Rogi
           const targetRot = Math.atan2(dx, dz);
           let diff = targetRot - npc.mesh.rotation.y;
           diff = Math.atan2(Math.sin(diff), Math.cos(diff));
@@ -1207,7 +1256,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, isEntered }) 
         ];
 
         let closestNPC = null;
-        let minNPCListDist = 0.14; // Proximity threshold
+        let minNPCListDist = 0.08; // Narrow proximity threshold (0.08) for very small characters
 
         npcs.forEach(npc => {
           const dx = rogiX - npc.x;
