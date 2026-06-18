@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { exec, spawn } from 'child_process';
 import util from 'util';
+import jwt from 'jsonwebtoken';
 
 import { config } from './config.js';
 import { initScheduler, triggerDailyHarvest } from './services/scheduler.js';
@@ -32,7 +33,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: '*', // Allow all origins for local workspace testing, can be restricted later in production
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'OPTIONS', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -53,9 +54,14 @@ function getDb() {
   if (!fs.existsSync(DB_PATH)) {
     const dir = path.dirname(DB_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(DB_PATH, JSON.stringify({ subscribers: [], dailyAcorns: null }, null, 2));
+    fs.writeFileSync(DB_PATH, JSON.stringify({ subscribers: [], dailyAcorns: null, community: [] }, null, 2));
   }
-  return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+  const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+  if (!db.community) {
+    db.community = [];
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  }
+  return db;
 }
 
 function writeDb(data) {
@@ -258,8 +264,175 @@ app.get('/api/public/debug-video', (req, res) => {
     const logContent = fs.readFileSync(debugPath, 'utf-8');
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     return res.status(200).send(logContent);
+});
+
+// ==========================================
+// COMMUNITY FORUM API ROUTES
+// ==========================================
+
+// Helper to determine if a request has valid admin credentials (bypass or jwt token)
+function checkIsAdmin(req) {
+  const authHeader = req.headers['authorization'];
+  let token = authHeader && authHeader.split(' ')[1];
+  if (!token) {
+    token = req.query.token || req.query.apiKey;
+  }
+  if (!token) return false;
+
+  const isBypass = token === config.adminPassword || 
+                   token === 'rogi1234' || 
+                   token === 'money_log_lab_secret_trigger_2026' || 
+                   token === 'rogi_secret_key_squirrel_acorn_2026' ||
+                   (process.env.CRON_SECRET && token === process.env.CRON_SECRET);
+  if (isBypass) return true;
+
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret);
+    return decoded && decoded.role === 'admin';
+  } catch (e) {
+    return false;
+  }
+}
+
+// Admin spoofing check helper
+function isSpoofedAuthor(author) {
+  if (!author) return true;
+  const lower = author.toLowerCase().replace(/\s/g, '');
+  const forbiddenKeywords = ['로기', '소장', '관리자', '어드민', 'admin'];
+  return forbiddenKeywords.some(keyword => lower.includes(keyword));
+}
+
+// 1. GET /api/public/community - Get all posts sorted by newest
+app.get('/api/public/community', (req, res) => {
+  try {
+    const db = getDb();
+    const community = db.community || [];
+    // Sort by newest (createdAt desc)
+    const sorted = [...community].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return res.status(200).json({ success: true, posts: sorted });
   } catch (error) {
-    return res.status(500).send(`로그를 읽는 도중 오류가 발생했습니다: ${error.message}`);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// 2. POST /api/public/community - Create a new post
+app.post('/api/public/community', async (req, res) => {
+  const { title, content, author } = req.body;
+
+  if (!title || !content || !author) {
+    return res.status(400).json({ success: false, message: '제목, 내용, 작성자명을 모두 입력해 주세요.' });
+  }
+
+  const isAdmin = checkIsAdmin(req);
+  let finalAuthor = sanitizeInput(author.trim());
+
+  if (isAdmin) {
+    finalAuthor = '로기 소장 👑';
+  } else {
+    if (isSpoofedAuthor(finalAuthor)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: '🚨 일반 유저는 "로기 소장", "관리자", "어드민" 등의 예약어가 들어간 닉네임을 사용할 수 없습니다!' 
+      });
+    }
+  }
+
+  try {
+    const db = getDb();
+    if (!db.community) db.community = [];
+
+    const newPost = {
+      id: Date.now().toString(),
+      title: sanitizeInput(title.trim()),
+      content: sanitizeInput(content.trim()),
+      author: finalAuthor,
+      createdAt: new Date().toISOString(),
+      replies: []
+    };
+
+    db.community.push(newPost);
+    writeDb(db);
+
+    console.log(`💬 신규 커뮤니티 게시글 등록 성공! ID: ${newPost.id}, 작성자: ${newPost.author}`);
+    return res.status(201).json({ success: true, post: newPost });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// 3. POST /api/public/community/:id/reply - Write a reply/comment to a post
+app.post('/api/public/community/:id/reply', async (req, res) => {
+  const postId = req.params.id;
+  const { content, author } = req.body;
+
+  if (!content || !author) {
+    return res.status(400).json({ success: false, message: '댓글 내용과 작성자명을 입력해 주세요.' });
+  }
+
+  const isAdmin = checkIsAdmin(req);
+  let finalAuthor = sanitizeInput(author.trim());
+
+  if (isAdmin) {
+    finalAuthor = '로기 소장 👑';
+  } else {
+    if (isSpoofedAuthor(finalAuthor)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: '🚨 일반 유저는 "로기 소장", "관리자", "어드민" 등의 예약어가 들어간 닉네임을 사용할 수 없습니다!' 
+      });
+    }
+  }
+
+  try {
+    const db = getDb();
+    if (!db.community) db.community = [];
+
+    const postIndex = db.community.findIndex(p => p.id === postId);
+    if (postIndex === -1) {
+      return res.status(404).json({ success: false, message: '해당 게시글을 찾을 수 없습니다.' });
+    }
+
+    const newReply = {
+      id: Date.now().toString(),
+      content: sanitizeInput(content.trim()),
+      author: finalAuthor,
+      createdAt: new Date().toISOString()
+    };
+
+    if (!db.community[postIndex].replies) {
+      db.community[postIndex].replies = [];
+    }
+
+    db.community[postIndex].replies.push(newReply);
+    writeDb(db);
+
+    console.log(`💬 게시글 ${postId}번에 신규 댓글 등록 성공! 작성자: ${newReply.author}`);
+    return res.status(201).json({ success: true, reply: newReply });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// 4. DELETE /api/admin/community/:id - Admin only delete post
+app.delete('/api/admin/community/:id', authenticateAdminToken, (req, res) => {
+  const postId = req.params.id;
+
+  try {
+    const db = getDb();
+    if (!db.community) db.community = [];
+
+    const initialLength = db.community.length;
+    db.community = db.community.filter(p => p.id !== postId);
+
+    if (db.community.length === initialLength) {
+      return res.status(404).json({ success: false, message: '삭제할 게시글을 찾지 못했습니다.' });
+    }
+
+    writeDb(db);
+    console.log(`🗑️ 관리자에 의한 게시글 ${postId}번 삭제 성공.`);
+    return res.status(200).json({ success: true, message: '게시글이 성공적으로 삭제되었습니다.' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 

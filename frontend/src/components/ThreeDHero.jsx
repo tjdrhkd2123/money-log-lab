@@ -57,7 +57,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     fillLight.position.set(-5, 4, 2);
     scene.add(fillLight);
 
-    const pointLight = new THREE.PointLight(0x00ffff, 1.0, 4); // Hologram cyan light source
+    const pointLight = new THREE.PointLight(0xffffff, 0.22, 4); // Soft white ambient glow source
     pointLight.position.set(0.25, 0, -0.1);
     scene.add(pointLight);
 
@@ -92,35 +92,26 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     stemGeom.translate(0, 1.15, 0);
 
     const glassMaterial = new THREE.MeshStandardMaterial({
-      color: 0xc5a880,
-      roughness: 0.15,
-      metalness: 0.9,
-      transparent: true,
-      opacity: 1.0,
-      side: THREE.DoubleSide,
-      emissive: 0xc5a880,
-      emissiveIntensity: 0.1,
-      depthWrite: false
+      color: 0xbb7a55, // Warm wooden acorn orange-brown
+      roughness: 0.65, // Matte organic wood texture
+      metalness: 0.05,
+      transparent: false, // Opaque wood body
+      side: THREE.DoubleSide
     });
 
     const capMaterial = new THREE.MeshStandardMaterial({
-      color: 0x5b3f29,
-      roughness: 0.45,
-      metalness: 0.65,
-      transparent: true,
-      opacity: 1.0,
-      side: THREE.DoubleSide,
-      emissive: 0x5b3f29,
-      emissiveIntensity: 0.05,
-      depthWrite: false
+      color: 0x5b3f29, // Dark woody cap brown
+      roughness: 0.8,
+      metalness: 0.0,
+      transparent: false, // Opaque cap
+      side: THREE.DoubleSide
     });
 
     const stemMaterial = new THREE.MeshStandardMaterial({
-      color: 0x3d271a,
-      roughness: 0.8,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 1.0
+      color: 0x3d271a, // Dark bark stem brown
+      roughness: 0.95,
+      metalness: 0.0,
+      transparent: false // Opaque stem
     });
 
     const bodyMesh = new THREE.Mesh(bodyGeom, glassMaterial);
@@ -202,35 +193,35 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
 
-    // 6a. Lab Table Top (Local Y relative to floor) - Pushed outward to -0.35
+    // 6a. Lab Table Top (Local Y relative to floor) - Pushed outward to -0.44 (Left boundary)
     const tableTop = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.02, 0.22), furnitureMat);
-    tableTop.position.set(-0.35, 0.17, -0.05); // -0.48 absolute Y
+    tableTop.position.set(-0.44, 0.17, -0.05); // -0.48 absolute Y
     furnitureGroup.add(tableTop);
 
-    // Table Legs (Local Y) - Pushed outward
+    // Table Legs (Local Y) - Pushed outward based on new center -0.44
     const legGeom = new THREE.CylinderGeometry(0.008, 0.008, 0.15, 8);
     const legL1 = new THREE.Mesh(legGeom, metallicMat);
-    legL1.position.set(-0.52, 0.09, -0.14); // -0.56 absolute Y
+    legL1.position.set(-0.61, 0.09, -0.14); // -0.56 absolute Y
     furnitureGroup.add(legL1);
     const legL2 = new THREE.Mesh(legGeom, metallicMat);
-    legL2.position.set(-0.52, 0.09, 0.04);
+    legL2.position.set(-0.61, 0.09, 0.04);
     furnitureGroup.add(legL2);
     const legR1 = new THREE.Mesh(legGeom, metallicMat);
-    legR1.position.set(-0.18, 0.09, -0.14);
+    legR1.position.set(-0.27, 0.09, -0.14);
     furnitureGroup.add(legR1);
     const legR2 = new THREE.Mesh(legGeom, metallicMat);
-    legR2.position.set(-0.18, 0.09, 0.04);
+    legR2.position.set(-0.27, 0.09, 0.04);
     furnitureGroup.add(legR2);
 
     // 6b. Research Stool Chair (Local Y) - Pushed outward
     const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.012, 12), furnitureMat);
-    stoolSeat.position.set(-0.32, 0.11, 0.18); // -0.54 absolute Y
+    stoolSeat.position.set(-0.41, 0.11, 0.18); // -0.54 absolute Y
     furnitureGroup.add(stoolSeat);
     const stoolLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.1, 8), metallicMat);
-    stoolLeg.position.set(-0.32, 0.05, 0.18); // -0.60 absolute Y
+    stoolLeg.position.set(-0.41, 0.05, 0.18); // -0.60 absolute Y
     furnitureGroup.add(stoolLeg);
 
-    // 6c. Stacked Reports / Mini Books (Local Y) - Keeps on the right edge
+    // 6c. Stacked Reports / Mini Books (Local Y) - Pushed to the right boundary
     const bookColors = [0x9ca3af, 0x3b82f6, 0x10b981];
     const bookGroup = new THREE.Group();
     bookColors.forEach((color, idx) => {
@@ -242,15 +233,15 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         opacity: 0.0
       });
       const book = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.018, 0.09), bookMat);
-      book.position.set(0.3, 0.01 + idx * 0.02, 0.18); // -0.64 absolute Y
+      book.position.set(0.44, 0.01 + idx * 0.02, 0.18); // -0.64 absolute Y
       book.rotation.y = (idx === 1) ? 0.25 : (idx === 2) ? -0.15 : 0;
       bookGroup.add(book);
     });
     furnitureGroup.add(bookGroup);
 
-    // 6d. SF Energy Data Core Capsule (Local Y) - Pushed leftward
+    // 6d. SF Energy Data Core Capsule (Local Y) - Pushed leftward to match tableTop -0.44
     const energyCore = new THREE.Group();
-    energyCore.position.set(-0.42, 0.20, -0.07); // -0.45 absolute Y (Placed on desk top)
+    energyCore.position.set(-0.51, 0.20, -0.07); // -0.45 absolute Y (Placed on desk top)
     furnitureGroup.add(energyCore);
 
     const glassTubeMat = new THREE.MeshStandardMaterial({
@@ -286,7 +277,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
 
     // 6e. SF Cyber Console Input Panel (Local Y) - Moved leftward
     const consolePanel = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.008, 0.06), furnitureMat);
-    consolePanel.position.set(-0.34, 0.185, -0.01); // -0.465 absolute Y
+    consolePanel.position.set(-0.43, 0.185, -0.01); // -0.465 absolute Y
     consolePanel.rotation.x = -Math.PI / 16;
     furnitureGroup.add(consolePanel);
 
@@ -303,9 +294,9 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       consolePanel.add(consoleLed);
     }
 
-    // 6f. Research Bookcase (Local Y) - Pushed fully backward to -0.44
+    // 6f. Research Bookcase (Local Y) - Pushed fully backward to -0.51 (North boundary)
     const bookcaseGroup = new THREE.Group();
-    bookcaseGroup.position.set(0, 0.01, -0.44); // -0.64 absolute Y
+    bookcaseGroup.position.set(0, 0.01, -0.51); // -0.64 absolute Y
     furnitureGroup.add(bookcaseGroup);
 
     const frameMat = new THREE.MeshStandardMaterial({
@@ -363,32 +354,32 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     // 7. Interactive Holographic Devices and Servers (Now added to furnitureGroup to scale down)
     const clickables = [];
 
-    // 7a. NEWS Holographic Floating Screen (Local Y)
+    // 7a. NEWS Holographic Floating Screen (Local Y) - Refactored as a high-contrast Whiteboard
     const hlCanvas = document.createElement('canvas');
     hlCanvas.width = 256;
     hlCanvas.height = 160;
     const hlCtx = hlCanvas.getContext('2d');
-    hlCtx.fillStyle = 'rgba(15, 23, 42, 0.5)';
+    hlCtx.fillStyle = 'rgba(245, 247, 250, 0.95)'; // Clear light-gray whiteboard tone
     hlCtx.fillRect(0, 0, 256, 160);
-    hlCtx.strokeStyle = '#00ffff';
-    hlCtx.lineWidth = 6;
+    hlCtx.strokeStyle = 'rgba(74, 85, 104, 0.8)'; // Dark slate gray frames
+    hlCtx.lineWidth = 8;
     hlCtx.strokeRect(0, 0, 256, 160);
-    hlCtx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
-    hlCtx.lineWidth = 2;
-    for (let i = 10; i < 160; i += 8) {
+    hlCtx.strokeStyle = 'rgba(0, 0, 0, 0.03)'; // Barely visible guidelines
+    hlCtx.lineWidth = 1;
+    for (let i = 10; i < 160; i += 12) {
       hlCtx.beginPath();
       hlCtx.moveTo(0, i);
       hlCtx.lineTo(256, i);
       hlCtx.stroke();
     }
-    hlCtx.fillStyle = '#00ffff';
-    hlCtx.shadowColor = '#00ffff';
-    hlCtx.shadowBlur = 10;
-    hlCtx.font = 'bold 32px "Outfit", sans-serif';
+    hlCtx.fillStyle = 'rgba(17, 24, 39, 1)'; // High-contrast dark charcoal text
+    hlCtx.shadowBlur = 0; // Disable cyan blur shadow for maximum legibility
+    hlCtx.font = 'bold 34px "Outfit", sans-serif';
     hlCtx.textAlign = 'center';
     hlCtx.textBaseline = 'middle';
     hlCtx.fillText('실시간 뉴스', 128, 65);
-    hlCtx.font = 'bold 18px "Outfit", sans-serif';
+    hlCtx.font = 'bold 20px "Outfit", sans-serif';
+    hlCtx.fillStyle = 'rgba(59, 130, 246, 1)'; // Blue accent for instructions
     hlCtx.fillText('[클릭하여 열기]', 128, 115);
 
     const hlTexture = new THREE.CanvasTexture(hlCanvas);
@@ -399,19 +390,19 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide,
-      emissive: 0x00ffff,
-      emissiveIntensity: 0.65,
+      emissive: 0xffffff, // White light to preserve original canvas color values
+      emissiveIntensity: 0.18, // Reduced glow to keep text readable
       depthWrite: false
     });
     const hologramMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.35), hlMaterial);
-    hologramMesh.position.set(0.35, 0.43, -0.26); // -0.22 absolute Y - Pushed outward
+    hologramMesh.position.set(0.46, 0.43, -0.28); // Pushed further outward to the boundary
     hologramMesh.rotation.y = -0.15;
     hologramMesh.renderOrder = 1;
     hologramMesh.userData = { id: 'news' };
     furnitureGroup.add(hologramMesh);
     clickables.push(hologramMesh);
 
-    // Hologram Projector Base (Local Y) - Pushed outward
+    // Hologram Projector Base (Local Y) - Pushed outward to match the screen
     const projectorBaseMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       roughness: 0.35,
@@ -420,19 +411,19 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
     const projectorBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.015, 12), projectorBaseMat);
-    projectorBase.position.set(0.35, 0.01, -0.26); // -0.64 absolute Y
+    projectorBase.position.set(0.46, 0.01, -0.28); // Aligned X and Z
     furnitureGroup.add(projectorBase);
 
-    // Holographic Light Cone (Local Y) - Pushed outward
+    // Holographic Light Cone (Local Y) - Color changed to white and pushed outward
     const beamMat = new THREE.MeshBasicMaterial({
-      color: 0x00ffff,
+      color: 0xffffff, // White soft beam
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide,
       depthWrite: false
     });
     const beamCone = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.42, 16, 1, true), beamMat);
-    beamCone.position.set(0.35, 0.22, -0.26); // -0.43 absolute Y
+    beamCone.position.set(0.46, 0.22, -0.28); // Aligned X and Z
     furnitureGroup.add(beamCone);
 
     // Cyber Server Rack on the floor (Local Y) - Pushed outward
@@ -444,7 +435,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       opacity: 0.0
     });
     const serverMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.28, 0.15), serverMat);
-    serverMesh.position.set(0.45, 0.14, -0.15); // -0.51 absolute Y
+    serverMesh.position.set(0.50, 0.14, -0.15); // -0.51 absolute Y
     furnitureGroup.add(serverMesh);
 
     // Server LED indicator lights (Local Y) - Offset aligned with serverMesh
@@ -457,15 +448,15 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         opacity: 0.0
       });
       const led = new THREE.Mesh(new THREE.SphereGeometry(0.008, 8, 8), ledMat);
-      // Position calculated relative to serverMesh local coordinates (X pushed to 0.45, Z pushed to -0.15)
-      led.position.set(0.45 - 0.076, 0.23 - l * 0.045, -0.15 + (l % 2 === 0 ? 0.03 : -0.03));
+      // Position calculated relative to serverMesh local coordinates (X pushed to 0.50, Z pushed to -0.15)
+      led.position.set(0.50 - 0.076, 0.23 - l * 0.045, -0.15 + (l % 2 === 0 ? 0.03 : -0.03));
       furnitureGroup.add(led);
       serverLeds.push(led);
     }
 
     // 7b. Interactive 3D Mini-Calculator (Local Y) - Positioned on the shifted table top
     const calcGroup = new THREE.Group();
-    calcGroup.position.set(-0.26, 0.185, -0.04); // -0.465 absolute Y
+    calcGroup.position.set(-0.35, 0.185, -0.04); // -0.465 absolute Y
     calcGroup.rotation.y = 0.12;
     calcGroup.userData = { id: 'calculators' };
 
@@ -518,14 +509,14 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       wireframe: true
     });
     const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), globeMat);
-    globeMesh.position.set(-0.35, 0.33, -0.08); // -0.32 absolute Y
+    globeMesh.position.set(-0.44, 0.33, -0.08); // -0.32 absolute Y
     globeMesh.userData = { id: 'dashboard' };
     furnitureGroup.add(globeMesh);
     clickables.push(globeMesh);
 
     // 7d. Interactive 3D Envelope (Local Y) - Positioned on the shifted table top
     const letterGroup = new THREE.Group();
-    letterGroup.position.set(-0.25, 0.185, -0.15); // -0.465 absolute Y
+    letterGroup.position.set(-0.35, 0.185, -0.15); // -0.465 absolute Y
     letterGroup.rotation.y = -0.35;
     letterGroup.userData = { id: 'subscribe' };
 
@@ -554,8 +545,30 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
     furnitureGroup.add(letterGroup);
     clickables.push(letterGroup);
 
-    // DOWNSCALE FURNITURE & PROPS GROUP (Scale down to 0.45 to match 0.22 size squirrels!)
-    furnitureGroup.scale.set(0.45, 0.45, 0.45);
+    // 7e. Interactive 3D Community Board Terminal (Local Y)
+    const commTerminalGroup = new THREE.Group();
+    commTerminalGroup.position.set(-0.25, 0.08, 0.45); // Placed at the bottom-center/left edge (pushed outer)
+    commTerminalGroup.userData = { id: 'community' };
+
+    const termBody = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.024, 0.14, 12), furnitureMat);
+    commTerminalGroup.add(termBody);
+
+    const termLampMat = new THREE.MeshStandardMaterial({
+      color: 0x00ffcc,
+      emissive: 0x00ffcc,
+      emissiveIntensity: 0.8,
+      transparent: true,
+      opacity: 0.0
+    });
+    const termLamp = new THREE.Mesh(new THREE.SphereGeometry(0.015, 12, 12), termLampMat);
+    termLamp.position.y = 0.08;
+    commTerminalGroup.add(termLamp);
+
+    furnitureGroup.add(commTerminalGroup);
+    clickables.push(commTerminalGroup);
+
+    // DOWNSCALE FURNITURE & PROPS GROUP (Scale down to 0.4 to match 0.22 size squirrels!)
+    furnitureGroup.scale.set(0.4, 0.4, 0.4);
 
     // 8. Reusable Squirrel NPC Mesh Generator Function
     const npcMaterialsList = [];
@@ -584,35 +597,93 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       const cBlack = createNPCMat(0x0e0e0e, 0.15, 0.85);
       const cWhite = createNPCMat(0xffffff, 0.05, 0.95);
 
-      // Clothes / Coat Mat
-      const coatMat = options.coatColor ? createNPCMat(options.coatColor, 0.7, 0.05) : null;
-      const primaryBodyMat = coatMat ? coatMat : cMain;
-
-      // 8a. Tummy / Lower Body
+      // 8a. Tummy / Lower Body (Always keep squirrel main fur color)
       const sqBodyGeom = new THREE.SphereGeometry(0.09, 18, 18);
       sqBodyGeom.scale(1.0, 1.25, 0.95);
-      const sqBodyMesh = new THREE.Mesh(sqBodyGeom, primaryBodyMat);
+      const sqBodyMesh = new THREE.Mesh(sqBodyGeom, cMain);
       sqBodyMesh.position.y = 0.11;
       sqBodyGroup.add(sqBodyMesh);
 
-      // Light belly patch
+      // Light belly patch (Always draw tummy patch)
       const sqBellyGeom = new THREE.SphereGeometry(0.075, 18, 18);
       sqBellyGeom.scale(0.82, 1.02, 0.45);
       const sqBellyMesh = new THREE.Mesh(sqBellyGeom, cLight);
       sqBellyMesh.position.set(0, 0.095, 0.055);
       sqBodyGroup.add(sqBellyMesh);
 
-      // Back stripes
-      if (!options.coatColor) {
-        const stripeL = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cDark);
-        stripeL.position.set(-0.03, 0.11, -0.078);
-        sqBodyGroup.add(stripeL);
-        const stripeC = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cLight);
-        stripeC.position.set(0, 0.11, -0.082);
-        sqBodyGroup.add(stripeC);
-        const stripeR = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cDark);
-        stripeR.position.set(0.03, 0.11, -0.078);
-        sqBodyGroup.add(stripeR);
+      // Back stripes (Drawn always, but hidden underneath the coat)
+      const stripeL = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cDark);
+      stripeL.position.set(-0.03, 0.11, -0.078);
+      sqBodyGroup.add(stripeL);
+      const stripeC = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cLight);
+      stripeC.position.set(0, 0.11, -0.082);
+      sqBodyGroup.add(stripeC);
+      const stripeR = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.14, 0.008), cDark);
+      stripeR.position.set(0.03, 0.11, -0.078);
+      sqBodyGroup.add(stripeR);
+
+      // Real Lab Coat Uniform overlay (If coat Color option is provided)
+      if (options.coatColor) {
+        const coatMaterial = createNPCMat(0xffffff, 0.8, 0.02); // Matte white lab coat
+        
+        // Open-front Cylinder surrounding the body
+        const coatGeom = new THREE.CylinderGeometry(0.093, 0.098, 0.15, 16, 1, true, -Math.PI * 0.72, Math.PI * 1.44);
+        coatGeom.scale(1.0, 1.0, 0.95);
+        const coatMesh = new THREE.Mesh(coatGeom, coatMaterial);
+        coatMesh.position.y = 0.115;
+        sqBodyGroup.add(coatMesh);
+
+        // Lab coat left collar front fold
+        const collarGeom = new THREE.BoxGeometry(0.012, 0.045, 0.006);
+        const collarL = new THREE.Mesh(collarGeom, coatMaterial);
+        collarL.position.set(-0.035, 0.175, 0.058);
+        collarL.rotation.z = -0.32;
+        collarL.rotation.y = 0.25;
+        sqBodyGroup.add(collarL);
+
+        // Lab coat right collar front fold
+        const collarR = new THREE.Mesh(collarGeom, coatMaterial);
+        collarR.position.set(0.035, 0.175, 0.058);
+        collarR.rotation.z = 0.32;
+        collarR.rotation.y = -0.25;
+        sqBodyGroup.add(collarR);
+        
+        // Lab coat shiny metallic gold/brass buttons (Larger & clearer)
+        const buttonGeom = new THREE.SphereGeometry(0.0075, 8, 8);
+        buttonGeom.scale(1.0, 1.0, 0.5); // Slightly flat button
+        const buttonMat = createNPCMat(0xd97706, 0.2, 0.9); // Shiny brass button
+        
+        const btn1 = new THREE.Mesh(buttonGeom, buttonMat);
+        btn1.position.set(0.016, 0.08, 0.094); // Button placed on the flap edge
+        sqBodyGroup.add(btn1);
+        
+        const btn2 = new THREE.Mesh(buttonGeom, buttonMat);
+        btn2.position.set(0.016, 0.045, 0.094);
+        sqBodyGroup.add(btn2);
+
+        // [High-Detail Additions]
+        // 1. Left Chest Pocket (Grey-white small box)
+        const pocketGeom = new THREE.BoxGeometry(0.018, 0.025, 0.005);
+        const pocketMesh = new THREE.Mesh(pocketGeom, coatMaterial);
+        pocketMesh.position.set(-0.035, 0.13, 0.078);
+        pocketMesh.rotation.y = 0.4;
+        sqBodyGroup.add(pocketMesh);
+
+        // 2. Blue Pen poking out of the pocket
+        const penGeom = new THREE.CylinderGeometry(0.002, 0.002, 0.015, 6);
+        const penMat = createNPCMat(0x2563eb, 0.5, 0.1); // Rich blue pen
+        const penMesh = new THREE.Mesh(penGeom, penMat);
+        penMesh.position.set(-0.038, 0.145, 0.08);
+        penMesh.rotation.x = -0.1;
+        sqBodyGroup.add(penMesh);
+
+        // 3. Right Chest Researcher Badge (Glowing cyan indicator)
+        const badgeGeom = new THREE.BoxGeometry(0.015, 0.01, 0.004);
+        const badgeMat = createNPCMat(0x00ffcc, 0.2, 0.8); // Glowing cyan badge
+        const badgeMesh = new THREE.Mesh(badgeGeom, badgeMat);
+        badgeMesh.position.set(0.035, 0.14, 0.078);
+        badgeMesh.rotation.y = -0.4;
+        sqBodyGroup.add(badgeMesh);
       }
 
       // 8b. Head
@@ -704,33 +775,91 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       sqInnerEarR.rotation.z = -0.24;
       sqBodyGroup.add(sqInnerEarR);
 
-      // 8d. Arms (Cylinders)
-      const sqArmGeom = new THREE.CylinderGeometry(0.015, 0.011, 0.065, 8);
-      sqArmGeom.translate(0, -0.03, 0);
+      // 8d. Arms (Cylinders) & Sleeves
+      const armBaseGeom = new THREE.CylinderGeometry(0.012, 0.010, 0.065, 8);
+      armBaseGeom.translate(0, -0.03, 0);
 
-      const sqArmL = new THREE.Mesh(sqArmGeom, coatMat ? coatMat : cMain);
+      const sqArmL = new THREE.Mesh(armBaseGeom, cMain); // Squirrel skin-color arms
       sqArmL.position.set(-0.085, 0.14, 0.025);
       sqArmL.rotation.z = 1.1;
       sqArmL.rotation.y = 0.5;
       sqArmL.rotation.x = 0.4;
       sqBodyGroup.add(sqArmL);
 
-      const sqArmR = new THREE.Mesh(sqArmGeom, coatMat ? coatMat : cMain);
+      const sqArmR = new THREE.Mesh(armBaseGeom, cMain);
       sqArmR.position.set(0.085, 0.14, 0.025);
       sqArmR.rotation.z = -1.1;
       sqArmR.rotation.y = -0.5;
       sqArmR.rotation.x = 0.4;
       sqBodyGroup.add(sqArmR);
 
-      // 8e. Legs & feet
+      // Add white sleeves if wearing lab coat
+      if (options.coatColor) {
+        const sleeveMaterial = createNPCMat(0xffffff, 0.8, 0.02);
+        const sleeveGeom = new THREE.CylinderGeometry(0.016, 0.013, 0.045, 8);
+        sleeveGeom.translate(0, -0.02, 0); // Sleeve covers upper part of the arm
+        
+        const sleeveL = new THREE.Mesh(sleeveGeom, sleeveMaterial);
+        sqArmL.add(sleeveL);
+        
+        const sleeveR = new THREE.Mesh(sleeveGeom, sleeveMaterial);
+        sqArmR.add(sleeveR);
+
+        // Cuff line highlights at the end of sleeves (Teal piping)
+        const cuffLineGeom = new THREE.CylinderGeometry(0.014, 0.013, 0.008, 8);
+        cuffLineGeom.translate(0, -0.046, 0);
+        const cuffLineMat = createNPCMat(0x0d9488, 0.6, 0.1);
+
+        const cuffLineL = new THREE.Mesh(cuffLineGeom, cuffLineMat);
+        sqArmL.add(cuffLineL);
+
+        const cuffLineR = new THREE.Mesh(cuffLineGeom, cuffLineMat);
+        sqArmR.add(cuffLineR);
+      }
+
+      // 8e. Legs & feet & coat bottom legs
       const sqLegGeom = new THREE.CylinderGeometry(0.022, 0.02, 0.04, 8);
-      const sqLegL = new THREE.Mesh(sqLegGeom, coatMat ? coatMat : cMain);
+      const sqLegL = new THREE.Mesh(sqLegGeom, cMain); // Squirrel skin-color legs
       sqLegL.position.set(-0.045, 0.02, 0.002);
       sqBodyGroup.add(sqLegL);
 
-      const sqLegR = new THREE.Mesh(sqLegGeom, coatMat ? coatMat : cMain);
+      // Add white pants cuffs/lower coat parts for legs if wearing coat
+      if (options.coatColor) {
+        const pantMaterial = createNPCMat(0xffffff, 0.8, 0.02);
+        const pantGeom = new THREE.CylinderGeometry(0.024, 0.022, 0.025, 8);
+        pantGeom.translate(0, 0.01, 0); // Cuff cover
+        
+        const pantL = new THREE.Mesh(pantGeom, pantMaterial);
+        sqLegL.add(pantL);
+
+        // Leg cuff line highlight (Teal piping)
+        const legCuffLineGeom = new THREE.CylinderGeometry(0.025, 0.023, 0.006, 8);
+        legCuffLineGeom.translate(0, 0.021, 0);
+        const legCuffLineMat = createNPCMat(0x0d9488, 0.6, 0.1);
+        const legCuffLineL = new THREE.Mesh(legCuffLineGeom, legCuffLineMat);
+        sqLegL.add(legCuffLineL);
+      }
+
+      const sqLegR = new THREE.Mesh(sqLegGeom, cMain);
       sqLegR.position.set(0.045, 0.02, 0.002);
       sqBodyGroup.add(sqLegR);
+
+      // Add white pants cuffs/lower coat parts for legs if wearing coat
+      if (options.coatColor) {
+        const pantMaterial = createNPCMat(0xffffff, 0.8, 0.02);
+        const pantGeom = new THREE.CylinderGeometry(0.024, 0.022, 0.025, 8);
+        pantGeom.translate(0, 0.01, 0); // Cuff cover
+        
+        const pantR = new THREE.Mesh(pantGeom, pantMaterial);
+        sqLegR.add(pantR);
+
+        // Leg cuff line highlight (Teal piping)
+        const legCuffLineGeom = new THREE.CylinderGeometry(0.025, 0.023, 0.006, 8);
+        legCuffLineGeom.translate(0, 0.021, 0);
+        const legCuffLineMat = createNPCMat(0x0d9488, 0.6, 0.1);
+        const legCuffLineR = new THREE.Mesh(legCuffLineGeom, legCuffLineMat);
+        sqLegR.add(legCuffLineR);
+      }
 
       const sqFootGeom = new THREE.BoxGeometry(0.03, 0.015, 0.055);
       const sqFootL = new THREE.Mesh(sqFootGeom, cLight);
@@ -797,7 +926,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0x4a5568, light: 0xe2e8f0, dark: 0x1e293b },
       { hasGlasses: true, glassesColor: 0x1e293b, coatColor: 0xffffff }
     );
-    npcNews.mesh.position.set(0.15, -0.64, -0.05); // Repositioned outward corresponding to the hologram mesh
+    npcNews.mesh.position.set(0.26, -0.64, -0.15); // Repositioned outward corresponding to the shifted hologram mesh
     npcNews.mesh.rotation.y = -Math.PI / 4; 
     npcNews.mesh.userData = { id: 'npc_news' };
     acornGroup.add(npcNews.mesh);
@@ -808,7 +937,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xfbd38d, light: 0xfffaf0, dark: 0x7b341e },
       { hasGlasses: true, glassesColor: 0xd69e2e, coatColor: 0xffffff }
     );
-    npcCalc.mesh.position.set(-0.16, -0.64, 0.1); // Repositioned outward corresponding to the stool/calculator
+    npcCalc.mesh.position.set(-0.28, -0.64, 0.1); // Repositioned outward corresponding to the shifted stool/calculator
     npcCalc.mesh.rotation.y = Math.PI / 3; 
     npcCalc.mesh.userData = { id: 'npc_calc' };
     acornGroup.add(npcCalc.mesh);
@@ -819,7 +948,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xd69e2e, light: 0xfefcbf, dark: 0x4a3728 },
       { hasGlasses: false, coatColor: 0xffffff } 
     );
-    npcBenefit.mesh.position.set(-0.08, -0.64, -0.24); // Repositioned outward corresponding to the envelope
+    npcBenefit.mesh.position.set(-0.22, -0.64, -0.24); // Repositioned outward corresponding to the shifted envelope
     npcBenefit.mesh.rotation.y = Math.PI / 5;
     npcBenefit.mesh.userData = { id: 'npc_benefit' };
     acornGroup.add(npcBenefit.mesh);
@@ -830,7 +959,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       { main: 0xf6e05e, light: 0xfffaf0, dark: 0x744210 },
       { hasGlasses: true, glassesColor: 0xa0aec0, coatColor: 0xffffff } 
     );
-    npcDashboard.mesh.position.set(-0.26, -0.64, 0.0); // Repositioned outward corresponding to the globe
+    npcDashboard.mesh.position.set(-0.36, -0.64, -0.02); // Repositioned outward corresponding to the shifted globe
     npcDashboard.mesh.rotation.y = Math.PI / 2.5;
     npcDashboard.mesh.userData = { id: 'npc_dashboard' };
     acornGroup.add(npcDashboard.mesh);
@@ -901,8 +1030,8 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         return;
       }
 
-      hlMaterial.emissiveIntensity = 0.65;
-      hlMaterial.emissive.setHex(0x00ffff);
+      hlMaterial.emissiveIntensity = 0.18; // Preserves whiteboard visibility
+      hlMaterial.emissive.setHex(0xffffff);
 
       calcScreenMat.emissiveIntensity = 0.35;
       calcScreenMat.emissive.setHex(0xffaa00);
@@ -913,6 +1042,8 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
       sealMat.emissiveIntensity = 0.25;
       sealMat.emissive.setHex(0xe53e3e);
 
+      termLampMat.emissiveIntensity = 0.8;
+
       const hit = checkIntersection(targetMouseX, targetMouseY);
       if (hit) {
         canvasRef.current.style.cursor = 'pointer';
@@ -922,7 +1053,7 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         }
         if (obj) {
           if (obj.userData.id === 'news' || obj.userData.id === 'npc_news') {
-            hlMaterial.emissiveIntensity = 1.4;
+            hlMaterial.emissiveIntensity = 0.75;
           } else if (obj.userData.id === 'calculators' || obj.userData.id === 'npc_calc') {
             calcScreenMat.emissiveIntensity = 0.95;
             calcScreenMat.emissive.setHex(0xffbb00);
@@ -932,6 +1063,8 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
           } else if (obj.userData.id === 'subscribe' || obj.userData.id === 'npc_benefit') {
             sealMat.emissiveIntensity = 0.95;
             sealMat.emissive.setHex(0xff3333);
+          } else if (obj.userData.id === 'community') {
+            termLampMat.emissiveIntensity = 1.6;
           }
         }
       } else {
@@ -1049,10 +1182,27 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
         camera.lookAt(new THREE.Vector3(0, 0, 0));
       }
 
-      const targetShellOpacity = entered ? 0.0 : 1.0;
-      glassMaterial.opacity += (targetShellOpacity - glassMaterial.opacity) * 0.08;
-      capMaterial.opacity += (targetShellOpacity - capMaterial.opacity) * 0.08;
-      stemMaterial.opacity += (targetShellOpacity - stemMaterial.opacity) * 0.08;
+      if (entered) {
+        glassMaterial.transparent = true;
+        capMaterial.transparent = true;
+        stemMaterial.transparent = true;
+        glassMaterial.opacity += (0.0 - glassMaterial.opacity) * 0.08;
+        capMaterial.opacity += (0.0 - capMaterial.opacity) * 0.08;
+        stemMaterial.opacity += (0.0 - stemMaterial.opacity) * 0.08;
+      } else {
+        // Force complete opaque state to avoid semi-transparent glitch
+        if (glassMaterial.transparent || capMaterial.transparent || stemMaterial.transparent) {
+          glassMaterial.transparent = false;
+          capMaterial.transparent = false;
+          stemMaterial.transparent = false;
+          glassMaterial.opacity = 1.0;
+          capMaterial.opacity = 1.0;
+          stemMaterial.opacity = 1.0;
+          glassMaterial.needsUpdate = true;
+          capMaterial.needsUpdate = true;
+          stemMaterial.needsUpdate = true;
+        }
+      }
 
       const targetInteriorOpacity = entered ? 1.0 : 0.0;
       floorMaterial.opacity += (targetInteriorOpacity - floorMaterial.opacity) * 0.08;
@@ -1256,7 +1406,10 @@ export default function ThreeDHero({ onItemClick, onNearNPCChange, onNPCPosition
           npc_news: getScreenCoord(npcNews.mesh, 0.06),
           npc_calc: getScreenCoord(npcCalc.mesh, 0.06),
           npc_benefit: getScreenCoord(npcBenefit.mesh, 0.06),
-          npc_dashboard: getScreenCoord(npcDashboard.mesh, 0.06)
+          npc_dashboard: getScreenCoord(npcDashboard.mesh, 0.06),
+          prop_dashboard: getScreenCoord(globeMesh, 0.06),
+          prop_news: getScreenCoord(hologramMesh, 0.10),
+          prop_community: getScreenCoord(commTerminalGroup, 0.05)
         });
       }
 

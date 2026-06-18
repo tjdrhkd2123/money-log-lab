@@ -124,6 +124,7 @@ export const mailService = {
 
     // Call Resend REST API using Axios
     try {
+      console.log(`✉️ [1차 시도] ${config.senderEmail} 주소로 일괄 발송을 시도합니다...`);
       const response = await axios.post(
         'https://api.resend.com/emails',
         {
@@ -141,14 +142,83 @@ export const mailService = {
         }
       );
 
-      console.log('🎉 Resend API를 통해 경제 도토리 뉴스레터 이메일 발송 성공!', response.data);
+      console.log('🎉 Resend API를 통해 경제 도토리 뉴스레터 일괄 발송 성공!', response.data);
       resendLastError = null; // Clear error on success
       return { success: true, messageId: response.data?.id };
     } catch (error) {
       const apiErrorMsg = error.response?.data?.message || error.message;
-      console.error('❌ Resend API 메일 발송 중 오류 발생:', apiErrorMsg);
-      resendLastError = `메일 발송 중 오류: ${apiErrorMsg}`;
-      return { success: false, error: apiErrorMsg };
+      console.warn('⚠️ [1차 시도 실패] Resend 일괄 발송 실패. onboarding@resend.dev 및 개별 전송 루프로 우회를 시작합니다:', apiErrorMsg);
+      
+      // Fallback 1: Try sending with onboarding@resend.dev as 'from' for all recipients (bulk)
+      try {
+        console.log(`✉️ [2차 시도] onboarding@resend.dev 주소로 일괄 발송을 재시도합니다...`);
+        const response = await axios.post(
+          'https://api.resend.com/emails',
+          {
+            from: `Money Log Lab <onboarding@resend.dev>`,
+            to: recipientEmails,
+            subject: subject,
+            html: htmlBody
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${config.resendApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000
+          }
+        );
+        console.log('🎉 Resend API를 통해 경제 도토리 뉴스레터 onboarding 주소 일괄 발송 성공!', response.data);
+        resendLastError = null;
+        return { success: true, messageId: response.data?.id };
+      } catch (error2) {
+        const apiErrorMsg2 = error2.response?.data?.message || error2.message;
+        console.warn('⚠️ [2차 시도 실패] onboarding@resend.dev 일괄 발송 실패. 개별 순회 발송(Individual Loop Send)을 실행합니다:', apiErrorMsg2);
+        
+        // Fallback 2: Loop and send individually, catching errors for each unverified recipient
+        let successCount = 0;
+        let lastSuccessId = null;
+        let errors = [];
+
+        for (const email of recipientEmails) {
+          try {
+            console.log(`✉️ [개별 발송] ${email} 주소로 뉴스레터를 전송 중...`);
+            const response = await axios.post(
+              'https://api.resend.com/emails',
+              {
+                from: `Money Log Lab <onboarding@resend.dev>`,
+                to: [email],
+                subject: subject,
+                html: htmlBody
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${config.resendApiKey}`,
+                  'Content-Type': 'application/json'
+                },
+                timeout: 5000
+              }
+            );
+            console.log(`  └─ ✅ ${email} 발송 완료! ID:`, response.data?.id);
+            successCount++;
+            lastSuccessId = response.data?.id;
+          } catch (loopError) {
+            const loopErrorMsg = loopError.response?.data?.message || loopError.message;
+            console.error(`  └─ ❌ ${email} 발송 실패 (미인증 계정 추정):`, loopErrorMsg);
+            errors.push(`${email}: ${loopErrorMsg}`);
+          }
+        }
+
+        if (successCount > 0) {
+          console.log(`🎉 개별 순회 발송 최종 완료! (성공: ${successCount}/${recipientEmails.length}건)`);
+          resendLastError = errors.length > 0 ? `일부 수신처 발송 오류: ${errors.join(', ')}` : null;
+          return { success: true, messageId: lastSuccessId, partialSuccess: true, successCount };
+        } else {
+          console.error('🚨 개별 순회 발송 역시 모두 실패하였습니다.');
+          resendLastError = `개별 발송 전체 실패: ${errors.join('; ')}`;
+          return { success: false, error: resendLastError };
+        }
+      }
     }
   },
 

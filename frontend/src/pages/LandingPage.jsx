@@ -14,7 +14,143 @@ export default function LandingPage({ onNavigateToAdmin }) {
   
   // Game state variables
   const [isEntered, setIsEntered] = useState(false);
-  const [activeOverlay, setActiveOverlay] = useState(null); // 'dashboard', 'news', 'calculators', 'subscribe', 'benefits'
+  const [activeOverlay, setActiveOverlay] = useState(null); // 'dashboard', 'news', 'calculators', 'subscribe', 'benefits', 'community'
+
+  // Community State Variables
+  const [communityPosts, setCommunityPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [newPostTitle, setNewPostTitle] = useState('');
+  const [newPostContent, setNewPostContent] = useState('');
+  const [newReplyContent, setNewReplyContent] = useState('');
+  const [commError, setCommError] = useState('');
+
+  const fetchCommunityPosts = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/public/community`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setCommunityPosts(data.posts || []);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch community posts:', e);
+    }
+  };
+
+  useEffect(() => {
+    if (activeOverlay === 'community') {
+      fetchCommunityPosts();
+      setSelectedPost(null);
+      setNewPostTitle('');
+      setNewPostContent('');
+      setNewReplyContent('');
+      setCommError('');
+    }
+  }, [activeOverlay]);
+
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    setCommError('');
+    if (!newPostTitle || !newPostContent) {
+      setCommError('제목과 내용을 모두 적어줘!');
+      return;
+    }
+
+    const token = sessionStorage.getItem('admin_token');
+    const author = currentUser || '미가입 다람쥐';
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/public/community`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          title: newPostTitle,
+          content: newPostContent,
+          author
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setNewPostTitle('');
+        setNewPostContent('');
+        fetchCommunityPosts();
+      } else {
+        setCommError(data.message || '글 등록 중 오류가 발생했어!');
+      }
+    } catch (err) {
+      setCommError('서버와 통신하는 데 실패했어!');
+    }
+  };
+
+  const handleCreateReply = async (e) => {
+    e.preventDefault();
+    setCommError('');
+    if (!newReplyContent) return;
+
+    const token = sessionStorage.getItem('admin_token');
+    const author = currentUser || '댓글 다람쥐';
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/public/community/${selectedPost.id}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          content: newReplyContent,
+          author
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setNewReplyContent('');
+        const updatedPost = {
+          ...selectedPost,
+          replies: [...(selectedPost.replies || []), data.reply]
+        };
+        setSelectedPost(updatedPost);
+        fetchCommunityPosts();
+      } else {
+        setCommError(data.message || '댓글 등록 실패!');
+      }
+    } catch (err) {
+      setCommError('서버 통신 실패!');
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('정말 이 제보 글을 삭제하겠어? 🗑️')) return;
+    setCommError('');
+
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      setCommError('관리자만 삭제할 수 있어!');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/community/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setSelectedPost(null);
+        fetchCommunityPosts();
+      } else {
+        setCommError(data.message || '글 삭제 실패!');
+      }
+    } catch (err) {
+      setCommError('서버 통신 실패!');
+    }
+  };
 
   // NPC Interaction state variables
   const [nearNPC, setNearNPC] = useState(null);
@@ -220,6 +356,13 @@ export default function LandingPage({ onNavigateToAdmin }) {
       return;
     }
 
+    const cleanedName = authName.trim().replace(/\s/g, '').toLowerCase();
+    const forbiddenKeywords = ['로기', '소장', '관리자', '어드민', 'admin'];
+    if (forbiddenKeywords.some(keyword => cleanedName.includes(keyword))) {
+      setAuthError('🚨 일반 유저는 "로기 소장", "관리자", "어드민" 등의 예약어가 포함된 닉네임을 지정할 수 없습니다!');
+      return;
+    }
+
     try {
       const users = JSON.parse(localStorage.getItem('moneylog_users') || '[]');
       if (users.some(u => u.email === authEmail)) {
@@ -388,7 +531,10 @@ export default function LandingPage({ onNavigateToAdmin }) {
                   npc_news: { name: '차돌 뉴스 연구원 📰', color: '#4a5568' },
                   npc_calc: { name: '뽀짝 환율 연구원 💱', color: '#d69e2e' },
                   npc_benefit: { name: '베이지 혜택 연구원 🪙', color: '#a38d6b' },
-                  npc_dashboard: { name: '노랑 지표 연구원 📊', color: '#744210' }
+                  npc_dashboard: { name: '노랑 지표 연구원 📊', color: '#744210' },
+                  prop_dashboard: { name: '🟢 지구본: 금융 대시보드 📊', color: '#00ff88' },
+                  prop_news: { name: '🌐 홀로그램: 실시간 뉴스 📰', color: '#00ffff' },
+                  prop_community: { name: '💬 소통 단말기: 오류 제보 🛠️', color: '#00ffcc' }
                 };
                 const info = nameTags[key];
                 if (!info || !pos) return null;
@@ -463,6 +609,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 <button onClick={() => { setIsEntered(true); setActiveOverlay('news'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>실시간 뉴스 📰</button>
                 <button onClick={() => { setIsEntered(true); setActiveOverlay('calculators'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>금융 계산기 💱</button>
                 <button onClick={() => { setIsEntered(true); setActiveOverlay('benefits'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>파트너 혜택 🪙</button>
+                <button onClick={() => { setIsEntered(true); setActiveOverlay('community'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>제보 게시판 💬</button>
                 <button onClick={() => { setIsEntered(true); setActiveOverlay('subscribe'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-headers)', cursor: 'pointer', paddingBottom: '2px' }}>도토리 구독 🌰</button>
 
                 {isAdmin && (
@@ -597,50 +744,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 🎮 방향키(↑,↓,←,→ 또는 W,A,S,D)로 로기를 3D 맵 안에서 자유롭게 조종해봐! 🐿️
               </div>
 
-              {/* Game Item Labels */}
-              <div 
-                className="tooltip-bounce"
-                style={{
-                  position: 'absolute',
-                  top: '32%',
-                  left: '12%',
-                  zIndex: 10,
-                  background: 'rgba(0, 255, 136, 0.12)',
-                  color: '#00ff88',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '11px',
-                  fontWeight: '800',
-                  boxShadow: '0 4px 15px rgba(0, 255, 136, 0.1)',
-                  border: '1px solid rgba(0, 255, 136, 0.3)',
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                🟢 지구본: 금융 대시보드
-              </div>
-
-              <div 
-                className="tooltip-bounce"
-                style={{
-                  position: 'absolute',
-                  top: '28%',
-                  right: '15%',
-                  zIndex: 10,
-                  background: 'rgba(0, 255, 255, 0.12)',
-                  color: '#00ffff',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '11px',
-                  fontWeight: '800',
-                  boxShadow: '0 4px 15px rgba(0, 255, 255, 0.1)',
-                  border: '1px solid rgba(0, 255, 255, 0.3)',
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                🌐 홀로그램: 실시간 뉴스
-              </div>
+              {/* Game Item Labels removed - projected via 2.5D name tags overlay dynamically */}
 
               {/* NPC Proximity Tooltip */}
               {nearNPC && !activeNPC && (
@@ -808,6 +912,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('dashboard'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>금융 대시보드</button>
               <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('news'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>실시간 뉴스 📰</button>
               <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('calculators'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>금융 계산기 💱</button>
+              <button onClick={() => { setActiveView('home'); setIsEntered(true); setActiveOverlay('community'); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>제보 게시판 💬</button>
 
               {currentUser ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', borderLeft: '1px solid var(--color-card-border)', paddingLeft: '16px' }}>
@@ -1104,6 +1209,179 @@ export default function LandingPage({ onNavigateToAdmin }) {
                     <div style={{ background: 'rgba(16, 185, 129, 0.08)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent-emerald)' }}><ArrowRight size={16} /></div>
                   </a>
                 </div>
+              </section>
+            )}
+
+            {activeOverlay === 'community' && (
+              <section style={{ animation: 'fadeIn 0.3s ease-in-out', textAlign: 'left' }}>
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                  <h2 style={{ fontSize: '24px', color: 'var(--color-text-primary)', fontFamily: 'var(--font-headers)', fontWeight: '800' }}>💬 연구소 건의 및 오류 제보 센터</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>머니로그랩을 이용하며 오류가 있거나 로기에게 제안할 점이 있다면 글을 남겨줘! 🐿️</p>
+                </div>
+
+                {commError && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '12px 16px', borderRadius: '12px', fontSize: '13.5px', marginBottom: '20px', fontWeight: 'bold' }}>
+                    ⚠️ {commError}
+                  </div>
+                )}
+
+                {selectedPost ? (
+                  /* 상세 보기 화면 */
+                  <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '20px', background: 'var(--bg-secondary)', borderColor: 'var(--color-card-border-glow)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--color-card-border)', paddingBottom: '14px' }}>
+                      <div>
+                        <button onClick={() => setSelectedPost(null)} style={{ background: 'none', border: 'none', color: 'var(--color-accent-blue)', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', marginBottom: '8px', padding: 0 }}>← 목록으로 돌아가기</button>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)' }}>{selectedPost.title}</h3>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                          작성자: <span style={{ color: selectedPost.author.includes('👑') ? '#fbbf24' : 'var(--color-text-secondary)', fontWeight: 'bold' }}>{selectedPost.author}</span> • {new Date(selectedPost.createdAt).toLocaleString('ko-KR')}
+                        </p>
+                      </div>
+                      {isAdmin && (
+                        <button onClick={() => handleDeletePost(selectedPost.id)} style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: '800', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer' }}>
+                          삭제 🗑️
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '14.5px', color: 'var(--color-text-primary)', lineHeight: '1.6', whiteSpace: 'pre-wrap', minHeight: '120px' }}>
+                      {selectedPost.content}
+                    </div>
+
+                    {/* 댓글 섹션 */}
+                    <div style={{ borderTop: '1px solid var(--color-card-border)', paddingTop: '20px' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: '850', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>댓글 ({selectedPost.replies?.length || 0})</h4>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                        {selectedPost.replies && selectedPost.replies.length > 0 ? (
+                          selectedPost.replies.map((reply) => (
+                            <div key={reply.id} style={{ background: 'var(--bg-tertiary)', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--color-card-border)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+                                <span style={{ fontWeight: '800', color: reply.author.includes('👑') ? '#fbbf24' : 'var(--color-text-secondary)' }}>{reply.author}</span>
+                                <span>{new Date(reply.createdAt).toLocaleString('ko-KR')}</span>
+                              </div>
+                              <p style={{ fontSize: '13px', color: 'var(--color-text-primary)', margin: 0, lineHeight: '1.4' }}>{reply.content}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', padding: '10px 0', margin: 0 }}>아직 등록된 댓글이 없습니다. 첫 댓글을 작성해봐! 🐿️</p>
+                        )}
+                      </div>
+
+                      {/* 댓글 작성 폼 */}
+                      {currentUser ? (
+                        <form onSubmit={handleCreateReply} style={{ display: 'flex', gap: '8px' }}>
+                          <input 
+                            type="text" 
+                            placeholder="댓글을 적어줘..." 
+                            required 
+                            value={newReplyContent} 
+                            onChange={(e) => setNewReplyContent(e.target.value)}
+                            style={{ flex: 1, background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '10px 14px', color: 'var(--color-text-primary)', outline: 'none', fontSize: '13.5px' }} 
+                          />
+                          <button type="submit" style={{ background: 'var(--color-accent-blue)', border: 'none', color: '#ffffff', fontWeight: '800', fontSize: '13px', padding: '0 18px', borderRadius: '12px', cursor: 'pointer' }}>
+                            등록 💬
+                          </button>
+                        </form>
+                      ) : (
+                        <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', textAlign: 'center', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '10px', border: '1px dashed var(--color-card-border)' }}>
+                          댓글 작성을 하려면 로그인이 필요해! 🐿️
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  /* 목록 및 글쓰기 화면 */
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
+                    {/* 글쓰기 영역 */}
+                    <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--bg-secondary)', borderColor: 'var(--color-card-border-glow)' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '850', color: 'var(--color-text-primary)', marginBottom: '14px' }}>🐿️ 새로운 제보 글 작성하기</h3>
+                      
+                      {currentUser ? (
+                        <form onSubmit={handleCreatePost} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <input 
+                            type="text" 
+                            placeholder="제목을 입력해줘" 
+                            required 
+                            value={newPostTitle} 
+                            onChange={(e) => setNewPostTitle(e.target.value)}
+                            style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '12px 16px', color: 'var(--color-text-primary)', outline: 'none', fontSize: '14px', fontWeight: '700' }} 
+                          />
+                          <textarea 
+                            placeholder="로기 연구원들에게 제보하고 싶은 상세 에러나 건의 내용을 적어줘!" 
+                            required 
+                            rows={3}
+                            value={newPostContent} 
+                            onChange={(e) => setNewPostContent(e.target.value)}
+                            style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--color-card-border)', borderRadius: '12px', padding: '12px 16px', color: 'var(--color-text-primary)', outline: 'none', fontSize: '13.5px', fontFamily: 'inherit', resize: 'vertical' }} 
+                          />
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                            <span style={{ fontSize: '12.5px', color: 'var(--color-text-muted)' }}>
+                              작성자 닉네임: <strong style={{ color: isAdmin ? '#fbbf24' : 'var(--color-text-secondary)' }}>{currentUser}</strong>
+                            </span>
+                            <button type="submit" className="btn-primary" style={{ padding: '8px 24px', borderRadius: '20px', fontSize: '13px' }}>
+                              건의 제출하기 🚀
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '24px 0', border: '1.5px dashed var(--color-card-border)', borderRadius: '12px', color: 'var(--color-text-muted)' }}>
+                          <p style={{ fontSize: '14px', marginBottom: '10px' }}>건의 제보는 로그인한 패밀리 다람쥐만 작성할 수 있어!</p>
+                          <div style={{ display: 'inline-flex', gap: '10px' }}>
+                            <button onClick={() => { setActiveOverlay(null); setActiveView('login'); }} style={{ background: 'var(--color-accent-blue)', color: '#ffffff', border: 'none', fontWeight: '800', fontSize: '12.5px', padding: '6px 14px', borderRadius: '10px', cursor: 'pointer' }}>로그인</button>
+                            <button onClick={() => { setActiveOverlay(null); setActiveView('register'); }} style={{ background: 'none', color: 'var(--color-text-secondary)', border: '1px solid var(--color-card-border)', fontWeight: '800', fontSize: '12.5px', padding: '6px 14px', borderRadius: '10px', cursor: 'pointer' }}>회원가입</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 글 목록 영역 */}
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: '850', color: 'var(--color-text-primary)', marginBottom: '16px' }}>📋 최근 제보 목록 ({communityPosts.length})</h3>
+                      
+                      {communityPosts.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {communityPosts.map((post) => (
+                            <div 
+                              key={post.id} 
+                              onClick={() => setSelectedPost(post)}
+                              className="glass-card" 
+                              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', cursor: 'pointer', background: 'var(--bg-secondary)', borderColor: 'var(--color-card-border)', transition: 'all 0.2s' }}
+                              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-accent-blue)'}
+                              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-card-border)'}
+                            >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+                                <h4 style={{ fontSize: '14.5px', fontWeight: '750', color: 'var(--color-text-primary)' }}>{post.title}</h4>
+                                <div style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', display: 'flex', gap: '8px' }}>
+                                  <span style={{ fontWeight: '800', color: post.author.includes('👑') ? '#fbbf24' : 'var(--color-text-secondary)' }}>{post.author}</span>
+                                  <span>•</span>
+                                  <span>{new Date(post.createdAt).toLocaleDateString('ko-KR')}</span>
+                                  <span>•</span>
+                                  <span style={{ color: 'var(--color-accent-blue)', fontWeight: 'bold' }}>댓글 {post.replies?.length || 0}</span>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {isAdmin && (
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }} 
+                                    style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '4px', fontSize: '12px' }}
+                                    title="글 삭제"
+                                  >
+                                    🗑️
+                                  </button>
+                                )}
+                                <ChevronRight size={16} style={{ color: 'var(--color-text-muted)' }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '40px 0', border: '1px dashed var(--color-card-border)', borderRadius: '16px', color: 'var(--color-text-muted)' }}>
+                          <p style={{ fontSize: '14px' }}>등록된 건의 글이 없습니다. 로기에게 첫 글을 남겨봐! 🐿️</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </section>
             )}
           </div>
